@@ -4,7 +4,7 @@ import FuseUtils from '@fuse/FuseUtils';
 
 class jwtService extends FuseUtils.EventEmitter {
 	init() {
-		axios.defaults.baseURL = 'http://127.0.0.1:8000';
+		axios.defaults.baseURL = process.env.REACT_APP_API_URL;
 		axios.defaults.headers.post['Content-Type'] = 'application/json';
 		this.setInterceptors();
 		this.handleAuthentication();
@@ -12,16 +12,12 @@ class jwtService extends FuseUtils.EventEmitter {
 
 	setInterceptors = () => {
 		axios.interceptors.response.use(
-			response => {
+			(response) => {
 				return response;
 			},
-			err => {
+			(err) => {
 				return new Promise((resolve, reject) => {
-					if (
-						err.response.status === 401 &&
-						err.config &&
-						!err.config.__isRetryRequest
-					) {
+					if (err.response.status === 401 && err.config && !err.config.__isRetryRequest) {
 						// if you ever get an unauthorized response, logout the user
 						this.emit('onAutoLogout', 'Invalid access_token');
 						this.setSession(null);
@@ -50,9 +46,9 @@ class jwtService extends FuseUtils.EventEmitter {
 		}
 	};
 
-	createUser = data => {
+	createUser = (data) => {
 		return new Promise((resolve, reject) => {
-			axios.post('/api/auth/register', data).then(response => {
+			axios.post('/api/auth/register', data).then((response) => {
 				if (response.data.user) {
 					this.setSession(response.data.access);
 					resolve(response.data.user);
@@ -70,7 +66,7 @@ class jwtService extends FuseUtils.EventEmitter {
 					username,
 					password
 				})
-				.then(response => {
+				.then((response) => {
 					if (response.data) {
 						this.setSession(response.data.access);
 						resolve(username);
@@ -85,9 +81,9 @@ class jwtService extends FuseUtils.EventEmitter {
 		return new Promise((resolve, reject) => {
 			axios
 				.post('api/token/verify/', {
-					token: this.getAccessToken()
+					token : this.getAccessToken()
 				})
-				.then(response => {
+				.then((response) => {
 					if (response) {
 						this.setSession(this.getAccessToken());
 						resolve({ username: 'zrapar' });
@@ -96,20 +92,20 @@ class jwtService extends FuseUtils.EventEmitter {
 						reject('Failed to login with token.');
 					}
 				})
-				.catch(error => {
+				.catch((error) => {
 					this.logout();
 					reject('Failed to login with token.');
 				});
 		});
 	};
 
-	updateUserData = user => {
+	updateUserData = (user) => {
 		return axios.post('/api/auth/user/update', {
-			user: user
+			user : user
 		});
 	};
 
-	setSession = access_token => {
+	setSession = (access_token) => {
 		if (access_token) {
 			localStorage.setItem('jwt_access_token', access_token);
 			axios.defaults.headers.common['Authorization'] = 'Bearer ' + access_token;
@@ -123,7 +119,7 @@ class jwtService extends FuseUtils.EventEmitter {
 		this.setSession(null);
 	};
 
-	isAuthTokenValid = access_token => {
+	isAuthTokenValid = (access_token) => {
 		if (!access_token) {
 			return false;
 		}

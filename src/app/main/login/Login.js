@@ -84,7 +84,7 @@ function Login() {
 									/>
 								}
 								className='min-w-0'
-								label='JWT'
+								label='Inicio de Sesión'
 							/>
 						</Tabs>
 
