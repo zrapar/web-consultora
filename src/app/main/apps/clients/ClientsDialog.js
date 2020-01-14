@@ -33,8 +33,7 @@ const defaultFormState = {
 	clave_opds   : '',
 	clave_acumar : '',
 	clave_ina    : '',
-	clave        : '',
-  firmantes    : 'asdkfjhakdf'
+	clave        : ''
 };
 
 function ClientsDialog(props) {
@@ -54,16 +53,10 @@ function ClientsDialog(props) {
 
 	const initDialog = useCallback(
 		() => {
-			/**
-             * Dialog type: 'edit'
-             */
 			if (clientsDialog.type === 'edit' && clientsDialog.data) {
 				setForm({ ...clientsDialog.data });
 			}
 
-			/**
-             * Dialog type: 'new'
-             */
 			if (clientsDialog.type === 'new') {
 				setForm({
 					...defaultFormState,
@@ -76,9 +69,6 @@ function ClientsDialog(props) {
 
 	useEffect(
 		() => {
-			/**
-         * After Dialog Open
-         */
 			if (clientsDialog.props.open) {
 				initDialog();
 			}
@@ -93,7 +83,23 @@ function ClientsDialog(props) {
 	}
 
 	function canBeSubmitted() {
-		return form.empresa.length > 0;
+		return (
+			form.empresa.lenth > 0 &&
+			form.direccion.lenth > 0 &&
+			form.cuit.lenth > 0 &&
+			form.id_estab.lenth > 0 &&
+			form.zip_code.lenth > 0 &&
+			form.phone.lenth > 0 &&
+			form.email.lenth > 0 &&
+			form.user_opds.lenth > 0 &&
+			form.user_acumar.lenth > 0 &&
+			form.user_ina.lenth > 0 &&
+			form.user.lenth > 0 &&
+			form.clave_opds.lenth > 0 &&
+			form.clave_acumar.lenth > 0 &&
+			form.clave_ina.lenth > 0 &&
+			form.clave.lenth > 0
+		);
 	}
 
 	function handleSubmit(event) {
@@ -425,7 +431,7 @@ function ClientsDialog(props) {
 							color='primary'
 							onClick={handleSubmit}
 							type='submit'
-							disabled={!canBeSubmitted()}
+							disabled={canBeSubmitted()}
 						>
 							Agregar
 						</Button>
@@ -437,7 +443,7 @@ function ClientsDialog(props) {
 							color='primary'
 							type='submit'
 							onClick={handleSubmit}
-							disabled={!canBeSubmitted()}
+							disabled={canBeSubmitted()}
 						>
 							Guardar Cambios
 						</Button>

@@ -15,7 +15,7 @@ export const REMOVE_CLIENT = '@@Clients/Remove client';
 export const REMOVE_CLIENTS = '@@Clients/Remove client';
 
 export const getClients = (routeParams) => async (dispatch) => {
-	const response = await axios.get('/clientes/?format=json', {
+	const response = await axios.get('/clientes/', {
 		params : routeParams
 	});
 
@@ -74,7 +74,7 @@ export const addClient = (newClient) => async (dispatch) => {
 };
 
 export const updateClient = (client) => async (dispatch) => {
-	const response = await axios.post('/api/contacts-app/update-contact', client);
+	const response = await axios.put(`/clientes/${client.id}/`, client);
 
 	if (response) {
 		Promise.all([
@@ -86,7 +86,7 @@ export const updateClient = (client) => async (dispatch) => {
 };
 
 export const removeClient = (clientId) => async (dispatch) => {
-	const response = await axios.post('/api/contacts-app/remove-contact', clientId);
+	const response = await axios.delete(`/clientes/${clientId}/`);
 	if (response) {
 		Promise.all([
 			dispatch({
@@ -96,14 +96,18 @@ export const removeClient = (clientId) => async (dispatch) => {
 	}
 };
 
-export const removeClients = (clientIds) => async (dispatch) => {
-	const response = await axios.post('/api/contacts-app/remove-contact', clientIds);
+export const removeClients = (clientIds) => (dispatch) => {
+	let arrayPromise = [];
+	clientIds.forEach((element) => {
+		const req = axios.delete(`/clientes/${element}/`);
+		arrayPromise.push(req);
+	});
 
-	if (response) {
-		Promise.all([
-			dispatch({
-				type : REMOVE_CLIENT
-			})
-		]).then(() => dispatch(getClients()));
-	}
+	arrayPromise.push(
+		dispatch({
+			type : REMOVE_CLIENTS
+		})
+	);
+
+	Promise.all(arrayPromise).then(() => dispatch(getClients()));
 };

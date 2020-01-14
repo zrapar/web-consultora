@@ -19,8 +19,15 @@ const navigationConfig = [
 				id    : 'clients',
 				title : 'Clientes',
 				type  : 'item',
-				icon  : 'dashboard',
+				icon  : 'account_box',
 				url   : '/apps/clients'
+			},
+			{
+				id    : 'signatories',
+				title : 'Firmantes',
+				type  : 'item',
+				icon  : 'account_box',
+				url   : '/apps/signatories'
 			}
 		]
 	}
