@@ -28,6 +28,13 @@ const navigationConfig = [
 				type  : 'item',
 				icon  : 'account_box',
 				url   : '/apps/signatories'
+			},
+			{
+				id    : 'users',
+				title : 'Usuarios',
+				type  : 'item',
+				icon  : 'account_box',
+				url   : '/apps/users'
 			}
 		]
 	}

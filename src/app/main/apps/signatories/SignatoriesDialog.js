@@ -22,7 +22,7 @@ let defaultFormState = {
 	dni       : '',
 	phone     : '',
 	email     : '',
-	cliente   : []
+	cliente   : null
 };
 
 const SignatoriesDialog = (props) => {
@@ -69,7 +69,7 @@ const SignatoriesDialog = (props) => {
 			form.dni.length > 0 &&
 			form.phone.length > 0 &&
 			form.email.length > 0 &&
-			form.cliente.length > 0
+			form.cliente
 		);
 	}
 
@@ -90,7 +90,7 @@ const SignatoriesDialog = (props) => {
 	}
 
 	function handleChipChange(value, name) {
-		setForm(_.set({ ...form }, name, [ { id: value.id, empresa: value.label } ]));
+		setForm(_.set({ ...form }, name, value.value));
 	}
 
 	return (
@@ -106,7 +106,7 @@ const SignatoriesDialog = (props) => {
 			<AppBar position='static' elevation={1}>
 				<Toolbar className='flex w-full'>
 					<Typography variant='subtitle1' color='inherit'>
-						{signatoriesDialog.type === 'new' ? 'Nuevo Cliente' : 'Editar Cliente'}
+						{signatoriesDialog.type === 'new' ? 'Nuevo Firmante' : 'Editar Firmante'}
 					</Typography>
 				</Toolbar>
 				<div className='flex flex-col items-center justify-center pb-24'>
@@ -126,9 +126,9 @@ const SignatoriesDialog = (props) => {
 
 						<TextField
 							className='mb-24'
-							label='Empresa'
+							label='Nombre del Firmante'
 							autoFocus
-							id='Nombre del Firmante'
+							id='full_name'
 							name='full_name'
 							value={form.full_name}
 							onChange={handleChange}
@@ -183,10 +183,17 @@ const SignatoriesDialog = (props) => {
 						<div className='min-w-48 pt-20' />
 						<FuseChipSelect
 							className='mt-8 mb-24 w-full'
-							value={form.cliente.map((item) => ({
-								value : item.id,
-								label : item.empresa
-							}))}
+							value={clients
+								.map((item) => {
+									if (item.id === form.cliente) {
+										return {
+											value : item.id,
+											label : item.empresa
+										};
+									}
+									return false;
+								})
+								.filter((i) => i)}
 							onChange={(value) => handleChipChange(value, 'cliente')}
 							placeholder='Selecciona el cliente'
 							textFieldProps={{
@@ -196,6 +203,7 @@ const SignatoriesDialog = (props) => {
 								},
 								variant         : 'outlined'
 							}}
+							variant='fixed'
 							options={clients.map((item) => ({
 								value : item.id,
 								label : item.empresa

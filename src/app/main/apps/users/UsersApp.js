@@ -3,9 +3,9 @@ import { Fab, Icon } from '@material-ui/core';
 import { FusePageSimple, FuseAnimate } from '@fuse';
 import { useDispatch } from 'react-redux';
 import withReducer from 'app/store/withReducer';
-import SignatoriesList from './SignatoriesList';
-import SignatoriesHeader from './SignatoriesHeader';
-import SignatoriesDialog from './SignatoriesDialog';
+import UsersList from './UsersList';
+import UsersHeader from './UsersHeader';
+import UsersDialog from './UsersDialog';
 import * as Actions from './store/actions';
 import reducer from './store/reducers';
 import { makeStyles } from '@material-ui/styles';
@@ -19,7 +19,7 @@ const useStyles = makeStyles({
 	}
 });
 
-const SignatoriesApp = (props) => {
+const UsersApp = (props) => {
 	const dispatch = useDispatch();
 
 	const classes = useStyles(props);
@@ -27,8 +27,7 @@ const SignatoriesApp = (props) => {
 
 	useEffect(
 		() => {
-			dispatch(Actions.getSignatories());
-			dispatch(Actions.getClientsInSignatory());
+			dispatch(Actions.getUsers());
 		},
 		[ dispatch ]
 	);
@@ -42,8 +41,8 @@ const SignatoriesApp = (props) => {
 					leftSidebar    : 'w-256 border-0',
 					header         : 'min-h-72 h-72 sm:h-136 sm:min-h-136'
 				}}
-				header={<SignatoriesHeader pageLayout={pageLayout} />}
-				content={<SignatoriesList />}
+				header={<UsersHeader pageLayout={pageLayout} />}
+				content={<UsersList />}
 				sidebarInner
 				ref={pageLayout}
 				innerScroll
@@ -53,14 +52,14 @@ const SignatoriesApp = (props) => {
 					color='primary'
 					aria-label='add'
 					className={classes.addButton}
-					onClick={(ev) => dispatch(Actions.openNewSignatoryDialog())}
+					onClick={(ev) => dispatch(Actions.openNewUserDialog())}
 				>
 					<Icon>person_add</Icon>
 				</Fab>
 			</FuseAnimate>
-			<SignatoriesDialog />
+			<UsersDialog />
 		</React.Fragment>
 	);
 };
 
-export default withReducer('signatories', reducer)(SignatoriesApp);
+export default withReducer('users', reducer)(UsersApp);
