@@ -35,6 +35,13 @@ const navigationConfig = [
 				type  : 'item',
 				icon  : 'account_box',
 				url   : '/apps/users'
+			},
+			{
+				id    : 'users',
+				title : 'Estudios',
+				type  : 'item',
+				icon  : 'account_box',
+				url   : '/apps/casestudy'
 			}
 		]
 	}
