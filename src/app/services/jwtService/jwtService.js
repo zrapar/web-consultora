@@ -42,7 +42,7 @@ class jwtService extends FuseUtils.EventEmitter {
 			this.emit('onAutoLogin', true);
 		} else {
 			this.setSession(null);
-			this.emit('onAutoLogout', 'access_token expired');
+			this.emit('onAutoLogout', 'Tu sesión ha expirado');
 		}
 	};
 

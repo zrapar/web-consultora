@@ -11,9 +11,11 @@ import {
 	Toolbar,
 	AppBar
 } from '@material-ui/core';
+import { FuseChipSelect } from '@fuse';
 import { useForm } from '@fuse/hooks';
 import * as Actions from './store/actions';
 import { useDispatch, useSelector } from 'react-redux';
+import _ from '@lodash';
 
 let defaultFormState = {
 	name : '',
@@ -23,6 +25,7 @@ let defaultFormState = {
 const EstudiosDialog = (props) => {
 	const dispatch = useDispatch();
 	const estudiosDialog = useSelector(({ estudios: { estudios } }) => estudios.estudiosDialog);
+	const tiposEstudios = [ { name: 'Fisico', value: 'F' }, { name: 'Quimico', value: 'Q' } ];
 
 	const { form, handleChange, setForm } = useForm(defaultFormState);
 
@@ -51,17 +54,17 @@ const EstudiosDialog = (props) => {
 		[ estudiosDialog.props.open, initDialog ]
 	);
 
-	function closeComposeDialog() {
+	const closeComposeDialog = () => {
 		estudiosDialog.type === 'edit'
 			? dispatch(Actions.closeEditEstudioDialog())
 			: dispatch(Actions.closeNewEstudioDialog());
-	}
+	};
 
-	function canBeSubmitted() {
+	const canBeSubmitted = () => {
 		return form.name.length > 0 && form.tipo;
-	}
+	};
 
-	function handleSubmit(event) {
+	const handleSubmit = (event) => {
 		event.preventDefault();
 
 		if (estudiosDialog.type === 'new') {
@@ -70,12 +73,16 @@ const EstudiosDialog = (props) => {
 			dispatch(Actions.updateEstudio(form));
 		}
 		closeComposeDialog();
-	}
+	};
 
-	function handleRemove() {
+	const handleRemove = () => {
 		dispatch(Actions.removeEstudio(form.id));
 		closeComposeDialog();
-	}
+	};
+
+	const handleChipChange = (value, name) => {
+		setForm(_.set({ ...form }, name, value.value));
+	};
 
 	return (
 		<Dialog
@@ -114,6 +121,37 @@ const EstudiosDialog = (props) => {
 							onChange={handleChange}
 							variant='outlined'
 							fullWidth
+						/>
+					</div>
+					<div className='flex'>
+						<div className='min-w-48 pt-20 mb-48' />
+						<FuseChipSelect
+							className='mt-8 mb-60 w-full'
+							value={tiposEstudios
+								.map((item) => {
+									if (item.value === form.tipo) {
+										return {
+											value : item.value,
+											label : item.name
+										};
+									}
+									return false;
+								})
+								.filter((i) => i)}
+							onChange={(value) => handleChipChange(value, 'tipo')}
+							placeholder='Selecciona el tipo de estudio'
+							textFieldProps={{
+								label           : 'Tipo de Estudio',
+								InputLabelProps : {
+									shrink : true
+								},
+								variant         : 'outlined'
+							}}
+							variant='fixed'
+							options={tiposEstudios.map((item) => ({
+								value : item.value,
+								label : item.name
+							}))}
 						/>
 					</div>
 				</DialogContent>

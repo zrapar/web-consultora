@@ -10,7 +10,7 @@ import jwtService from 'app/services/jwtService';
 
 class Auth extends Component {
 	state = {
-		waitAuthCheck: true
+		waitAuthCheck : true
 	};
 
 	componentDidMount() {
@@ -25,30 +25,30 @@ class Auth extends Component {
 	}
 
 	jwtCheck = () =>
-		new Promise(resolve => {
+		new Promise((resolve) => {
 			jwtService.on('onAutoLogin', () => {
-				this.props.showMessage({ message: 'Welcome Back' });
+				this.props.showMessage({ message: 'Bienvenido de Vuelta' });
 
 				/**
 				 * Sign in and retrieve user data from Api
 				 */
 				jwtService
 					.signInWithToken()
-					.then(user => {
+					.then((user) => {
 						this.props.setUserData(user);
 
 						resolve();
 
-						this.props.showMessage({ message: 'Welcome Back' });
+						this.props.showMessage({ message: 'Bienvenido de Vuelta' });
 					})
-					.catch(error => {
+					.catch((error) => {
 						this.props.showMessage({ message: error });
 
 						resolve();
 					});
 			});
 
-			jwtService.on('onAutoLogout', message => {
+			jwtService.on('onAutoLogout', (message) => {
 				if (message) {
 					this.props.showMessage({ message });
 				}
@@ -68,8 +68,8 @@ class Auth extends Component {
 		});
 
 	auth0Check = () =>
-		new Promise(resolve => {
-			auth0Service.init(success => {
+		new Promise((resolve) => {
+			auth0Service.init((success) => {
 				if (!success) {
 					resolve();
 				}
@@ -81,7 +81,7 @@ class Auth extends Component {
 				/**
 				 * Retrieve user data from Auth0
 				 */
-				auth0Service.getUserData().then(tokenData => {
+				auth0Service.getUserData().then((tokenData) => {
 					this.props.setUserDataAuth0(tokenData);
 
 					resolve();
@@ -96,14 +96,14 @@ class Auth extends Component {
 		});
 
 	firebaseCheck = () =>
-		new Promise(resolve => {
-			firebaseService.init(success => {
+		new Promise((resolve) => {
+			firebaseService.init((success) => {
 				if (!success) {
 					resolve();
 				}
 			});
 
-			firebaseService.onAuthStateChanged(authUser => {
+			firebaseService.onAuthStateChanged((authUser) => {
 				if (authUser) {
 					this.props.showMessage({ message: 'Logging in with Firebase' });
 
@@ -111,14 +111,14 @@ class Auth extends Component {
 					 * Retrieve user data from Firebase
 					 */
 					firebaseService.getUserData(authUser.uid).then(
-						user => {
+						(user) => {
 							this.props.setUserDataFirebase(user, authUser);
 
 							resolve();
 
 							this.props.showMessage({ message: 'Logged in with Firebase' });
 						},
-						error => {
+						(error) => {
 							resolve();
 						}
 					);
@@ -131,23 +131,19 @@ class Auth extends Component {
 		});
 
 	render() {
-		return this.state.waitAuthCheck ? (
-			<FuseSplashScreen />
-		) : (
-			<React.Fragment children={this.props.children} />
-		);
+		return this.state.waitAuthCheck ? <FuseSplashScreen /> : <React.Fragment children={this.props.children} />;
 	}
 }
 
 function mapDispatchToProps(dispatch) {
 	return bindActionCreators(
 		{
-			logout: userActions.logoutUser,
-			setUserData: userActions.setUserData,
-			setUserDataAuth0: userActions.setUserDataAuth0,
-			setUserDataFirebase: userActions.setUserDataFirebase,
-			showMessage: Actions.showMessage,
-			hideMessage: Actions.hideMessage
+			logout              : userActions.logoutUser,
+			setUserData         : userActions.setUserData,
+			setUserDataAuth0    : userActions.setUserDataAuth0,
+			setUserDataFirebase : userActions.setUserDataFirebase,
+			showMessage         : Actions.showMessage,
+			hideMessage         : Actions.hideMessage
 		},
 		dispatch
 	);

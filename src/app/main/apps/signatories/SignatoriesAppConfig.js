@@ -9,12 +9,12 @@ export const SignatoriesAppConfig = {
 	},
 	routes   : [
 		{
-      path: '/apps/signatories/:id',
+			path      : '/apps/firmantes/:id',
 			component : React.lazy(() => import('./SignatoriesApp'))
 		},
 		{
-      path: '/apps/signatories',
-      component: () => <Redirect to='/apps/signatories/all' />
+			path      : '/apps/firmantes',
+			component : () => <Redirect to='/apps/firmantes/all' />
 		}
 	]
 };

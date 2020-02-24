@@ -16,32 +16,39 @@ const navigationConfig = [
 				url   : '/apps/dashboard'
 			},
 			{
-				id    : 'clients',
+				id    : 'clientes',
 				title : 'Clientes',
 				type  : 'item',
 				icon  : 'account_box',
-				url   : '/apps/clients'
+				url   : '/apps/clientes'
 			},
 			{
-				id    : 'signatories',
+				id    : 'firmantes',
 				title : 'Firmantes',
 				type  : 'item',
 				icon  : 'account_box',
-				url   : '/apps/signatories'
+				url   : '/apps/firmantes'
 			},
 			{
-				id    : 'users',
+				id    : 'usuarios',
 				title : 'Usuarios',
 				type  : 'item',
 				icon  : 'account_box',
-				url   : '/apps/users'
+				url   : '/apps/usuarios'
 			},
 			{
-				id    : 'users',
+				id    : 'estudios',
 				title : 'Estudios',
 				type  : 'item',
 				icon  : 'account_box',
-				url   : '/apps/casestudy'
+				url   : '/apps/estudios'
+			},
+			{
+				id    : 'tasks',
+				title : 'Tareas',
+				type  : 'item',
+				icon  : 'today',
+				url   : '/apps/tareas'
 			}
 		]
 	}

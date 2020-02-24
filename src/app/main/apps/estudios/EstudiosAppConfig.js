@@ -9,12 +9,12 @@ export const EstudiosAppConfig = {
 	},
 	routes   : [
 		{
-			path      : '/apps/casestudy/:id',
+			path      : '/apps/estudios/:id',
 			component : React.lazy(() => import('./EstudiosApp'))
 		},
 		{
-			path      : '/apps/casestudy',
-			component : () => <Redirect to='/apps/casestudy/all' />
+			path      : '/apps/estudios',
+			component : () => <Redirect to='/apps/estudios/all' />
 		}
 	]
 };

@@ -9,12 +9,12 @@ export const UsersAppConfig = {
 	},
 	routes   : [
 		{
-			path      : '/apps/users/:id',
+			path      : '/apps/usuarios/:id',
 			component : React.lazy(() => import('./UsersApp'))
 		},
 		{
-			path      : '/apps/users',
-			component : () => <Redirect to='/apps/users/all' />
+			path      : '/apps/usuarios',
+			component : () => <Redirect to='/apps/usuarios/all' />
 		}
 	]
 };
