@@ -4,6 +4,7 @@ export const GET_TASKS = '@@ Task // GET TASKS';
 export const GET_USERS = '@@ Task // GET USERS';
 export const GET_CLIENTS = '@@ Task // GET CLIENTS';
 export const GET_ESTUDIOS = '@@ Task // GET ESTUDIOS';
+export const SHOW_LOADING = '@@ Task // SHOW LOADING';
 export const OPEN_NEW_TASK_DIALOG = '@@ Task // OPEN NEW TASK DIALOG';
 export const CLOSE_NEW_TASK_DIALOG = '@@ Task // CLOSE NEW TASK DIALOG';
 export const OPEN_EDIT_TASK_DIALOG = '@@ Task // OPEN EDIT TASK DIALOG';
@@ -13,6 +14,10 @@ export const UPDATE_TASK = '@@ Task // UPDATE TASK';
 export const REMOVE_TASK = '@@ Task // REMOVE TASK';
 
 export const getTasks = () => async (dispatch) => {
+	dispatch({
+		type : SHOW_LOADING
+	});
+
 	const response = await axios.get('/tareas/');
 
 	dispatch({

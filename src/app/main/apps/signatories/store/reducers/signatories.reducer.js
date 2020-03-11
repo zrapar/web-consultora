@@ -13,7 +13,11 @@ const initialState = {
 		},
 		data  : null
 	},
-	clients              : []
+	clients              : [],
+	success              : {
+		signatories : false,
+		clients     : false
+	}
 };
 
 const signatoriesReducer = function(state = initialState, action) {
@@ -22,13 +26,30 @@ const signatoriesReducer = function(state = initialState, action) {
 			return {
 				...state,
 				entities    : _.keyBy(action.payload, 'id'),
-				routeParams : action.routeParams
+				routeParams : action.routeParams,
+				success     : {
+					...state.success,
+					signatories : true
+				}
 			};
 		}
 		case Actions.GET_CLIENTS: {
 			return {
 				...state,
-				clients : action.payload
+				clients : action.payload,
+				success : {
+					...state.success,
+					clients : true
+				}
+			};
+		}
+		case Actions.SHOW_LOADING: {
+			return {
+				...state,
+				success : {
+					signatories : false,
+					clients     : false
+				}
 			};
 		}
 		case Actions.SET_SEARCH_TEXT: {

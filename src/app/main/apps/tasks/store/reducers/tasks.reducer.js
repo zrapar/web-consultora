@@ -1,17 +1,24 @@
 import * as Actions from '../actions';
 
 const initialState = {
-	entities   : [],
-	taskDialog : {
+	entities    : [],
+	taskDialog  : {
 		type  : 'new',
 		props : {
 			open : false
 		},
 		data  : null
 	},
-	users      : [],
-	clients    : [],
-	estudios   : []
+	users       : [],
+	clients     : [],
+	estudios    : [],
+	showLoading : true,
+	success     : {
+		task     : false,
+		users    : false,
+		clients  : false,
+		estudios : false
+	}
 };
 
 const tasksReducer = function(state = initialState, action) {
@@ -19,32 +26,49 @@ const tasksReducer = function(state = initialState, action) {
 		case Actions.GET_TASKS: {
 			const entities = action.payload.map((event) => ({
 				...event,
-				start : new Date(event.inicio),
-				end   : new Date(event.fin),
-				title : event.estado
+				start       : new Date(event.inicio),
+				end         : event.fin ? new Date(event.fin) : new Date(event.estimada),
+				title       : `Estudio de ${event.estudio.name} en ${event.cliente.empresa}`,
+				description : `Estudio de ${event.estudio.name} en ${event.cliente.empresa} asignado a ${event
+					.responsable.name}`
 			}));
 
 			return {
 				...state,
-				entities
+				entities,
+				success  : { ...state.success, task: true }
 			};
 		}
 		case Actions.GET_USERS: {
 			return {
 				...state,
-				users : action.payload
+				users   : action.payload,
+				success : { ...state.success, users: true }
 			};
 		}
 		case Actions.GET_CLIENTS: {
 			return {
 				...state,
-				clients : action.payload
+				clients : action.payload,
+				success : { ...state.success, clients: true }
 			};
 		}
 		case Actions.GET_ESTUDIOS: {
 			return {
 				...state,
-				estudios : action.payload
+				estudios : action.payload,
+				success  : { ...state.success, estudios: true }
+			};
+		}
+		case Actions.SHOW_LOADING: {
+			return {
+				...state,
+				success : {
+					task     : false,
+					users    : false,
+					clients  : false,
+					estudios : false
+				}
 			};
 		}
 		case Actions.OPEN_NEW_TASK_DIALOG: {

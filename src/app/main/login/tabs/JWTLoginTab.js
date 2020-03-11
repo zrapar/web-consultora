@@ -1,37 +1,58 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Button, InputAdornment, Icon } from '@material-ui/core';
+import { Button, InputAdornment, Icon, CircularProgress } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 import { TextFieldFormsy } from '@fuse';
 import Formsy from 'formsy-react';
 import * as authActions from 'app/auth/store/actions';
 import { useDispatch, useSelector } from 'react-redux';
 
-function JWTLoginTab(props) {
+const useStyles = makeStyles((theme) => ({
+	progress : {
+		margin : theme.spacing(2),
+		width  : '100px!important',
+		height : '100px!important'
+	},
+	center   : {
+		display        : 'flex',
+		justifyContent : 'center'
+	}
+}));
+
+const JWTLoginTab = (props) => {
+	const classes = useStyles();
 	const dispatch = useDispatch();
 	const login = useSelector(({ auth }) => auth.login);
 
-	const [isFormValid, setIsFormValid] = useState(false);
+	const [ isFormValid, setIsFormValid ] = useState(false);
+	const [ showLoading, toggleLoading ] = useState(false);
 	const formRef = useRef(null);
 
-	useEffect(() => {
-		if (login.error && (login.error.email || login.error.password)) {
-			formRef.current.updateInputsWithError({
-				...login.error
-			});
-			disableButton();
-		}
-	}, [login.error]);
+	useEffect(
+		() => {
+			if (login.error) {
+				// formRef.current.updateInputsWithError({
+				// 	...login.error
+				// });
+				enableButton();
+				toggleLoading(false);
+			}
+		},
+		[ login.error ]
+	);
 
-	function disableButton() {
+	const disableButton = () => {
 		setIsFormValid(false);
-	}
+	};
 
-	function enableButton() {
+	const enableButton = () => {
 		setIsFormValid(true);
-	}
+	};
 
-	function handleSubmit(model) {
+	const handleSubmit = (model) => {
+		disableButton();
+		toggleLoading(true);
 		dispatch(authActions.submitLogin(model));
-	}
+	};
 
 	return (
 		<div className='w-full'>
@@ -46,18 +67,18 @@ function JWTLoginTab(props) {
 					className='mb-16'
 					type='text'
 					name='username'
-					label='Username/Email'
+					label='Nombre de usuario'
 					validations={{
-						minLength: 4
+						minLength : 4
 					}}
 					validationErrors={{
-						minLength: 'Min character length is 4'
+						minLength : 'Min character length is 4'
 					}}
 					InputProps={{
-						endAdornment: (
+						endAdornment : (
 							<InputAdornment position='end'>
 								<Icon className='text-20' color='action'>
-									email
+									account_box
 								</Icon>
 							</InputAdornment>
 						)
@@ -70,15 +91,15 @@ function JWTLoginTab(props) {
 					className='mb-16'
 					type='password'
 					name='password'
-					label='Password'
+					label='Contraseña'
 					validations={{
-						minLength: 4
+						minLength : 4
 					}}
 					validationErrors={{
-						minLength: 'Min character length is 4'
+						minLength : 'Min character length is 4'
 					}}
 					InputProps={{
-						endAdornment: (
+						endAdornment : (
 							<InputAdornment position='end'>
 								<Icon className='text-20' color='action'>
 									vpn_key
@@ -99,11 +120,17 @@ function JWTLoginTab(props) {
 					disabled={!isFormValid}
 					value='legacy'
 				>
-					Login
+					Iniciar sesión
 				</Button>
+
+				{showLoading && (
+					<div className={`w-full ${classes.center}`}>
+						<CircularProgress className={classes.progress} />
+					</div>
+				)}
 			</Formsy>
 		</div>
 	);
-}
+};
 
 export default JWTLoginTab;

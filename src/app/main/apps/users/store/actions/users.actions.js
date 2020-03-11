@@ -1,6 +1,7 @@
 import axios from 'axios';
 // users
 export const GET_USERS = '@@Users/Get Users';
+export const SHOW_LOADING = '@@Users/Show Loading';
 export const SET_SEARCH_TEXT = '@@Users/Set Search Text';
 export const TOGGLE_IN_SELECTED_USERS = '@@Users/Toggle in selected users';
 export const SELECT_ALL_USERS = '@@Users/Select all users';
@@ -15,6 +16,7 @@ export const REMOVE_USER = '@@Users/Remove user';
 export const REMOVE_USERS = '@@Users/Remove users';
 
 export const getUsers = (routeParams) => async (dispatch) => {
+	dispatch({ type: SHOW_LOADING });
 	const response = await axios.get('/usuarios/', {
 		params : routeParams
 	});

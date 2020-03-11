@@ -2,6 +2,7 @@ import axios from 'axios';
 // estudios
 export const GET_ESTUDIOS = '@@Estudios/Get Estudios';
 export const SET_SEARCH_TEXT = '@@Estudios/Set Search Text';
+export const SHOW_LOADING = '@@Estudios/Show Loading';
 export const TOGGLE_IN_SELECTED_ESTUDIOS = '@@Estudios/Toggle in selected estudios';
 export const SELECT_ALL_ESTUDIOS = '@@Estudios/Select all estudios';
 export const DESELECT_ALL_ESTUDIOS = '@@Estudios/Deselect all estudios';
@@ -15,6 +16,7 @@ export const REMOVE_ESTUDIO = '@@Estudios/Remove estudio';
 export const REMOVE_ESTUDIOS = '@@Estudios/Remove estudios';
 
 export const getEstudios = (routeParams) => async (dispatch) => {
+	dispatch({ type: SHOW_LOADING });
 	const response = await axios.get('/estudios/', {
 		params : routeParams
 	});

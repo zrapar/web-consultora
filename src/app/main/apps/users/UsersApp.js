@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Fab, Icon } from '@material-ui/core';
-import { FusePageSimple, FuseAnimate } from '@fuse';
-import { useDispatch } from 'react-redux';
+import { FusePageSimple, FuseAnimate, FuseLoading } from '@fuse';
+import { useDispatch, useSelector } from 'react-redux';
 import withReducer from 'app/store/withReducer';
 import UsersList from './UsersList';
 import UsersHeader from './UsersHeader';
@@ -21,7 +21,7 @@ const useStyles = makeStyles({
 
 const UsersApp = (props) => {
 	const dispatch = useDispatch();
-
+	const success = useSelector(({ users: { users } }) => users.success);
 	const classes = useStyles(props);
 	const pageLayout = useRef(null);
 
@@ -34,30 +34,36 @@ const UsersApp = (props) => {
 
 	return (
 		<React.Fragment>
-			<FusePageSimple
-				classes={{
-					contentWrapper : 'p-0 sm:p-24 pb-80 sm:pb-80 h-full',
-					content        : 'flex flex-col h-full',
-					leftSidebar    : 'w-256 border-0',
-					header         : 'min-h-72 h-72 sm:h-136 sm:min-h-136'
-				}}
-				header={<UsersHeader pageLayout={pageLayout} />}
-				content={<UsersList />}
-				sidebarInner
-				ref={pageLayout}
-				innerScroll
-			/>
-			<FuseAnimate animation='transition.expandIn' delay={300}>
-				<Fab
-					color='primary'
-					aria-label='add'
-					className={classes.addButton}
-					onClick={(ev) => dispatch(Actions.openNewUserDialog())}
-				>
-					<Icon>person_add</Icon>
-				</Fab>
-			</FuseAnimate>
-			<UsersDialog />
+			{success ? (
+				<React.Fragment>
+					<FusePageSimple
+						classes={{
+							contentWrapper : 'p-0 sm:p-24 pb-80 sm:pb-80 h-full',
+							content        : 'flex flex-col h-full',
+							leftSidebar    : 'w-256 border-0',
+							header         : 'min-h-72 h-72 sm:h-136 sm:min-h-136'
+						}}
+						header={<UsersHeader pageLayout={pageLayout} />}
+						content={<UsersList />}
+						sidebarInner
+						ref={pageLayout}
+						innerScroll
+					/>
+					<FuseAnimate animation='transition.expandIn' delay={300}>
+						<Fab
+							color='primary'
+							aria-label='add'
+							className={classes.addButton}
+							onClick={(ev) => dispatch(Actions.openNewUserDialog())}
+						>
+							<Icon>person_add</Icon>
+						</Fab>
+					</FuseAnimate>
+					<UsersDialog />
+				</React.Fragment>
+			) : (
+				<FuseLoading delay={true} />
+			)}
 		</React.Fragment>
 	);
 };

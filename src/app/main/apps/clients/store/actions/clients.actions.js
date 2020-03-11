@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 export const GET_CLIENTS = '@@Clients/Get Clients';
+export const SHOW_LOADING = '@@Clients/Show Loading';
 export const SET_SEARCH_TEXT = '@@Clients/Set Search Text';
 export const TOGGLE_IN_SELECTED_CLIENTS = '@@Clients/Toggle in selected clients';
 export const SELECT_ALL_CLIENTS = '@@Clients/Select all clients';
@@ -15,6 +16,7 @@ export const REMOVE_CLIENT = '@@Clients/Remove client';
 export const REMOVE_CLIENTS = '@@Clients/Remove client';
 
 export const getClients = (routeParams) => async (dispatch) => {
+	dispatch({ type: SHOW_LOADING });
 	const response = await axios.get('/clientes/', {
 		params : routeParams
 	});

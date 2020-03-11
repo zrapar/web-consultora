@@ -2,6 +2,7 @@ import axios from 'axios';
 // signatories
 export const GET_SIGNATORIES = '@@Signatories/Get Signatories';
 export const GET_CLIENTS = '@@Signatories/Get Clients';
+export const SHOW_LOADING = '@@Signatories/Show loading';
 export const SET_SEARCH_TEXT = '@@Signatories/Set Search Text';
 export const TOGGLE_IN_SELECTED_SIGNATORIES = '@@Signatories/Toggle in selected signatories';
 export const SELECT_ALL_SIGNATORIES = '@@Signatories/Select all signatories';
@@ -16,6 +17,7 @@ export const REMOVE_SIGNATORY = '@@Signatories/Remove signatory';
 export const REMOVE_SIGNATORIES = '@@Signatories/Remove signatories';
 
 export const getSignatories = (routeParams) => async (dispatch) => {
+	dispatch({ type: SHOW_LOADING });
 	const response = await axios.get('/firmantes/', {
 		params : routeParams
 	});

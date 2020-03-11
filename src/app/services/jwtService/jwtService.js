@@ -4,7 +4,8 @@ import FuseUtils from '@fuse/FuseUtils';
 
 class jwtService extends FuseUtils.EventEmitter {
 	init() {
-		axios.defaults.baseURL = process.env.REACT_APP_API_URL;
+		// axios.defaults.baseURL = process.env.REACT_APP_API_URL;
+		axios.defaults.baseURL = 'http://127.0.0.1:8000';
 		axios.defaults.headers.post['Content-Type'] = 'application/json';
 		this.setInterceptors();
 		this.handleAuthentication();
@@ -19,7 +20,14 @@ class jwtService extends FuseUtils.EventEmitter {
 				return new Promise((resolve, reject) => {
 					if (err.response.status === 401 && err.config && !err.config.__isRetryRequest) {
 						// if you ever get an unauthorized response, logout the user
-						this.emit('onAutoLogout', 'Invalid access_token');
+						if (err.response.data) {
+							if (err.response.data.detail) {
+								this.emit('onAutoLogout', err.response.data.detail);
+							}
+						} else {
+							this.emit('onAutoLogout', 'El tiempo de su sesión finalizo');
+						}
+
 						this.setSession(null);
 					}
 					throw err;
@@ -59,22 +67,21 @@ class jwtService extends FuseUtils.EventEmitter {
 		});
 	};
 
-	signInWithEmailAndPassword = (username, password) => {
-		return new Promise((resolve, reject) => {
-			axios
-				.post('/api/token/', {
-					username,
-					password
-				})
-				.then((response) => {
-					if (response.data) {
-						this.setSession(response.data.access);
-						resolve(username);
-					} else {
-						reject(response.data.error);
-					}
-				});
-		});
+	signInWithEmailAndPassword = async (username, password) => {
+		try {
+			const response = await axios.post('/api/token/', {
+				username,
+				password
+			});
+			if (response.data) {
+				this.setSession(response.data.access);
+				return { success: true, username };
+			} else {
+				return { success: false, message: response.data };
+			}
+		} catch (error) {
+			return { success: false, message: error.response.data };
+		}
 	};
 
 	signInWithToken = () => {

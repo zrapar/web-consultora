@@ -12,7 +12,8 @@ const initialState = {
 			open : false
 		},
 		data  : null
-	}
+	},
+	success            : false
 };
 
 const estudiosReducer = function(state = initialState, action) {
@@ -21,7 +22,14 @@ const estudiosReducer = function(state = initialState, action) {
 			return {
 				...state,
 				entities    : _.keyBy(action.payload, 'id'),
-				routeParams : action.routeParams
+				routeParams : action.routeParams,
+				success     : true
+			};
+		}
+		case Actions.SHOW_LOADING: {
+			return {
+				...state,
+				success : false
 			};
 		}
 		case Actions.SET_SEARCH_TEXT: {

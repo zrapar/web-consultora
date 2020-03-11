@@ -22,22 +22,24 @@ import * as Actions from './store/actions';
 import { FuseChipSelect } from '@fuse';
 import _ from '@lodash';
 
-const defaultFormState = {
+let defaultFormState = {
 	// title       : '',
 	// allDay      : false,
 	inicio      : new Date(),
 	fin         : new Date(),
+	estimada    : new Date(),
 	estudio     : null,
 	responsable : null,
 	cliente     : null,
 	estado      : 'created'
 };
 
+defaultFormState['estimada'].setDate(defaultFormState['estimada'].getDate() + 1);
 const statesOfTask = [
 	{ name: 'Creado', value: 'created' },
 	{ name: 'En Progreso', value: 'on-progress' },
 	{ name: 'Finalizado', value: 'finish' },
-	{ name: 'Cancelado', value: 'cancel' }
+	{ name: 'Cancelado', value: 'canceled' }
 ];
 
 const TaskDialog = (props) => {
@@ -50,6 +52,7 @@ const TaskDialog = (props) => {
 	const { form, handleChange, setForm } = useForm(defaultFormState);
 	let start = moment(form.inicio).locale('es').format(moment.HTML5_FMT.DATETIME_LOCAL_SECONDS);
 	let end = moment(form.fin).locale('es').format(moment.HTML5_FMT.DATETIME_LOCAL_SECONDS);
+	let estimated = moment(form.estimada).locale('es').format(moment.HTML5_FMT.DATETIME_LOCAL_SECONDS);
 
 	const initDialog = useCallback(
 		() => {
@@ -125,6 +128,9 @@ const TaskDialog = (props) => {
 
 			<form noValidate onSubmit={handleSubmit}>
 				<DialogContent classes={{ root: 'p-16 pb-0 sm:p-24 sm:pb-0' }}>
+					<Typography variant='subtitle1' color='inherit'>
+						{taskDialog.type !== 'new' && form.description}
+					</Typography>
 					{/* <TextField
 						id='title'
 						label='Title'
@@ -168,52 +174,75 @@ const TaskDialog = (props) => {
 						fullWidth
 					/>
 
-					<TextField
-						id='fin'
-						name='fin'
-						label='Fecha de finalización'
-						type='datetime-local'
-						className='mt-8 mb-16'
-						InputLabelProps={{
-							shrink : true
-						}}
-						inputProps={{
-							min : start
-						}}
-						value={end}
-						onChange={handleChange}
-						variant='outlined'
-						fullWidth
-					/>
-
-					<FuseChipSelect
-						className='mt-8 mb-24 w-full'
-						value={statesOfTask
-							.map((item) => {
-								if (item.value === form.estado) {
-									return {
-										value : item.value,
-										label : item.name
-									};
-								}
-								return false;
-							})
-							.filter((i) => i)}
-						onChange={(value) => handleChipChange(value, 'estado')}
-						placeholder='Estado de la tarea'
-						textFieldProps={{
-							label           : 'Estado de la tarea',
-							InputLabelProps : {
+					{taskDialog.type === 'new' && (
+						<TextField
+							id='estimada'
+							name='estimada'
+							label='Fecha de estimada de finalizacion'
+							type='datetime-local'
+							className='mt-8 mb-16'
+							InputLabelProps={{
 								shrink : true
-							},
-							variant         : 'outlined'
-						}}
-						variant='fixed'
-						options={statesOfTask.map((item) => ({
-							value : item.value,
-							label : item.name
-						}))}
-					/>
+							}}
+							inputProps={{
+								min : start
+							}}
+							value={estimated}
+							onChange={handleChange}
+							variant='outlined'
+							fullWidth
+						/>
+					)}
+
+					{taskDialog.type !== 'new' && (
+						<React.Fragment>
+							<TextField
+								id='fin'
+								name='fin'
+								label='Fecha de finalización'
+								type='datetime-local'
+								className='mt-8 mb-16'
+								InputLabelProps={{
+									shrink : true
+								}}
+								inputProps={{
+									min : start
+								}}
+								value={end}
+								onChange={handleChange}
+								variant='outlined'
+								fullWidth
+							/>
+							<FuseChipSelect
+								className='mt-8 mb-24 w-full'
+								value={statesOfTask
+									.map((item) => {
+										if (item.value === form.estado) {
+											return {
+												value : item.value,
+												label : item.name
+											};
+										}
+										return false;
+									})
+									.filter((i) => i)}
+								onChange={(value) => handleChipChange(value, 'estado')}
+								placeholder='Estado de la tarea'
+								textFieldProps={{
+									label           : 'Estado de la tarea',
+									InputLabelProps : {
+										shrink : true
+									},
+									variant         : 'outlined'
+								}}
+								variant='fixed'
+								options={statesOfTask.map((item) => ({
+									value : item.value,
+									label : item.name
+								}))}
+							/>
+						</React.Fragment>
+					)}
 
 					<FuseChipSelect
 						className='mt-8 mb-24 w-full'
