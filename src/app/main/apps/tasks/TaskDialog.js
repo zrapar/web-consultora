@@ -32,7 +32,7 @@ let defaultFormState = {
 	estudio     : { id: null },
 	responsable : { id: null },
 	cliente     : { id: null },
-	estado      : 'created'
+	estado      : { id: 'created' }
 };
 
 defaultFormState['estimada'].setDate(defaultFormState['estimada'].getDate() + 1);
@@ -95,18 +95,34 @@ const TaskDialog = (props) => {
 
 	const canBeSubmitted = () => {
 		let dates = start < estimated;
-		if (form.fin) {
+		if (taskDialog.type === 'edit' && taskDialog.data && taskDialog.data.fin) {
 			dates = start < end;
 		}
-		return form.estudio && form.responsable && form.cliente && form.estado && dates;
+		return form.estudio.id && form.responsable.id && form.cliente.id && form.estado.id && dates;
 	};
 
 	const handleSubmit = (event) => {
 		event.preventDefault();
 		if (taskDialog.type === 'new') {
-			dispatch(Actions.addTask(form));
+			dispatch(
+				Actions.addTask({
+					...form,
+					estudio     : form.estudio.id,
+					responsable : form.responsable.id,
+					cliente     : form.cliente.id,
+					estado      : form.estado.id
+				})
+			);
 		} else {
-			dispatch(Actions.updateTask(form));
+			dispatch(
+				Actions.updateTask({
+					...form,
+					estudio     : form.estudio.id,
+					responsable : form.responsable.id,
+					cliente     : form.cliente.id,
+					estado      : form.estado.id
+				})
+			);
 		}
 		closeComposeDialog();
 	};
@@ -117,9 +133,9 @@ const TaskDialog = (props) => {
 	};
 
 	const handleChipChange = (value, name) => {
-		setForm(_.set({ ...form }, name, value.value));
+		setForm(_.set({ ...form }, name, { id: value.value, name: value.label }));
 	};
-
+	console.log(form);
 	return (
 		<Dialog {...taskDialog.props} onClose={closeComposeDialog} fullWidth maxWidth='md' component='form'>
 			<AppBar position='static'>
@@ -226,7 +242,7 @@ const TaskDialog = (props) => {
 								className='mt-8 mb-24 w-full'
 								value={statesOfTask
 									.map((item) => {
-										if (item.value === form.estado) {
+										if (item.value === form.estado.id) {
 											return {
 												value : item.value,
 												label : item.name

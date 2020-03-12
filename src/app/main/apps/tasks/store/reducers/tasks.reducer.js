@@ -30,7 +30,8 @@ const tasksReducer = function(state = initialState, action) {
 				end         : event.fin ? new Date(event.fin) : new Date(event.estimada),
 				title       : `Estudio de ${event.estudio.name} en ${event.cliente.empresa}`,
 				description : `Estudio de ${event.estudio.name} en ${event.cliente.empresa} asignado a ${event
-					.responsable.name}`
+					.responsable.name}`,
+				estado      : { id: event.estado }
 			}));
 
 			return {
