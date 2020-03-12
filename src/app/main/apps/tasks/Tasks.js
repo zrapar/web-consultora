@@ -209,60 +209,62 @@ const Tasks = (props) => {
 		<div className={clsx(classes.root, 'flex flex-col flex-auto relative')}>
 			<div ref={headerEl} />
 			{task && users && clients && estudios ? (
-				<DragAndDropCalendar
-					className='flex flex-1 container'
-					selectable
-					localizer={localizer}
-					events={tasks}
-					onEventDrop={moveTask}
-					resizable
-					onEventResize={resizeTask}
-					defaultView={Views.MONTH}
-					defaultDate={new Date()}
-					startAccessor='start'
-					endAccessor='end'
-					views={allViews}
-					step={60}
-					showMultiDayTimes
-					components={{
-						toolbar : (props) => {
-							return headerEl.current
-								? ReactDOM.createPortal(<TasksHeader {...props} />, headerEl.current)
-								: null;
-						}
-					}}
-					// onNavigate={handleNavigate}
-					onSelectEvent={(event) => {
-						dispatch(Actions.openEditTaskDialog(event));
-					}}
-					onSelectSlot={(slotInfo) =>
-						dispatch(
-							Actions.openNewTaskDialog({
-								start : slotInfo.start.toLocaleString(),
-								end   : slotInfo.end.toLocaleString()
-							})
-						)}
-				/>
+				<React.Fragment>
+					<DragAndDropCalendar
+						className='flex flex-1 container'
+						selectable
+						localizer={localizer}
+						events={tasks}
+						onEventDrop={moveTask}
+						resizable
+						onEventResize={resizeTask}
+						defaultView={Views.MONTH}
+						defaultDate={new Date()}
+						startAccessor='start'
+						endAccessor='end'
+						views={allViews}
+						step={60}
+						showMultiDayTimes
+						components={{
+							toolbar : (props) => {
+								return headerEl.current
+									? ReactDOM.createPortal(<TasksHeader {...props} />, headerEl.current)
+									: null;
+							}
+						}}
+						// onNavigate={handleNavigate}
+						onSelectEvent={(event) => {
+							dispatch(Actions.openEditTaskDialog(event));
+						}}
+						onSelectSlot={(slotInfo) =>
+							dispatch(
+								Actions.openNewTaskDialog({
+									start : slotInfo.start.toLocaleString(),
+									end   : slotInfo.end.toLocaleString()
+								})
+							)}
+					/>
+					<FuseAnimate animation='transition.expandIn' delay={500}>
+						<Fab
+							color='secondary'
+							aria-label='add'
+							className={classes.addButton}
+							onClick={() =>
+								dispatch(
+									Actions.openNewTaskDialog({
+										start : new Date(),
+										end   : new Date()
+									})
+								)}
+						>
+							<Icon>add</Icon>
+						</Fab>
+					</FuseAnimate>
+					<TaskDialog />
+				</React.Fragment>
 			) : (
 				<FuseLoading delay={true} />
 			)}
-			<FuseAnimate animation='transition.expandIn' delay={500}>
-				<Fab
-					color='secondary'
-					aria-label='add'
-					className={classes.addButton}
-					onClick={() =>
-						dispatch(
-							Actions.openNewTaskDialog({
-								start : new Date(),
-								end   : new Date()
-							})
-						)}
-				>
-					<Icon>add</Icon>
-				</Fab>
-			</FuseAnimate>
-			<TaskDialog />
 		</div>
 	);
 };

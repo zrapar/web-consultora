@@ -64,10 +64,8 @@ const tasksReducer = function(state = initialState, action) {
 			return {
 				...state,
 				success : {
-					task     : false,
-					users    : false,
-					clients  : false,
-					estudios : false
+					...state.success,
+					task : false
 				}
 			};
 		}

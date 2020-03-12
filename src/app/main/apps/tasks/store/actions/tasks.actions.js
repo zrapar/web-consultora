@@ -93,7 +93,11 @@ export const addTask = (newTask) => async (dispatch) => {
 };
 
 export const updateTask = (task) => async (dispatch) => {
-	const response = await axios.post(`/tareas/${task.id}`, task);
+	dispatch({
+		type : SHOW_LOADING
+	});
+
+	const response = await axios.put(`/tareas/${task.id}/`, task);
 
 	if (response) {
 		Promise.all([
@@ -105,6 +109,10 @@ export const updateTask = (task) => async (dispatch) => {
 };
 
 export const removeTask = (taskId) => async (dispatch) => {
+	dispatch({
+		type : SHOW_LOADING
+	});
+
 	const response = await axios.delete(`/tareas/${taskId}`);
 
 	if (response) {

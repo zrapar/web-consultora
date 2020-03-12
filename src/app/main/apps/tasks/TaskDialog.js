@@ -25,12 +25,13 @@ import _ from '@lodash';
 let defaultFormState = {
 	// title       : '',
 	// allDay      : false,
+	id          : null,
 	inicio      : new Date(),
 	fin         : new Date(),
 	estimada    : new Date(),
-	estudio     : null,
-	responsable : null,
-	cliente     : null,
+	estudio     : { id: null },
+	responsable : { id: null },
+	cliente     : { id: null },
 	estado      : 'created'
 };
 
@@ -93,12 +94,15 @@ const TaskDialog = (props) => {
 	};
 
 	const canBeSubmitted = () => {
-		return form.estudio && form.responsable && form.cliente && form.estado;
+		let dates = start < estimated;
+		if (form.fin) {
+			dates = start < end;
+		}
+		return form.estudio && form.responsable && form.cliente && form.estado && dates;
 	};
 
 	const handleSubmit = (event) => {
 		event.preventDefault();
-
 		if (taskDialog.type === 'new') {
 			dispatch(Actions.addTask(form));
 		} else {
@@ -128,33 +132,20 @@ const TaskDialog = (props) => {
 
 			<form noValidate onSubmit={handleSubmit}>
 				<DialogContent classes={{ root: 'p-16 pb-0 sm:p-24 sm:pb-0' }}>
-					<Typography variant='subtitle1' color='inherit'>
+					<Typography className='mb-16' variant='subtitle1' color='inherit'>
 						{taskDialog.type !== 'new' && form.description}
 					</Typography>
-					{/* <TextField
-						id='title'
-						label='Title'
+
+					<TextField
+						id='id'
 						className='mt-8 mb-16'
-						InputLabelProps={{
-							shrink : true
-						}}
-						inputProps={{
-							max : end
-						}}
-						name='title'
-						value={form.title}
+						name='id'
+						value={form.id}
 						onChange={handleChange}
 						variant='outlined'
-						autoFocus
-						required
+						type='hidden'
 						fullWidth
-					/> */}
-
-					{/* <FormControlLabel
-						className='mt-8 mb-16'
-						label='All Day'
-						control={<Switch checked={form.allDay} id='allDay' name='allDay' onChange={handleChange} />}
-					/> */}
+					/>
 
 					<TextField
 						id='inicio'
@@ -196,6 +187,24 @@ const TaskDialog = (props) => {
 
 					{taskDialog.type !== 'new' && (
 						<React.Fragment>
+							<TextField
+								id='estimada'
+								name='estimada'
+								label='Fecha de estimada de finalizacion'
+								type='datetime-local'
+								className='mt-8 mb-16'
+								InputLabelProps={{
+									shrink : true
+								}}
+								inputProps={{
+									min : start
+								}}
+								value={estimated}
+								onChange={handleChange}
+								variant='outlined'
+								fullWidth
+							/>
+
 							<TextField
 								id='fin'
 								name='fin'
@@ -248,7 +257,7 @@ const TaskDialog = (props) => {
 						className='mt-8 mb-24 w-full'
 						value={estudios
 							.map((item) => {
-								if (item.id === form.estudio) {
+								if (item.id === form.estudio.id) {
 									return {
 										value : item.id,
 										label : item.name
@@ -277,7 +286,7 @@ const TaskDialog = (props) => {
 						className='mt-8 mb-24 w-full'
 						value={users
 							.map((item) => {
-								if (item.id === form.responsable) {
+								if (item.id === form.responsable.id) {
 									return {
 										value : item.id,
 										label : item.name
@@ -306,7 +315,7 @@ const TaskDialog = (props) => {
 						className='mt-8 mb-60 w-full'
 						value={clients
 							.map((item) => {
-								if (item.id === form.cliente) {
+								if (item.id === form.cliente.id) {
 									return {
 										value : item.id,
 										label : item.empresa
