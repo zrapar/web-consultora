@@ -1,115 +1,135 @@
 import axios from 'axios';
+// import { FuseUtils } from '@fuse';
+import { showMessage } from 'app/store/actions/fuse';
 
-export const GET_CLIENTS = '@@Clients/Get Clients';
-export const SHOW_LOADING = '@@Clients/Show Loading';
-export const SET_SEARCH_TEXT = '@@Clients/Set Search Text';
-export const TOGGLE_IN_SELECTED_CLIENTS = '@@Clients/Toggle in selected clients';
-export const SELECT_ALL_CLIENTS = '@@Clients/Select all clients';
-export const DESELECT_ALL_CLIENTS = '@@Clients/Deselect all clients';
-export const OPEN_NEW_CLIENT_DIALOG = '@@Clients/Open new client dialog';
-export const CLOSE_NEW_CLIENT_DIALOG = '@@Clients/Close new client dialog';
-export const OPEN_EDIT_CLIENT_DIALOG = '@@Clients/Open edit client dialog';
-export const CLOSE_EDIT_CLIENT_DIALOG = '@@Clients/Close edit client dialog';
-export const ADD_CLIENT = '@@Clients/Add client';
-export const UPDATE_CLIENT = '@@Clients/Update client';
-export const REMOVE_CLIENT = '@@Clients/Remove client';
-export const REMOVE_CLIENTS = '@@Clients/Remove client';
+export const GET_CLIENT = '@@Clients/ GET Client';
+export const SAVE_CLIENT = '@@Clients/ Save Client';
+export const GET_CLIENTS = '@@Clients/ GET CLIENTS';
+export const SET_CLIENTS_SEARCH_TEXT = '@@Clients/ SET CLIENTS SEARCH TEXT';
 
-export const getClients = (routeParams) => async (dispatch) => {
-	dispatch({ type: SHOW_LOADING });
-	const response = await axios.get('/clientes/', {
-		params : routeParams
-	});
+export const getClients = () => async (dispatch) => {
+	const response = await axios.get('/clientes/');
+	const data = JSON.parse(response.data);
 
-	dispatch({
-		type        : GET_CLIENTS,
-		payload     : response.data,
-		routeParams
+	return dispatch({
+		type    : GET_CLIENTS,
+		payload : data
 	});
 };
 
-export const setSearchText = (event) => ({
-	type       : SET_SEARCH_TEXT,
+export const setClientsSearchText = (event) => ({
+	type       : SET_CLIENTS_SEARCH_TEXT,
 	searchText : event.target.value
 });
 
-export const toggleInSelectedClients = (clientId) => ({
-	type     : TOGGLE_IN_SELECTED_CLIENTS,
-	clientId
-});
-
-export const selectAllClients = () => ({
-	type : SELECT_ALL_CLIENTS
-});
-
-export const deSelectAllClients = () => ({
-	type : DESELECT_ALL_CLIENTS
-});
-
-export const openNewClientDialog = () => ({
-	type : OPEN_NEW_CLIENT_DIALOG
-});
-
-export const closeNewClientDialog = () => ({
-	type : CLOSE_NEW_CLIENT_DIALOG
-});
-
-export const openEditClientDialog = (data) => ({
-	type : OPEN_EDIT_CLIENT_DIALOG,
-	data
-});
-
-export const closeEditClientDialog = () => ({
-	type : CLOSE_EDIT_CLIENT_DIALOG
-});
-
-export const addClient = (newClient) => async (dispatch) => {
-	const response = await axios.post('/clientes/', newClient);
-
-	if (response) {
-		Promise.all([
-			dispatch({
-				type : ADD_CLIENT
-			})
-		]).then(() => dispatch(getClients()));
-	}
-};
-
-export const updateClient = (client) => async (dispatch) => {
-	const response = await axios.put(`/clientes/${client.id}/`, client);
-
-	if (response) {
-		Promise.all([
-			dispatch({
-				type : UPDATE_CLIENT
-			})
-		]).then(() => dispatch(getClients()));
-	}
-};
-
-export const removeClient = (clientId) => async (dispatch) => {
-	const response = await axios.delete(`/clientes/${clientId}/`);
-	if (response) {
-		Promise.all([
-			dispatch({
-				type : REMOVE_CLIENT
-			})
-		]).then(() => dispatch(getClients()));
-	}
-};
-
-export const removeClients = (clientIds) => (dispatch) => {
-	let arrayPromise = [];
-	clientIds.forEach((element) => {
-		const req = axios.delete(`/clientes/${element}/`);
-		arrayPromise.push(req);
+export const getClient = (params) => async (dispatch) => {
+	const response = await axios.get('/api/e-commerce-app/product', { params });
+	return dispatch({
+		type    : GET_CLIENT,
+		payload : response.data
 	});
+};
 
-	arrayPromise.push(
-		dispatch({
-			type : REMOVE_CLIENTS
-		})
-	);
+export const saveClient = (data) => async (dispatch) => {
+	const response = await axios.post('/api/e-commerce-app/product/save', data);
 
-	Promise.all(arrayPromise).then(() => dispatch(getClients()));
+	dispatch(showMessage({ message: 'Client Saved' }));
+
+	return dispatch({
+		type    : SAVE_CLIENT,
+		payload : response.data
+	});
+};
+
+export const newClient = () => {
+	const data = {
+		formalData : {
+			clientId            : '',
+			clientName          : '',
+			cuit                : '',
+			address             : {
+				partido       : '',
+				localidad     : '',
+				calleRuta     : '',
+				nKm           : '',
+				piso          : '',
+				depto         : '',
+				codigo_postal : '',
+				type          : {
+					label : 'Seleccione el tipo de domicilio',
+					value : null
+				}
+			},
+			legalRepresentative : {
+				name            : '',
+				dni             : '',
+				position        : '',
+				cuil            : '',
+				estatuto        : [],
+				actaDesignacion : [],
+				poderes         : [],
+				extraPdfs       : []
+			}
+		},
+		planta     : {
+			id_establecimiento : '',
+			address            : {
+				partido       : '',
+				localidad     : '',
+				calleRuta     : '',
+				nKm           : '',
+				piso          : '',
+				depto         : '',
+				codigo_postal : ''
+			},
+			email              : '',
+			phoneContacts      : '',
+			innerContact       : {
+				name     : '',
+				lastName : '',
+				phone    : '',
+				email    : '',
+				position : '',
+				workArea : ''
+			},
+			govermentUsers     : {
+				opds   : {
+					user : '',
+					pass : ''
+				},
+				ada    : {
+					user : '',
+					pass : ''
+				},
+				ina    : {
+					user : '',
+					pass : ''
+				},
+				acumar : {
+					user : '',
+					pass : ''
+				}
+			},
+			mobiliary          : {
+				orderNum            : '',
+				partidaInmobiliaria : '',
+				matricula           : '',
+				circunscripcion     : '',
+				seccion             : '',
+				fraccion            : '',
+				manzana             : '',
+				parcela             : '',
+				poligono            : '',
+				propietario         : '',
+				caracterUso         : '',
+				documentacion       : '',
+				observaciones       : ''
+			}
+		}
+	};
+
+	return {
+		type    : GET_CLIENT,
+		payload : data
+	};
 };

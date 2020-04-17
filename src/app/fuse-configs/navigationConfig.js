@@ -1,5 +1,5 @@
 // import { MaterialUIComponentsNavigation } from 'app/main/documentation/material-ui-components/MaterialUIComponentsNavigation';
-// import { authRoles } from 'app/auth';
+import { authRoles } from 'app/auth';
 
 const navigationConfig = [
 	{
@@ -20,35 +20,40 @@ const navigationConfig = [
 				title : 'Clientes',
 				type  : 'item',
 				icon  : 'account_box',
-				url   : '/apps/clientes'
+				url   : '/apps/clients',
+				auth  : authRoles.staff
 			},
 			{
 				id    : 'firmantes',
 				title : 'Firmantes',
 				type  : 'item',
 				icon  : 'account_box',
-				url   : '/apps/firmantes'
+				url   : '/apps/firmantes',
+				auth  : authRoles.staff
 			},
 			{
 				id    : 'usuarios',
 				title : 'Usuarios',
 				type  : 'item',
 				icon  : 'account_box',
-				url   : '/apps/usuarios'
+				url   : '/apps/usuarios',
+				auth  : authRoles.staff
 			},
 			{
 				id    : 'estudios',
 				title : 'Estudios',
 				type  : 'item',
 				icon  : 'account_box',
-				url   : '/apps/estudios'
+				url   : '/apps/estudios',
+				auth  : authRoles.staff
 			},
 			{
 				id    : 'tasks',
 				title : 'Tareas',
 				type  : 'item',
 				icon  : 'today',
-				url   : '/apps/tareas'
+				url   : '/apps/tareas',
+				auth  : authRoles.staff
 			}
 		]
 	}

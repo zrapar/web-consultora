@@ -7,7 +7,7 @@ export const LOGIN_SUCCESS = 'LOGIN_SUCCESS';
 export const submitLogin = ({ username, password }) => async (dispatch) => {
 	const data = await jwtService.signInWithEmailAndPassword(username, password);
 	if (data.success) {
-		dispatch(setUserData(data.username));
+		dispatch(setUserData(data.user));
 
 		return dispatch({
 			type : LOGIN_SUCCESS

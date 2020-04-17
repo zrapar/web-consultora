@@ -19,7 +19,7 @@ const useStyles = makeStyles((theme) => ({
 		width      : 72,
 		height     : 72,
 		position   : 'absolute',
-		top        : 92,
+		top        : 120,
 		padding    : 8,
 		background : theme.palette.background.default,
 		boxSizing  : 'content-box',
@@ -46,13 +46,16 @@ function UserNavbarHeader(props) {
 			color='primary'
 			elevation={0}
 			classes={{ root: classes.root }}
-			className='user relative flex flex-col items-center justify-center pt-24 pb-64 mb-32 z-0'
+			className='user relative flex flex-col items-center justify-center pt-24 pb-64 mb-64 z-0'
 		>
 			<Typography className='username text-16 whitespace-no-wrap' color='inherit'>
 				{user.data.displayName}
 			</Typography>
 			<Typography className='email text-13 mt-8 opacity-50 whitespace-no-wrap' color='inherit'>
 				{user.username}
+			</Typography>
+			<Typography className='email text-13 mt-8 opacity-50 whitespace-no-wrap' color='inherit'>
+				{user.data.email}
 			</Typography>
 			<Avatar
 				className={clsx(classes.avatar, 'avatar')}

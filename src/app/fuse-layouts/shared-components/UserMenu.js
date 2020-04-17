@@ -1,14 +1,5 @@
 import React, { useState } from 'react';
-import {
-	Avatar,
-	Button,
-	Icon,
-	ListItemIcon,
-	ListItemText,
-	Popover,
-	MenuItem,
-	Typography
-} from '@material-ui/core';
+import { Avatar, Button, Icon, ListItemIcon, ListItemText, Popover, MenuItem, Typography } from '@material-ui/core';
 import { useSelector, useDispatch } from 'react-redux';
 import * as authActions from 'app/auth/store/actions';
 import { Link } from 'react-router-dom';
@@ -17,9 +8,9 @@ function UserMenu(props) {
 	const dispatch = useDispatch();
 	const user = useSelector(({ auth }) => auth.user);
 
-	const [userMenu, setUserMenu] = useState(null);
+	const [ userMenu, setUserMenu ] = useState(null);
 
-	const userMenuClick = event => {
+	const userMenuClick = (event) => {
 		setUserMenu(event.currentTarget);
 	};
 
@@ -40,6 +31,7 @@ function UserMenu(props) {
 					<Typography component='span' className='normal-case font-600 flex'>
 						{user.data.displayName}
 					</Typography>
+
 					<Typography className='text-11 capitalize' color='textSecondary'>
 						{user.role.toString()}
 					</Typography>
@@ -55,15 +47,15 @@ function UserMenu(props) {
 				anchorEl={userMenu}
 				onClose={userMenuClose}
 				anchorOrigin={{
-					vertical: 'bottom',
-					horizontal: 'center'
+					vertical   : 'bottom',
+					horizontal : 'center'
 				}}
 				transformOrigin={{
-					vertical: 'top',
-					horizontal: 'center'
+					vertical   : 'top',
+					horizontal : 'center'
 				}}
 				classes={{
-					paper: 'py-8'
+					paper : 'py-8'
 				}}
 			>
 				{!user.role || user.role.length === 0 ? (

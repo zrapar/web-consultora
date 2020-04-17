@@ -4,8 +4,8 @@ import FuseUtils from '@fuse/FuseUtils';
 
 class jwtService extends FuseUtils.EventEmitter {
 	init() {
-		axios.defaults.baseURL = process.env.REACT_APP_API_URL;
-		// axios.defaults.baseURL = 'http://127.0.0.1:8000';
+		// axios.defaults.baseURL = process.env.REACT_APP_API_URL;
+		axios.defaults.baseURL = 'http://127.0.0.1:8000';
 		axios.defaults.headers.post['Content-Type'] = 'application/json';
 		this.setInterceptors();
 		this.handleAuthentication();
@@ -75,7 +75,9 @@ class jwtService extends FuseUtils.EventEmitter {
 			});
 			if (response.data) {
 				this.setSession(response.data.access);
-				return { success: true, username };
+				const user = await this.getInfoUser(jwtDecode(response.data.access));
+
+				return { success: true, user };
 			} else {
 				return { success: false, message: response.data };
 			}
@@ -90,10 +92,12 @@ class jwtService extends FuseUtils.EventEmitter {
 				.post('api/token/verify/', {
 					token : this.getAccessToken()
 				})
-				.then((response) => {
+				.then(async (response) => {
 					if (response) {
 						this.setSession(this.getAccessToken());
-						resolve({ username: 'zrapar' });
+						const user = await this.getInfoUser(jwtDecode(this.getAccessToken()));
+
+						resolve({ user });
 					} else {
 						this.logout();
 						reject('Failed to login with token.');
@@ -142,6 +146,11 @@ class jwtService extends FuseUtils.EventEmitter {
 
 	getAccessToken = () => {
 		return window.localStorage.getItem('jwt_access_token');
+	};
+
+	getInfoUser = async ({ user_id }) => {
+		const response = await axios.get(`/user/${user_id}/`);
+		return response.data;
 	};
 }
 
