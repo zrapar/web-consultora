@@ -19,18 +19,10 @@ import {
 	CircularProgress
 } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
-
-// import { orange } from '@material-ui/core/colors';
 import { makeStyles } from '@material-ui/styles';
-import {
-	FuseAnimate,
-	FusePageCarded,
-	FuseChipSelect
-	// FuseUtils
-} from '@fuse';
+import { FuseAnimate, FusePageCarded, FuseChipSelect } from '@fuse';
 import { useForm } from '@fuse/hooks';
 import { Link } from 'react-router-dom';
-// import clsx from 'clsx';
 import _ from '@lodash';
 import { useDispatch, useSelector } from 'react-redux';
 import withReducer from 'app/store/withReducer';
@@ -40,38 +32,6 @@ import { useDropzone } from 'react-dropzone';
 import { SingS3, uploadFile, deleteFile } from '../../../../utils/aws';
 
 const useStyles = makeStyles((theme) => ({
-	// clientImageFeaturedStar : {
-	// 	position : 'absolute',
-	// 	top      : 0,
-	// 	right    : 0,
-	// 	color    : orange[400],
-	// 	opacity  : 0
-	// },
-	// clientImageUpload       : {
-	// 	transitionProperty       : 'box-shadow',
-	// 	transitionDuration       : theme.transitions.duration.short,
-	// 	transitionTimingFunction : theme.transitions.easing.easeInOut
-	// },
-	// clientImageItem         : {
-	// 	transitionProperty       : 'box-shadow',
-	// 	transitionDuration       : theme.transitions.duration.short,
-	// 	transitionTimingFunction : theme.transitions.easing.easeInOut,
-	// 	'&:hover'                : {
-	// 		'& $clientImageFeaturedStar' : {
-	// 			opacity : 0.8
-	// 		}
-	// 	},
-	// 	'&.featured'             : {
-	// 		pointerEvents                      : 'none',
-	// 		boxShadow                          : theme.shadows[3],
-	// 		'& $clientImageFeaturedStar'       : {
-	// 			opacity : 1
-	// 		},
-	// 		'&:hover $clientImageFeaturedStar' : {
-	// 			opacity : 1
-	// 		}
-	// 	}
-	// }
 	root     : {
 		flexGrow  : 1,
 		marginTop : 10
@@ -141,6 +101,13 @@ const Client = (props) => {
 		acumar : false
 	});
 
+	const [ addressFormalData, setAddress ] = useState([]);
+	const [ legalRepresentativeFormalData, setLegalRepresentative ] = useState([]);
+	const [ dataPlanta, setPlanta ] = useState([]);
+	const [ phoneContactsPlanta, setPhoneContacts ] = useState([]);
+	const [ innerContactsPlanta, setInnerContacts ] = useState([]);
+	const [ mobiliaryPlanta, setMobiliary ] = useState([]);
+
 	const { opds, ada, ina, acumar } = checkBox;
 
 	const { estatuto, actaDesignacion, poderes, extraPdfs, planchetas } = formalDataFiles;
@@ -187,44 +154,133 @@ const Client = (props) => {
 	};
 
 	const handleChipChange = (value, name) => {
-		setForm(_.set({ ...form }, name, value.map((item) => item.value)));
+		setForm(_.set({ ...form }, name, value));
 	};
 
-	// function setFeaturedImage(id) {
-	// 	setForm(_.set({ ...form }, 'featuredImageId', id));
-	// }
-
-	// function handleUploadChange(e) {
-	// 	const files = e.target.files;
-	// 	console.log(files);
-	// 	if (files.length === 0) {
-	// 		return;
-	// 	}
-
-	// 	console.log(e.target.name);
-	// 	// const reader = new FileReader();
-	// 	// reader.readAsBinaryString(file);
-
-	// 	// reader.onload = () => {
-	// 	// 	setForm(
-	// 	// 		_.set({ ...form }, `images`, [
-	// 	// 			{
-	// 	// 				url  : `data:${file.type};base64,${btoa(reader.result)}`,
-	// 	// 				type : 'image'
-	// 	// 			},
-	// 	// 			...form.images
-	// 	// 		])
-	// 	// 	);
-	// 	// };
-
-	// 	// reader.onerror = function() {
-	// 	// 	console.log('error on load image');
-	// 	// };
-	// }
-
-	function canBeSubmitted() {
+	const canBeSubmitted = () => {
 		return form.formalData.clientName.length > 0 && !_.isEqual(client, form);
-	}
+	};
+
+	const formalDataAddressSubmitted = () => {
+		const { partido, localidad, calleRuta, nKm, piso, depto, codigo_postal, type } = form.formalData.address;
+		let isSubmitted = false;
+		if (
+			partido.toString().length > 0 &&
+			localidad.toString().length > 0 &&
+			calleRuta.toString().length > 0 &&
+			nKm.toString().length > 0 &&
+			piso.toString().length > 0 &&
+			depto.toString().length > 0 &&
+			codigo_postal.toString().length > 0 &&
+			type.value
+		) {
+			isSubmitted = true;
+		}
+
+		return isSubmitted;
+	};
+
+	const formalDataLegalRepresentativeSubmitted = () => {
+		const { name, dni, position, cuil } = form.formalData.legalRepresentative;
+
+		let isSubmitted = false;
+		if (
+			name.toString().length > 0 &&
+			dni.toString().length > 0 &&
+			position.toString().length > 0 &&
+			cuil.toString().length > 0 &&
+			estatuto.length > 0 &&
+			actaDesignacion.length > 0 &&
+			poderes.length > 0 &&
+			extraPdfs.length > 0
+		) {
+			isSubmitted = true;
+		}
+
+		return isSubmitted;
+	};
+
+	const plantaSubmitted = () => {
+		let isSubmitted = false;
+		const { id_establecimiento, address, email } = form.planta;
+		if (
+			id_establecimiento.toString().length > 0 &&
+			address.toString().length > 0 &&
+			email.toString().length > 0 &&
+			phoneContactsPlanta.length > 0 &&
+			innerContactsPlanta.length > 0 &&
+			mobiliaryPlanta.length > 0
+		) {
+			let isSubmitted = true;
+		}
+
+		return isSubmitted;
+	};
+
+	const plantaPhoneContactsSubmitted = () => {
+		let isSubmitted = false;
+		if (form.phoneContacts.length > 0) {
+			isSubmitted = true;
+		}
+
+		return isSubmitted;
+	};
+
+	const plantaInnerContactsSubmitted = () => {
+		const { name, lastName, phone, email, position, workArea } = form.planta.innerContact;
+		let isSubmitted = false;
+		if (
+			name.toString().length > 0 &&
+			lastName.toString().length > 0 &&
+			phone.toString().length > 0 &&
+			email.toString().length > 0 &&
+			position.toString().length > 0 &&
+			workArea.toString().length > 0
+		) {
+			isSubmitted = true;
+		}
+
+		return isSubmitted;
+	};
+
+	const plantaMobiliarySubmitted = () => {
+		const {
+			orderNum,
+			partidaInmobiliaria,
+			matricula,
+			circunscripcion,
+			seccion,
+			fraccion,
+			manzana,
+			parcela,
+			poligono,
+			propietario,
+			caracterUso,
+			documentacion,
+			observaciones
+		} = form.planta.mobiliary;
+		let isSubmitted = false;
+		if (
+			orderNum.toString().length > 0 &&
+			partidaInmobiliaria.toString().length > 0 &&
+			matricula.toString().length > 0 &&
+			circunscripcion.toString().length > 0 &&
+			seccion.toString().length > 0 &&
+			fraccion.toString().length > 0 &&
+			manzana.toString().length > 0 &&
+			parcela.toString().length > 0 &&
+			poligono.toString().length > 0 &&
+			propietario.toString().length > 0 &&
+			caracterUso.toString().length > 0 &&
+			documentacion.toString().length > 0 &&
+			observaciones.toString().length > 0 &&
+			planchetas.length > 0
+		) {
+			isSubmitted = true;
+		}
+
+		return isSubmitted;
+	};
 
 	const EstatutoDropZone = ({
 		formalDataFiles,
@@ -833,11 +889,11 @@ const Client = (props) => {
 			getSignedUrl(uploadedFiles, `${folder}/${form.planta.id_establecimiento}`, async (response) => {
 				const arrayPromise = await response;
 				const acceptedFiles = arrayPromise.filter((i) => i);
-				console.log(acceptedFiles);
+
 				if (acceptedFiles.length > 0) {
 					setFormalDataFiles({
 						...formalDataFiles,
-						planchetas : [ ...files, ...acceptedFiles ]
+						planchetas : [ acceptedFiles[0] ]
 					});
 				} else {
 					alert('Existio un problema subiendo el (los) documento(s), intente de nuevo');
@@ -980,6 +1036,176 @@ const Client = (props) => {
 		return callBack(Promise.all(signedUrls));
 	};
 
+	const addFormalDataAddress = (address) => {
+		const newArray = [ ...addressFormalData, address ];
+		setAddress(newArray);
+		setForm(
+			_.set({ ...form }, 'formalData.address', {
+				partido       : '',
+				localidad     : '',
+				calleRuta     : '',
+				nKm           : '',
+				piso          : '',
+				depto         : '',
+				codigo_postal : '',
+				type          : {
+					label : 'Seleccione el tipo de domicilio',
+					value : null
+				}
+			})
+		);
+	};
+
+	const addFormalDataLegalRepresentative = (legalRepresentative) => {
+		const newArray = [
+			...legalRepresentativeFormalData,
+			{
+				...legalRepresentative,
+				estatuto,
+				actaDesignacion,
+				poderes,
+				extraPdfs
+			}
+		];
+		setLegalRepresentative(newArray);
+		setForm(
+			_.set({ ...form }, 'formalData.legalRepresentative', {
+				name            : '',
+				dni             : '',
+				position        : '',
+				cuil            : '',
+				estatuto        : [],
+				actaDesignacion : [],
+				poderes         : [],
+				extraPdfs       : []
+			})
+		);
+		setFormalDataFiles({
+			...formalDataFiles,
+			estatuto        : [],
+			actaDesignacion : [],
+			poderes         : [],
+			extraPdfs       : []
+		});
+	};
+
+	const addDataPlanta = (planta) => {
+		const newArray = [ ...dataPlanta, planta ];
+		setPlanta(newArray);
+		setForm(
+			_.set({ ...form }, 'planta', {
+				id_establecimiento : '',
+				address            : {
+					partido       : '',
+					localidad     : '',
+					calleRuta     : '',
+					nKm           : '',
+					piso          : '',
+					depto         : '',
+					codigo_postal : ''
+				},
+				email              : '',
+				phoneContacts      : '',
+				innerContact       : {
+					name     : '',
+					lastName : '',
+					phone    : '',
+					email    : '',
+					position : '',
+					workArea : ''
+				},
+				govermentUsers     : {
+					opds   : {
+						user : '',
+						pass : ''
+					},
+					ada    : {
+						user : '',
+						pass : ''
+					},
+					ina    : {
+						user : '',
+						pass : ''
+					},
+					acumar : {
+						user : '',
+						pass : ''
+					}
+				},
+				mobiliary          : {
+					orderNum            : '',
+					partidaInmobiliaria : '',
+					matricula           : '',
+					circunscripcion     : '',
+					seccion             : '',
+					fraccion            : '',
+					manzana             : '',
+					parcela             : '',
+					poligono            : '',
+					propietario         : '',
+					caracterUso         : '',
+					documentacion       : '',
+					observaciones       : ''
+				}
+			})
+		);
+	};
+
+	const addPlantaPhoneContacts = (phoneContact) => {
+		const newArray = [ ...phoneContactsPlanta, phoneContact ];
+		setPhoneContacts(newArray);
+		setForm(_.set({ ...form }, 'planta.phoneContacts', ''));
+	};
+
+	const addPlantaInnerContacts = (innerContact) => {
+		const newArray = [ ...innerContactsPlanta, innerContact ];
+		setInnerContacts(newArray);
+		setForm(
+			_.set({ ...form }, 'planta.innerContact', {
+				name     : '',
+				lastName : '',
+				phone    : '',
+				email    : '',
+				position : '',
+				workArea : ''
+			})
+		);
+	};
+
+	const addPlantaMobiliary = (mobiliary) => {
+		const newArray = [ ...mobiliaryPlanta, { ...mobiliary, plancheta: planchetas } ];
+		setMobiliary(newArray);
+		setForm(
+			_.set({ ...form }, 'planta.mobiliary', {
+				orderNum            : '',
+				partidaInmobiliaria : '',
+				matricula           : '',
+				circunscripcion     : '',
+				seccion             : '',
+				fraccion            : '',
+				manzana             : '',
+				parcela             : '',
+				poligono            : '',
+				propietario         : '',
+				caracterUso         : '',
+				documentacion       : '',
+				observaciones       : '',
+				plancheta           : ''
+			})
+		);
+		setFormalDataFiles({
+			...formalDataFiles,
+			planchetas : []
+		});
+	};
+
+	// console.log('addressFormalData', addressFormalData);
+	// console.log('legalRepresentativeFormalData', legalRepresentativeFormalData);
+	// console.log('dataPlanta', dataPlanta);
+	// console.log('phoneContactsPlanta', phoneContactsPlanta);
+	// console.log('innerContactsPlanta', innerContactsPlanta);
+	// console.log('mobiliaryPlanta', mobiliaryPlanta);
+
 	return (
 		<FusePageCarded
 			classes={{
@@ -1106,40 +1332,51 @@ const Client = (props) => {
 								)}
 								{tabInnerFormal === 1 && (
 									<React.Fragment>
+										{addressFormalData.length > 0 && (
+											<div className='flex justify-around items-center mb-16'>
+												<FuseAnimate animation='transition.slideRightIn' delay={300}>
+													<Button
+														className='whitespace-no-wrap '
+														variant='contained'
+														onClick={() => console.log('ver domicilios')}
+													>
+														Ver domicilios agregados
+													</Button>
+												</FuseAnimate>
+											</div>
+										)}
+
 										<div className='flex justify-around items-center'>
 											<TextField
 												className='mt-8 mb-16 mr-8'
-												error={form.formalData.cuit === ''}
+												error={form.formalData.address.partido === ''}
 												required
 												label='Partido'
-												placeholder='00-11223344-5'
-												id='formalData.cuit'
-												name='formalData.cuit'
-												value={form.formalData.cuit}
+												id='formalData.address.partido'
+												name='formalData.address.partido'
+												value={form.formalData.address.partido}
 												onChange={handleChange}
 												variant='outlined'
 											/>
 											<TextField
 												className='mt-8 mb-16 mr-8'
-												error={form.formalData.cuit === ''}
+												error={form.formalData.address.localidad === ''}
 												required
 												label='Localidad'
-												placeholder='00-11223344-5'
-												id='formalData.cuit'
-												name='formalData.cuit'
-												value={form.formalData.cuit}
+												id='formalData.address.localidad'
+												name='formalData.address.localidad'
+												value={form.formalData.address.localidad}
 												onChange={handleChange}
 												variant='outlined'
 											/>
 											<TextField
 												className='mt-8 mb-16 mr-8'
-												error={form.formalData.cuit === ''}
+												error={form.formalData.address.calleRuta === ''}
 												required
 												label='Calle / Ruta'
-												placeholder='00-11223344-5'
-												id='formalData.cuit'
-												name='formalData.cuit'
-												value={form.formalData.cuit}
+												id='formalData.address.calleRuta'
+												name='formalData.address.calleRuta'
+												value={form.formalData.address.calleRuta}
 												onChange={handleChange}
 												variant='outlined'
 											/>
@@ -1147,38 +1384,35 @@ const Client = (props) => {
 										<div className='flex justify-around items-center'>
 											<TextField
 												className='mt-8 mb-16 mr-8'
-												error={form.formalData.cuit === ''}
+												error={form.formalData.address.nKm === ''}
 												required
 												label='N° / Km'
-												placeholder='00-11223344-5'
-												id='formalData.cuit'
-												name='formalData.cuit'
-												value={form.formalData.cuit}
+												id='formalData.address.nKm'
+												name='formalData.address.nKm'
+												value={form.formalData.address.nKm}
 												onChange={handleChange}
 												variant='outlined'
 											/>
 
 											<TextField
 												className='mt-8 mb-16 mr-8'
-												error={form.formalData.cuit === ''}
+												error={form.formalData.address.piso === ''}
 												required
 												label='Piso'
-												placeholder='00-11223344-5'
-												id='formalData.cuit'
-												name='formalData.cuit'
-												value={form.formalData.cuit}
+												id='formalData.address.piso'
+												name='formalData.address.piso'
+												value={form.formalData.address.piso}
 												onChange={handleChange}
 												variant='outlined'
 											/>
 											<TextField
 												className='mt-8 mb-16 mr-8'
-												error={form.formalData.cuit === ''}
+												error={form.formalData.address.depto === ''}
 												required
 												label='Departamento'
-												placeholder='00-11223344-5'
-												id='formalData.cuit'
-												name='formalData.cuit'
-												value={form.formalData.cuit}
+												id='formalData.address.depto'
+												name='formalData.address.depto'
+												value={form.formalData.address.depto}
 												onChange={handleChange}
 												variant='outlined'
 											/>
@@ -1186,20 +1420,20 @@ const Client = (props) => {
 										<div className='flex justify-around items-center'>
 											<TextField
 												className='mt-8 mb-16 mr-8'
-												error={form.formalData.cuit === ''}
+												error={form.formalData.address.codigo_postal === ''}
 												required
 												label='Codigo Postal'
-												placeholder='00-11223344-5'
-												id='formalData.cuit'
-												name='formalData.cuit'
-												value={form.formalData.cuit}
+												id='formalData.address.codigo_postal'
+												name='formalData.address.codigo_postal'
+												value={form.formalData.address.codigo_postal}
 												onChange={handleChange}
 												variant='outlined'
 											/>
+
 											<FuseChipSelect
 												className='mt-8 mb-16 mr-8 w-360'
-												value={[]}
-												onChange={(value) => handleChipChange(value, 'categories')}
+												value={form.formalData.address.type}
+												onChange={(value) => handleChipChange(value, 'formalData.address.type')}
 												placeholder='Seleccione el tipo de domicilio'
 												textFieldProps={{
 													label           : 'Domicilio',
@@ -1214,14 +1448,15 @@ const Client = (props) => {
 													{ value: 'additional', label: 'Otro Domicilio' }
 												]}
 											/>
+
 											<FuseAnimate animation='transition.slideRightIn' delay={300}>
 												<Button
 													className='whitespace-no-wrap mt-8 mb-16 mr-8 h-56'
 													variant='contained'
-													disabled={!canBeSubmitted()}
-													onClick={() => dispatch(Actions.saveClient(form))}
+													disabled={!formalDataAddressSubmitted()}
+													onClick={() => addFormalDataAddress(form.formalData.address)}
 												>
-													Guardar
+													Crear Domicilio
 												</Button>
 											</FuseAnimate>
 										</div>
@@ -1229,52 +1464,65 @@ const Client = (props) => {
 								)}
 								{tabInnerFormal === 2 && (
 									<React.Fragment>
+										{legalRepresentativeFormalData.length > 0 && (
+											<div className='flex justify-around items-center mb-16'>
+												<FuseAnimate animation='transition.slideRightIn' delay={300}>
+													<Button
+														className='whitespace-no-wrap '
+														variant='contained'
+														onClick={() => console.log('ver representantes')}
+													>
+														Ver representantes agregados
+													</Button>
+												</FuseAnimate>
+											</div>
+										)}
 										<div className='flex justify-center items-center'>
 											<TextField
 												className='mt-8 mb-16 mr-8'
-												error={form.formalData.name === ''}
+												error={form.formalData.legalRepresentative.name === ''}
 												required
-												label='Nombre del Representante'
-												id='formalData.name'
-												name='formalData.name'
-												value={form.formalData.name}
+												label='Nombre'
+												id='formalData.legalRepresentative.name'
+												name='formalData.legalRepresentative.name'
+												value={form.formalData.legalRepresentative.name}
 												onChange={handleChange}
 												variant='outlined'
 											/>
 
 											<TextField
 												className='mt-8 mb-16 mr-8'
-												error={form.formalData.dni === ''}
+												error={form.formalData.legalRepresentative.dni === ''}
 												required
 												label='DNI'
-												id='formalData.dni'
-												name='formalData.dni'
-												value={form.formalData.dni}
+												id='formalData.legalRepresentative.dni'
+												name='formalData.legalRepresentative.dni'
+												value={form.formalData.legalRepresentative.dni}
 												onChange={handleChange}
 												variant='outlined'
 											/>
 
 											<TextField
 												className='mt-8 mb-16 mr-8'
-												error={form.formalData.position === ''}
+												error={form.formalData.legalRepresentative.position === ''}
 												required
 												label='Cargo'
-												id='formalData.position'
-												name='formalData.position'
-												value={form.formalData.position}
+												id='formalData.legalRepresentative.position'
+												name='formalData.legalRepresentative.position'
+												value={form.formalData.legalRepresentative.position}
 												onChange={handleChange}
 												variant='outlined'
 											/>
 
 											<TextField
 												className='mt-8 mb-16 mr-8'
-												error={form.formalData.cuil === ''}
+												error={form.formalData.legalRepresentative.cuil === ''}
 												required
 												label='CUIL'
 												placeholder='00-11223344-5'
-												id='formalData.cuil'
-												name='formalData.cuil'
-												value={form.formalData.cuil}
+												id='formalData.legalRepresentative.cuil'
+												name='formalData.legalRepresentative.cuil'
+												value={form.formalData.legalRepresentative.cuil}
 												onChange={handleChange}
 												variant='outlined'
 											/>
@@ -1282,8 +1530,11 @@ const Client = (props) => {
 												<Button
 													className='whitespace-no-wrap mt-8 mb-16 mr-8 h-56'
 													variant='contained'
-													disabled={!canBeSubmitted()}
-													onClick={() => dispatch(Actions.saveClient(form))}
+													disabled={!formalDataLegalRepresentativeSubmitted()}
+													onClick={() =>
+														addFormalDataLegalRepresentative(
+															form.formalData.legalRepresentative
+														)}
 												>
 													Guardar
 												</Button>
@@ -1798,6 +2049,29 @@ const Client = (props) => {
 								)}
 								{tabInnerPlanta === 3 && (
 									<div>
+										<div className='flex flex-row justify-around items-center mb-16'>
+											<FuseAnimate animation='transition.slideRightIn' delay={300}>
+												<Button
+													className='whitespace-no-wrap'
+													variant='contained'
+													disabled={!plantaMobiliarySubmitted()}
+													onClick={() => addPlantaMobiliary(form.planta.mobiliary)}
+												>
+													Crear Inmueble
+												</Button>
+											</FuseAnimate>
+											{mobiliaryPlanta.length > 0 && (
+												<FuseAnimate animation='transition.slideRightIn' delay={300}>
+													<Button
+														className='whitespace-no-wrap '
+														variant='contained'
+														onClick={() => console.log('ver inmuebles')}
+													>
+														Ver inmuebles agregados
+													</Button>
+												</FuseAnimate>
+											)}
+										</div>
 										<div className='flex'>
 											<TextField
 												className='mt-8 mb-16 mr-8'

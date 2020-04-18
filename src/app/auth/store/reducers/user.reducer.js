@@ -15,7 +15,7 @@ const user = function(state = initialState, action) {
 		case Actions.SET_USER_DATA: {
 			return {
 				...initialState,
-				role     : [ 'admin' ],
+				role     : [ action.payload.role ],
 				username : action.payload.username,
 				data     : {
 					...state.data,

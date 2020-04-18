@@ -14,21 +14,27 @@ import {
 import { useForm } from '@fuse/hooks';
 import * as Actions from './store/actions';
 import { useDispatch, useSelector } from 'react-redux';
+import { FuseChipSelect } from '@fuse';
+import _ from '@lodash';
+import { getRoleNameByUserType } from 'utils';
 
 let defaultFormState = {
-	name         : '',
-	incunvencias : '',
-	titulo1      : '',
-	titulo2      : '',
-	matricula1   : '',
-	matricula2   : '',
-	matricula3   : '',
-	matricula4   : '',
-	matricula5   : '',
-	dni          : '',
-	telefono     : '',
-	direccion    : ''
+	username   : '',
+	email      : '',
+	userType   : {
+		value : 4,
+		label : 'Empleado'
+	},
+	first_name : '',
+	last_name  : '',
+	dni        : ''
 };
+const roles = [
+	{ value: '1', label: 'Administrador' },
+	{ value: '2', label: 'Tecnico' },
+	{ value: '4', label: 'Empleado' }
+	// { value: '', label: 'Cliente' },
+];
 
 const UsersDialog = (props) => {
 	const dispatch = useDispatch();
@@ -39,7 +45,10 @@ const UsersDialog = (props) => {
 	const initDialog = useCallback(
 		() => {
 			if (usersDialog.type === 'edit' && usersDialog.data) {
-				setForm({ ...usersDialog.data });
+				setForm({
+					...usersDialog.data,
+					userType : roles.filter((i) => i.value === usersDialog.data.user_type.toString())[0]
+				});
 			}
 
 			if (usersDialog.type === 'new') {
@@ -67,36 +76,42 @@ const UsersDialog = (props) => {
 
 	function canBeSubmitted() {
 		return (
-			form.name.length > 0 &&
-			form.incunvencias.length > 0 &&
-			form.titulo1.length > 0 &&
-			form.titulo2.length > 0 &&
-			form.matricula1.length > 0 &&
-			form.matricula2.length > 0 &&
-			form.matricula3.length > 0 &&
-			form.matricula4.length > 0 &&
-			form.matricula5.length > 0 &&
-			form.dni.length > 0 &&
-			form.telefono.length > 0 &&
-			form.direccion.length > 0
+			form.username.length > 0 &&
+			form.email.length > 0 &&
+			form.first_name.length > 0 &&
+			form.last_name.length > 0 &&
+			form.dni.toString().length > 0
 		);
 	}
 
-	function handleSubmit(event) {
+	const handleSubmit = (event) => {
 		event.preventDefault();
 
 		if (usersDialog.type === 'new') {
-			dispatch(Actions.addUser(form));
+			const body = {
+				...form,
+				user_type : form.userType.value,
+				password  : form.username
+			};
+			dispatch(Actions.addUser(body));
 		} else {
-			dispatch(Actions.updateUser(form));
+			const body = {
+				...form,
+				user_type : form.userType.value
+			};
+			dispatch(Actions.updateUser(body));
 		}
 		closeComposeDialog();
-	}
+	};
 
 	function handleRemove() {
 		dispatch(Actions.removeUser(form.id));
 		closeComposeDialog();
 	}
+
+	const handleChipChange = (value, name) => {
+		setForm(_.set({ ...form }, name, value));
+	};
 
 	return (
 		<Dialog
@@ -125,156 +140,75 @@ const UsersDialog = (props) => {
 			<form noValidate onSubmit={handleSubmit} className='flex flex-col overflow-hidden'>
 				<DialogContent classes={{ root: 'p-24' }}>
 					<div className='flex'>
-						<div className='min-w-48 pt-20' />
+						<FuseChipSelect
+							className='mt-8 mb-16 mr-8 w-full'
+							value={form.userType}
+							onChange={(value) => handleChipChange(value, 'userType')}
+							placeholder='Seleccione el tipo de usuario'
+							textFieldProps={{
+								label           : 'Tipo de usuario',
+								InputLabelProps : {
+									shrink : true
+								},
+								variant         : 'outlined'
+							}}
+							options={roles}
+						/>
+					</div>
+					<div className='flex'>
 						<TextField
-							className='mb-24'
+							className='mt-8 mb-16 mr-8'
 							label='Nombre'
-							id='name'
-							name='name'
-							value={form.name}
+							id='first_name'
+							name='first_name'
+							value={form.first_name}
+							onChange={handleChange}
+							variant='outlined'
+							fullWidth
+						/>
+
+						<TextField
+							className='mt-8 mb-16 mr-8'
+							label='Apellido'
+							id='last_name'
+							name='last_name'
+							value={form.last_name}
 							onChange={handleChange}
 							variant='outlined'
 							fullWidth
 						/>
 					</div>
+
 					<div className='flex'>
-						<div className='min-w-48 pt-20' />
 						<TextField
-							className='mb-24'
-							label='Incunvencias'
-							id='incunvencias'
-							name='incunvencias'
-							value={form.incunvencias}
+							className='mt-8 mb-16 mr-8'
+							label='Correo Electronico'
+							id='email'
+							name='email'
+							value={form.email}
+							onChange={handleChange}
+							variant='outlined'
+							fullWidth
+						/>
+						<TextField
+							className='mt-8 mb-16 mr-8'
+							label='Nombre de usuario'
+							id='username'
+							name='username'
+							value={form.username}
 							onChange={handleChange}
 							variant='outlined'
 							fullWidth
 						/>
 					</div>
+
 					<div className='flex'>
-						<div className='min-w-48 pt-20' />
 						<TextField
-							className='mb-24'
-							label='Titulo'
-							id='titulo1'
-							name='titulo1'
-							value={form.titulo1}
-							onChange={handleChange}
-							variant='outlined'
-							fullWidth
-						/>
-					</div>
-					<div className='flex'>
-						<div className='min-w-48 pt-20' />
-						<TextField
-							className='mb-24'
-							label='Titulo'
-							id='titulo2'
-							name='titulo2'
-							value={form.titulo2}
-							onChange={handleChange}
-							variant='outlined'
-							fullWidth
-						/>
-					</div>
-					<div className='flex'>
-						<div className='min-w-48 pt-20' />
-						<TextField
-							className='mb-24'
-							label='Matricula'
-							id='matricula1'
-							name='matricula1'
-							value={form.matricula1}
-							onChange={handleChange}
-							variant='outlined'
-							fullWidth
-						/>
-					</div>
-					<div className='flex'>
-						<div className='min-w-48 pt-20' />
-						<TextField
-							className='mb-24'
-							label='Matricula'
-							id='matricula2'
-							name='matricula2'
-							value={form.matricula2}
-							onChange={handleChange}
-							variant='outlined'
-							fullWidth
-						/>
-					</div>
-					<div className='flex'>
-						<div className='min-w-48 pt-20' />
-						<TextField
-							className='mb-24'
-							label='Matricula'
-							id='matricula3'
-							name='matricula3'
-							value={form.matricula3}
-							onChange={handleChange}
-							variant='outlined'
-							fullWidth
-						/>
-					</div>
-					<div className='flex'>
-						<div className='min-w-48 pt-20' />
-						<TextField
-							className='mb-24'
-							label='Matricula'
-							id='matricula4'
-							name='matricula4'
-							value={form.matricula4}
-							onChange={handleChange}
-							variant='outlined'
-							fullWidth
-						/>
-					</div>
-					<div className='flex'>
-						<div className='min-w-48 pt-20' />
-						<TextField
-							className='mb-24'
-							label='Matricula'
-							id='matricula5'
-							name='matricula5'
-							value={form.matricula5}
-							onChange={handleChange}
-							variant='outlined'
-							fullWidth
-						/>
-					</div>
-					<div className='flex'>
-						<div className='min-w-48 pt-20' />
-						<TextField
-							className='mb-24'
+							className='mt-8 mb-16 mr-8'
 							label='DNI'
 							id='dni'
 							name='dni'
 							value={form.dni}
-							onChange={handleChange}
-							variant='outlined'
-							fullWidth
-						/>
-					</div>
-					<div className='flex'>
-						<div className='min-w-48 pt-20' />
-						<TextField
-							className='mb-24'
-							label='Telefono'
-							id='telefono'
-							name='telefono'
-							value={form.telefono}
-							onChange={handleChange}
-							variant='outlined'
-							fullWidth
-						/>
-					</div>
-					<div className='flex'>
-						<div className='min-w-48 pt-20' />
-						<TextField
-							className='mb-24'
-							label='Dirección'
-							id='direccion'
-							name='direccion'
-							value={form.direccion}
 							onChange={handleChange}
 							variant='outlined'
 							fullWidth

@@ -42,7 +42,7 @@ function ToolbarLayout3(props) {
 					</Hidden>
 
 					<div className='flex flex-1'>
-						<Hidden xsDown>{/* <FuseSearch className="mx-16 lg:mx-24" variant="basic"/> */}</Hidden>
+						{/* <Hidden xsDown><FuseSearch className="mx-16 lg:mx-24" variant="basic"/></Hidden> */}
 					</div>
 
 					<div className='flex'>

@@ -17,7 +17,7 @@ export const REMOVE_USERS = '@@Users/Remove users';
 
 export const getUsers = (routeParams) => async (dispatch) => {
 	dispatch({ type: SHOW_LOADING });
-	const response = await axios.get('/usuarios/', {
+	const response = await axios.get('/user/', {
 		params : routeParams
 	});
 
@@ -64,7 +64,7 @@ export const closeEditUserDialog = () => ({
 });
 
 export const addUser = (newUser) => async (dispatch) => {
-	const response = await axios.post('/usuarios/', newUser);
+	const response = await axios.post('/user/', newUser);
 
 	if (response) {
 		Promise.all([
@@ -76,7 +76,7 @@ export const addUser = (newUser) => async (dispatch) => {
 };
 
 export const updateUser = (user) => async (dispatch) => {
-	const response = await axios.put(`/usuarios/${user.id}/`, user);
+	const response = await axios.put(`/user/${user.id}/`, user);
 
 	if (response) {
 		Promise.all([
@@ -88,7 +88,7 @@ export const updateUser = (user) => async (dispatch) => {
 };
 
 export const removeUser = (userId) => async (dispatch) => {
-	const response = await axios.delete(`/usuarios/${userId}/`);
+	const response = await axios.delete(`/user/${userId}/`);
 	if (response) {
 		Promise.all([
 			dispatch({
@@ -101,7 +101,7 @@ export const removeUser = (userId) => async (dispatch) => {
 export const removeUsers = (usersIds) => (dispatch) => {
 	let arrayPromise = [];
 	usersIds.forEach((element) => {
-		const req = axios.delete(`/usuarios/${element}/`);
+		const req = axios.delete(`/user/${element}/`);
 		arrayPromise.push(req);
 	});
 

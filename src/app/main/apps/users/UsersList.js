@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import ReactTable from 'react-table';
 import * as Actions from './store/actions';
 import UsersMultiSelectMenu from './UsersMultiSelectMenu';
+import { rolesTranslate } from 'utils';
 
 const UsersList = (props) => {
 	const dispatch = useDispatch();
@@ -98,12 +99,12 @@ const UsersList = (props) => {
 					},
 					{
 						Header     : 'Nombre',
-						accessor   : 'name',
+						accessor   : 'first_name',
 						filterable : true
 					},
 					{
-						Header     : 'Incunvencia',
-						accessor   : 'incunvencias',
+						Header     : 'Apellido',
+						accessor   : 'last_name',
 						filterable : true
 					},
 					{
@@ -112,9 +113,19 @@ const UsersList = (props) => {
 						filterable : true
 					},
 					{
-						Header     : 'Telefono',
-						accessor   : 'telefono',
+						Header     : 'Correo electronico',
+						accessor   : 'email',
 						filterable : true
+					},
+					{
+						Header     : 'Rol',
+						filterable : true,
+						accessor   : 'user_type',
+						Cell       : (row) => {
+							const roleName = rolesTranslate(row.original.user_type);
+
+							return roleName.charAt(0).toUpperCase() + roleName.slice(1);
+						}
 					},
 					{
 						Header    : () => selectedUserIds.length > 0 && <UsersMultiSelectMenu />,

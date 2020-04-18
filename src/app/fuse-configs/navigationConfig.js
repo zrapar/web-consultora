@@ -21,40 +21,49 @@ const navigationConfig = [
 				type  : 'item',
 				icon  : 'account_box',
 				url   : '/apps/clients',
-				auth  : authRoles.staff
-			},
-			{
-				id    : 'firmantes',
-				title : 'Firmantes',
-				type  : 'item',
-				icon  : 'account_box',
-				url   : '/apps/firmantes',
-				auth  : authRoles.staff
+				auth  : authRoles.root
 			},
 			{
 				id    : 'usuarios',
 				title : 'Usuarios',
 				type  : 'item',
 				icon  : 'account_box',
-				url   : '/apps/usuarios',
-				auth  : authRoles.staff
+				url   : '/apps/users',
+				auth  : authRoles.admin
 			},
 			{
-				id    : 'estudios',
-				title : 'Estudios',
+				id    : 'logout',
+				title : 'Cerrar Sesion',
 				type  : 'item',
-				icon  : 'account_box',
-				url   : '/apps/estudios',
-				auth  : authRoles.staff
-			},
-			{
-				id    : 'tasks',
-				title : 'Tareas',
-				type  : 'item',
-				icon  : 'today',
-				url   : '/apps/tareas',
-				auth  : authRoles.staff
+				auth  : authRoles.customer,
+				url   : '/logout',
+				icon  : 'exit_to_app'
 			}
+			// {
+			// 	id    : 'firmantes',
+			// 	title : 'Firmantes',
+			// 	type  : 'item',
+			// 	icon  : 'account_box',
+			// 	url   : '/apps/firmantes',
+			// 	auth  : authRoles.admin
+			// },
+
+			// {
+			// 	id    : 'estudios',
+			// 	title : 'Estudios',
+			// 	type  : 'item',
+			// 	icon  : 'account_box',
+			// 	url   : '/apps/estudios',
+			// 	auth  : authRoles.admin
+			// },
+			// {
+			// 	id    : 'tasks',
+			// 	title : 'Tareas',
+			// 	type  : 'item',
+			// 	icon  : 'today',
+			// 	url   : '/apps/tareas',
+			// 	auth  : authRoles.admin
+			// }
 		]
 	}
 ];

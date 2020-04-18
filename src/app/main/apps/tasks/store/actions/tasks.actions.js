@@ -27,7 +27,7 @@ export const getTasks = () => async (dispatch) => {
 };
 
 export const getUsersInTasks = (routeParams) => async (dispatch) => {
-	const response = await axios.get('/usuarios/', {
+	const response = await axios.get('/user/', {
 		params : routeParams
 	});
 

@@ -123,7 +123,8 @@ export const newClient = () => {
 				propietario         : '',
 				caracterUso         : '',
 				documentacion       : '',
-				observaciones       : ''
+				observaciones       : '',
+				plancheta           : ''
 			}
 		}
 	};

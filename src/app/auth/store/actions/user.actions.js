@@ -5,7 +5,7 @@ import store from 'app/store';
 import * as Actions from 'app/store/actions';
 import firebase from 'firebase/app';
 import jwtService from 'app/services/jwtService';
-import { layoutByRole } from 'utils';
+import { layoutByRole, getRoleNameByUserType } from 'utils';
 
 export const SET_USER_DATA = '[USER] SET DATA';
 export const REMOVE_USER_DATA = '[USER] REMOVE DATA';
@@ -86,7 +86,9 @@ export function createUserSettingsFirebase(authUser) {
  */
 export function setUserData(user) {
 	return (dispatch) => {
-		dispatch(setDefaultSettings(layoutByRole.admin));
+		const role = getRoleNameByUserType(user.user_type);
+
+		dispatch(setDefaultSettings(layoutByRole[role]));
 
 		/*
         Set User Data
@@ -94,7 +96,7 @@ export function setUserData(user) {
 
 		dispatch({
 			type    : SET_USER_DATA,
-			payload : user
+			payload : { role, ...user }
 		});
 	};
 }
