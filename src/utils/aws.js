@@ -14,9 +14,13 @@ const s3 = new AWS.S3(); // Create a new instance of S3
 
 export const SingS3 = async (fileName, fileType, folder, clientId) => {
 	// Set up the payload of what we are sending to the S3 api
+
 	const s3Params = {
 		Bucket      : S3_BUCKET,
-		Key         : `clients/${clientId}/${folder}/${fileName}`,
+		Key         :
+			axios.defaults.baseURL === 'http://127.0.0.1:8000'
+				? `dev/clients/${clientId}/${folder}/${fileName}`
+				: `clients/${clientId}/${folder}/${fileName}`,
 		Expires     : 500,
 		ContentType : fileType,
 		ACL         : 'public-read'
@@ -66,7 +70,10 @@ export const uploadFile = async ({ fileType, signedRequest, file }) => {
 export const deleteFile = async (fileName, folder, clientId, callback) => {
 	const s3Params = {
 		Bucket : S3_BUCKET,
-		Key    : `clients/${clientId}/${folder}/${fileName}`
+		Key    :
+			axios.defaults.baseURL === 'http://127.0.0.1:8000'
+				? `dev/clients/${clientId}/${folder}/${fileName}`
+				: `clients/${clientId}/${folder}/${fileName}`
 	};
 
 	s3.deleteObject(s3Params, (err, data) => {

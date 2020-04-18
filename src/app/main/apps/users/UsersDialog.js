@@ -16,7 +16,6 @@ import * as Actions from './store/actions';
 import { useDispatch, useSelector } from 'react-redux';
 import { FuseChipSelect } from '@fuse';
 import _ from '@lodash';
-import { getRoleNameByUserType } from 'utils';
 
 let defaultFormState = {
 	username   : '',
@@ -30,6 +29,7 @@ let defaultFormState = {
 	dni        : ''
 };
 const roles = [
+	{ value: '0', label: 'Administrador' },
 	{ value: '1', label: 'Administrador' },
 	{ value: '2', label: 'Tecnico' },
 	{ value: '4', label: 'Empleado' }
