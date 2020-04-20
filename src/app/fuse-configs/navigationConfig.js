@@ -21,7 +21,7 @@ const navigationConfig = [
 				type  : 'item',
 				icon  : 'account_box',
 				url   : '/apps/clients',
-				auth  : authRoles.admin
+				auth  : authRoles.employee
 			},
 			{
 				id    : 'usuarios',
