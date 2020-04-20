@@ -1436,9 +1436,44 @@ const Client = (props) => {
 	const saveClientData = (form) => {
 		const body = {
 			...form.formalData,
-			address             : addressFormalData,
-			legalRepresentative : legalRepresentativeFormalData,
-			planta              : dataPlanta
+			address             : addressFormalData.map((i) => {
+				if (i.hasOwnProperty('tableData')) {
+					delete i.tableData;
+				}
+				return i;
+			}),
+			legalRepresentative : legalRepresentativeFormalData.map((i) => {
+				if (i.hasOwnProperty('tableData')) {
+					delete i.tableData;
+				}
+				return i;
+			}),
+			planta              : dataPlanta.map((i) => {
+				if (i.hasOwnProperty('tableData')) {
+					delete i.tableData;
+				}
+				return {
+					...i,
+					phoneContacts : i.phoneContacts.map((p) => {
+						if (i.hasOwnProperty('tableData')) {
+							delete i.tableData;
+						}
+						return p;
+					}),
+					innerContact  : i.innerContact.map((ic) => {
+						if (ic.hasOwnProperty('tableData')) {
+							delete ic.tableData;
+						}
+						return ic;
+					}),
+					mobiliary     : i.mobiliary.map((m) => {
+						if (m.hasOwnProperty('tableData')) {
+							delete m.tableData;
+						}
+						return m;
+					})
+				};
+			})
 		};
 
 		dispatch(Actions.saveClient(body, props.history));
