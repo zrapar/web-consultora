@@ -34,7 +34,7 @@ export const SingS3 = async (fileName, fileType, folder, clientId) => {
 				success : true,
 				data    : {
 					signedRequest : response,
-					url           : `https://${S3_BUCKET}.s3.amazonaws.com/${fileName}`
+					url           : `https://${S3_BUCKET}.s3.amazonaws.com/${s3Params.Key}`
 				}
 			};
 		}

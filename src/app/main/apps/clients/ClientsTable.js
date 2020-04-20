@@ -26,7 +26,7 @@ const ClientsTable = (props) => {
 	const [ page, setPage ] = useState(0);
 	const [ rowsPerPage, setRowsPerPage ] = useState(10);
 	const [ order, setOrder ] = useState({
-		direction : 'asc',
+		direction : 'desc',
 		id        : null
 	});
 
@@ -42,7 +42,13 @@ const ClientsTable = (props) => {
 			setData(
 				searchText.length === 0
 					? clients
-					: _.filter(clients, (item) => item.name.toLowerCase().includes(searchText.toLowerCase()))
+					: _.filter(
+							clients,
+							(item) =>
+								item.formalData.clientId.toString().toLowerCase().includes(searchText.toLowerCase()) ||
+								item.formalData.clientName.toLowerCase().includes(searchText.toLowerCase()) ||
+								item.formalData.cuit.toLowerCase().includes(searchText.toLowerCase())
+						)
 			);
 		},
 		[ clients, searchText ]
@@ -70,9 +76,9 @@ const ClientsTable = (props) => {
 		setSelected([]);
 	}
 
-	function handleClick(item) {
+	const handleClick = (item) => {
 		props.history.push('/apps/clients/' + item.id);
-	}
+	};
 
 	function handleCheck(event, id) {
 		const selectedIndex = selected.indexOf(id);
@@ -109,6 +115,7 @@ const ClientsTable = (props) => {
 						onSelectAllClick={handleSelectAllClick}
 						onRequestSort={handleRequestSort}
 						rowCount={data.length}
+						selected={selected}
 					/>
 
 					<TableBody>
@@ -129,7 +136,7 @@ const ClientsTable = (props) => {
 							[ order.direction ]
 						)
 							.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-							.map((n) => {
+							.map((n, index) => {
 								const isSelected = selected.indexOf(n.id) !== -1;
 								return (
 									<TableRow
@@ -138,7 +145,7 @@ const ClientsTable = (props) => {
 										role='checkbox'
 										aria-checked={isSelected}
 										tabIndex={-1}
-										key={n.id}
+										key={index}
 										selected={isSelected}
 										onClick={(event) => handleClick(n)}
 									>

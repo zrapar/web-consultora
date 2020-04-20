@@ -29,7 +29,6 @@ let defaultFormState = {
 	dni        : ''
 };
 const roles = [
-	{ value: '0', label: 'Administrador' },
 	{ value: '1', label: 'Administrador' },
 	{ value: '2', label: 'Tecnico' },
 	{ value: '4', label: 'Empleado' }
@@ -47,7 +46,10 @@ const UsersDialog = (props) => {
 			if (usersDialog.type === 'edit' && usersDialog.data) {
 				setForm({
 					...usersDialog.data,
-					userType : roles.filter((i) => i.value === usersDialog.data.user_type.toString())[0]
+					userType :
+						usersDialog.data.user_type === 0
+							? { value: '1', label: 'Administrador' }
+							: roles.filter((i) => i.value === usersDialog.data.user_type.toString())[0]
 				});
 			}
 
@@ -90,14 +92,14 @@ const UsersDialog = (props) => {
 		if (usersDialog.type === 'new') {
 			const body = {
 				...form,
-				user_type : form.userType.value,
+				user_type : usersDialog.data.user_type === 0 ? 0 : form.userType.value,
 				password  : form.username
 			};
 			dispatch(Actions.addUser(body));
 		} else {
 			const body = {
 				...form,
-				user_type : form.userType.value
+				user_type : usersDialog.data.user_type === 0 ? 0 : form.userType.value
 			};
 			dispatch(Actions.updateUser(body));
 		}
