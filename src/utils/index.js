@@ -574,3 +574,89 @@ export const getTreeData = (root, actual) => {
 			return false;
 	}
 };
+
+export const dataClientShow = {
+	formalData : {
+		clientId            : '',
+		clientName          : '',
+		cuit                : '',
+		address             : {
+			partido       : '',
+			localidad     : '',
+			calleRuta     : '',
+			nKm           : '',
+			piso          : '',
+			depto         : '',
+			codigo_postal : '',
+			type          : {
+				label : 'Seleccione el tipo de domicilio',
+				value : null
+			}
+		},
+		legalRepresentative : {
+			name            : '',
+			dni             : '',
+			position        : '',
+			cuil            : '',
+			estatuto        : [],
+			actaDesignacion : [],
+			poderes         : [],
+			extraPdfs       : []
+		}
+	},
+	planta     : {
+		id_establecimiento : '',
+		address            : {
+			partido       : '',
+			localidad     : '',
+			calleRuta     : '',
+			nKm           : '',
+			piso          : '',
+			depto         : '',
+			codigo_postal : ''
+		},
+		email              : '',
+		phoneContacts      : '',
+		innerContact       : {
+			name     : '',
+			lastName : '',
+			phone    : '',
+			email    : '',
+			position : '',
+			workArea : ''
+		},
+		govermentUsers     : {
+			opds   : {
+				user : '',
+				pass : ''
+			},
+			ada    : {
+				user : '',
+				pass : ''
+			},
+			ina    : {
+				user : '',
+				pass : ''
+			},
+			acumar : {
+				user : '',
+				pass : ''
+			}
+		},
+		mobiliary          : {
+			partidaInmobiliaria : '',
+			matricula           : '',
+			circunscripcion     : '',
+			seccion             : '',
+			fraccion            : '',
+			manzana             : '',
+			parcela             : '',
+			poligono            : '',
+			propietario         : '',
+			caracterUso         : '',
+			documentacion       : '',
+			observaciones       : '',
+			plancheta           : ''
+		}
+	}
+};

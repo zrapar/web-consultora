@@ -1,6 +1,8 @@
 import axios from 'axios';
 // import { FuseUtils } from '@fuse';
 import { showMessage } from 'app/store/actions/fuse';
+import _ from 'lodash';
+import { dataClientShow } from 'utils';
 
 export const GET_CLIENT = '@@Clients/ GET Client';
 export const SAVE_CLIENT = '@@Clients/ Save Client';
@@ -62,111 +64,42 @@ export const getClient = (client) => async (dispatch) => {
 };
 
 export const saveClient = (data, history) => async (dispatch) => {
-	const response = await axios.post('/clients/', data);
+	try {
+		const response = await axios.post('/clients/', data);
+		if (response.data) {
+			dispatch(showMessage({ message: 'Cliente creado correctamente' }));
+		}
 
-	dispatch(showMessage({ message: 'Client Saved' }));
+		Promise.all([
+			dispatch({
+				type    : SAVE_CLIENT,
+				payload : dataClientShow
+			})
+		]).then(() => {
+			dispatch(getClients());
+			history.push('/apps/clients');
+		});
+	} catch (err) {
+		const errors = _.flatten(
+			Object.values(err.response.data).map((i) => {
+				return i;
+			})
+		);
 
-	Promise.all([
-		dispatch({
-			type    : SAVE_CLIENT,
-			payload : response.data
-		})
-	]).then(() => {
-		dispatch(getClients());
-		history.push('/apps/clients');
-	});
+		errors.forEach((i) => {
+			dispatch(
+				showMessage({
+					message : i === 'Introduzca un número entero válido.' ? 'El DNI introducido no es correcto' : i
+				})
+			);
+		});
+	}
 };
 
 export const newClient = () => {
-	const data = {
-		formalData : {
-			clientId            : '',
-			clientName          : '',
-			cuit                : '',
-			address             : {
-				partido       : '',
-				localidad     : '',
-				calleRuta     : '',
-				nKm           : '',
-				piso          : '',
-				depto         : '',
-				codigo_postal : '',
-				type          : {
-					label : 'Seleccione el tipo de domicilio',
-					value : null
-				}
-			},
-			legalRepresentative : {
-				name            : '',
-				dni             : '',
-				position        : '',
-				cuil            : '',
-				estatuto        : [],
-				actaDesignacion : [],
-				poderes         : [],
-				extraPdfs       : []
-			}
-		},
-		planta     : {
-			id_establecimiento : '',
-			address            : {
-				partido       : '',
-				localidad     : '',
-				calleRuta     : '',
-				nKm           : '',
-				piso          : '',
-				depto         : '',
-				codigo_postal : ''
-			},
-			email              : '',
-			phoneContacts      : '',
-			innerContact       : {
-				name     : '',
-				lastName : '',
-				phone    : '',
-				email    : '',
-				position : '',
-				workArea : ''
-			},
-			govermentUsers     : {
-				opds   : {
-					user : '',
-					pass : ''
-				},
-				ada    : {
-					user : '',
-					pass : ''
-				},
-				ina    : {
-					user : '',
-					pass : ''
-				},
-				acumar : {
-					user : '',
-					pass : ''
-				}
-			},
-			mobiliary          : {
-				partidaInmobiliaria : '',
-				matricula           : '',
-				circunscripcion     : '',
-				seccion             : '',
-				fraccion            : '',
-				manzana             : '',
-				parcela             : '',
-				poligono            : '',
-				propietario         : '',
-				caracterUso         : '',
-				documentacion       : '',
-				observaciones       : '',
-				plancheta           : ''
-			}
-		}
-	};
-
 	return {
 		type    : GET_CLIENT,
-		payload : data
+		payload : dataClientShow
 	};
 };
 
