@@ -274,7 +274,14 @@ const ShowInfoDialog = (props) => {
 							title={getTitle(typeTable)}
 							columns={state.columns}
 							data={state.data}
-							icons={isNewClient ? { Add: (props) => null } : {}}
+							// icons={isNewClient ? { Add: (props) => null } : {}}
+							icons={
+								isNewClient ? (
+									{}
+								) : (
+									{ Add: (props) => null, Edit: (props) => null, Delete: (props) => null }
+								)
+							}
 							localization={{
 								pagination : {
 									labelDisplayedRows : '{from}-{to} de {count}',
@@ -311,106 +318,112 @@ const ShowInfoDialog = (props) => {
 									}
 								}
 							}}
-							editable={{
-								onRowAdd    : (newData) =>
-									new Promise((resolve) => {
-										setTimeout(() => {
-											resolve();
-											const data = [ ...state.data ];
-											data.push(newData);
-											setState({ ...state, data });
-											setDataEdit({
-												type : typeTable,
-												data
-											});
-										}, 600);
-									}),
-								onRowUpdate : (newData, oldData) =>
-									new Promise((resolve) => {
-										setTimeout(() => {
-											resolve();
-											const data = [ ...state.data ];
-											data[data.indexOf(oldData)] = newData;
-											setState({ ...state, data });
-											if (!lastData.back) {
-												setDataEdit({
-													type : typeTable,
-													data
-												});
-											} else {
-												let dataParents = [ ...lastData.data ];
-												switch (typeTable) {
-													case 'phoneContactsPlanta':
-														dataParents[lastData.actualIndex].phoneContacts = data.map(
-															(i) => i.phone
-														);
-														break;
-													case 'innerContactsEmailPlanta':
-														dataParents[lastData.actualIndex].email = data.map(
-															(i) => i.email
-														);
-														break;
-													case 'innerContactsPlanta':
-														dataParents[lastData.actualIndex].innerContact = data;
-														break;
-													case 'mobiliaryPlanta':
-														dataParents[lastData.actualIndex].mobiliary = data;
-														break;
+							editable={
+								isNewClient ? (
+									{
+										onRowAdd    : (newData) =>
+											new Promise((resolve) => {
+												setTimeout(() => {
+													resolve();
+													const data = [ ...state.data ];
+													data.push(newData);
+													setState({ ...state, data });
+													setDataEdit({
+														type : typeTable,
+														data
+													});
+												}, 600);
+											}),
+										onRowUpdate : (newData, oldData) =>
+											new Promise((resolve) => {
+												setTimeout(() => {
+													resolve();
+													const data = [ ...state.data ];
+													data[data.indexOf(oldData)] = newData;
+													setState({ ...state, data });
+													if (!lastData.back) {
+														setDataEdit({
+															type : typeTable,
+															data
+														});
+													} else {
+														let dataParents = [ ...lastData.data ];
+														switch (typeTable) {
+															case 'phoneContactsPlanta':
+																dataParents[
+																	lastData.actualIndex
+																].phoneContacts = data.map((i) => i.phone);
+																break;
+															case 'innerContactsEmailPlanta':
+																dataParents[lastData.actualIndex].email = data.map(
+																	(i) => i.email
+																);
+																break;
+															case 'innerContactsPlanta':
+																dataParents[lastData.actualIndex].innerContact = data;
+																break;
+															case 'mobiliaryPlanta':
+																dataParents[lastData.actualIndex].mobiliary = data;
+																break;
 
-													default:
-														break;
-												}
-												setLastData({
-													...lastData,
-													data : dataParents
-												});
-											}
-										}, 600);
-									}),
-								onRowDelete : (oldData) =>
-									new Promise((resolve) => {
-										setTimeout(() => {
-											resolve();
-											const data = [ ...state.data ];
-											data.splice(data.indexOf(oldData), 1);
-											setState({ ...state, data });
+															default:
+																break;
+														}
+														setLastData({
+															...lastData,
+															data : dataParents
+														});
+													}
+												}, 600);
+											}),
+										onRowDelete : (oldData) =>
+											new Promise((resolve) => {
+												setTimeout(() => {
+													resolve();
+													const data = [ ...state.data ];
+													data.splice(data.indexOf(oldData), 1);
+													setState({ ...state, data });
 
-											if (!lastData.back) {
-												setDataEdit({
-													type : typeTable,
-													data
-												});
-											} else {
-												let dataParents = [ ...lastData.data ];
-												switch (typeTable) {
-													case 'phoneContactsPlanta':
-														dataParents[lastData.actualIndex].phoneContacts = data.map(
-															(i) => i.phone
-														);
-														break;
-													case 'innerContactsEmailPlanta':
-														dataParents[lastData.actualIndex].email = data.map(
-															(i) => i.email
-														);
-														break;
-													case 'innerContactsPlanta':
-														dataParents[lastData.actualIndex].innerContact = data;
-														break;
-													case 'mobiliaryPlanta':
-														dataParents[lastData.actualIndex].mobiliary = data;
-														break;
+													if (!lastData.back) {
+														setDataEdit({
+															type : typeTable,
+															data
+														});
+													} else {
+														let dataParents = [ ...lastData.data ];
+														switch (typeTable) {
+															case 'phoneContactsPlanta':
+																dataParents[
+																	lastData.actualIndex
+																].phoneContacts = data.map((i) => i.phone);
+																break;
+															case 'innerContactsEmailPlanta':
+																dataParents[lastData.actualIndex].email = data.map(
+																	(i) => i.email
+																);
+																break;
+															case 'innerContactsPlanta':
+																dataParents[lastData.actualIndex].innerContact = data;
+																break;
+															case 'mobiliaryPlanta':
+																dataParents[lastData.actualIndex].mobiliary = data;
+																break;
 
-													default:
-														break;
-												}
-												setLastData({
-													...lastData,
-													data : dataParents
-												});
-											}
-										}, 600);
-									})
-							}}
+															default:
+																break;
+														}
+														setLastData({
+															...lastData,
+															data : dataParents
+														});
+													}
+												}, 600);
+											})
+									}
+								) : (
+									{}
+								)
+							}
 						/>
 					</div>
 				</DialogContent>

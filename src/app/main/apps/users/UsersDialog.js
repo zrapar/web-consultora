@@ -55,8 +55,7 @@ const UsersDialog = (props) => {
 
 			if (usersDialog.type === 'new') {
 				setForm({
-					...defaultFormState,
-					...usersDialog.data
+					...defaultFormState
 				});
 			}
 		},
@@ -92,7 +91,7 @@ const UsersDialog = (props) => {
 		if (usersDialog.type === 'new') {
 			const body = {
 				...form,
-				user_type : usersDialog.data.user_type === 0 ? 0 : form.userType.value,
+				user_type : form.userType.value,
 				password  : form.username
 			};
 			dispatch(Actions.addUser(body));

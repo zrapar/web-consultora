@@ -1,4 +1,7 @@
 import axios from 'axios';
+import { showMessage } from 'app/store/actions/fuse';
+import _ from 'lodash';
+
 // users
 export const GET_USERS = '@@Users/Get Users';
 export const SHOW_LOADING = '@@Users/Show Loading';
@@ -64,26 +67,58 @@ export const closeEditUserDialog = () => ({
 });
 
 export const addUser = (newUser) => async (dispatch) => {
-	const response = await axios.post('/user/', newUser);
+	try {
+		const response = await axios.post('/user/', newUser);
 
-	if (response) {
-		Promise.all([
-			dispatch({
-				type : ADD_USER
+		if (response) {
+			Promise.all([
+				dispatch({
+					type : ADD_USER
+				})
+			]).then(() => dispatch(getUsers()));
+		}
+	} catch (err) {
+		const errors = _.flatten(
+			Object.values(err.response.data).map((i) => {
+				return i;
 			})
-		]).then(() => dispatch(getUsers()));
+		);
+
+		errors.forEach((i) => {
+			dispatch(
+				showMessage({
+					message : i === 'Introduzca un número entero válido.' ? 'El DNI introducido no es correcto' : i
+				})
+			);
+		});
 	}
 };
 
 export const updateUser = (user) => async (dispatch) => {
-	const response = await axios.put(`/user/${user.id}/`, user);
+	try {
+		const response = await axios.put(`/user/${user.id}/`, user);
 
-	if (response) {
-		Promise.all([
-			dispatch({
-				type : UPDATE_USER
+		if (response) {
+			Promise.all([
+				dispatch({
+					type : UPDATE_USER
+				})
+			]).then(() => dispatch(getUsers()));
+		}
+	} catch (err) {
+		const errors = _.flatten(
+			Object.values(err.response.data).map((i) => {
+				return i;
 			})
-		]).then(() => dispatch(getUsers()));
+		);
+
+		errors.forEach((i) => {
+			dispatch(
+				showMessage({
+					message : i === 'Introduzca un número entero válido.' ? 'El DNI introducido no es correcto' : i
+				})
+			);
+		});
 	}
 };
 

@@ -21,7 +21,12 @@ class jwtService extends FuseUtils.EventEmitter {
 						// if you ever get an unauthorized response, logout the user
 						if (err.response.data) {
 							if (err.response.data.detail) {
-								this.emit('onAutoLogout', err.response.data.detail);
+								this.emit(
+									'onAutoLogout',
+									err.response.data.detail === 'No active account found with the given credentials'
+										? 'Las credenciales proporcionadas son incorrectas'
+										: err.response.data.detail
+								);
 							}
 						} else {
 							this.emit('onAutoLogout', 'El tiempo de su sesión finalizo');

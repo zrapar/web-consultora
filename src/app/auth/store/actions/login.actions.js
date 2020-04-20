@@ -13,6 +13,7 @@ export const submitLogin = ({ username, password }) => async (dispatch) => {
 			type : LOGIN_SUCCESS
 		});
 	}
+
 	return dispatch({
 		type    : LOGIN_ERROR,
 		payload : data.message

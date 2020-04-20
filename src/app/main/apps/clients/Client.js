@@ -164,6 +164,7 @@ const Client = (props) => {
 					setAddress(editedClient.formalData.address);
 					setLegalRepresentative(editedClient.formalData.legalRepresentative);
 					setPlanta(editedClient.planta);
+
 					editedClient.formalData.address = {
 						partido       : '',
 						localidad     : '',
