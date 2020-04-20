@@ -4,8 +4,7 @@ import FuseUtils from '@fuse/FuseUtils';
 
 class jwtService extends FuseUtils.EventEmitter {
 	init() {
-		// axios.defaults.baseURL = process.env.REACT_APP_API_URL;
-		axios.defaults.baseURL = 'http://127.0.0.1:8000';
+		axios.defaults.baseURL = process.env.REACT_APP_API_URL;
 		axios.defaults.headers.post['Content-Type'] = 'application/json';
 		this.setInterceptors();
 		this.handleAuthentication();
