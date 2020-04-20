@@ -9,14 +9,19 @@ import {
 	Toolbar,
 	AppBar,
 	DialogTitle,
-	Link,
-	CircularProgress
+	Link
+	// CircularProgress
 } from '@material-ui/core';
 import { Document, Page } from 'react-pdf/dist/entry.webpack';
 import CloseIcon from '@material-ui/icons/Close';
 import { FuseAnimate } from '@fuse';
 import { makeStyles } from '@material-ui/core/styles';
-import { getTitle, getColumns, convertData, getTreeData } from 'utils';
+import {
+	getTitle,
+	getColumns,
+	convertData
+	// getTreeData
+} from 'utils';
 import MaterialTable from 'material-table';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 
@@ -136,6 +141,7 @@ const ShowInfoDialog = (props) => {
 			setDataTable(newData);
 			setTypeTable(newType);
 		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[ typeTable, dataTable ]
 	);
 
@@ -152,6 +158,7 @@ const ShowInfoDialog = (props) => {
 				columns : getColumns(typeTable, handleClickOpen, getNewData)
 			});
 		},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[ typeTable, dataTable ]
 	);
 
