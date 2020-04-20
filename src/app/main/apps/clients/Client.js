@@ -271,7 +271,7 @@ const Client = (props) => {
 							dataTable : [],
 							typeTable : ''
 						});
-						setInnerContactsEmail(dataModifyPhone);
+						setPhoneContacts(dataModifyPhone);
 						setTimeout(() => {
 							setDataModal({
 								dataTable : dataModifyPhone,
