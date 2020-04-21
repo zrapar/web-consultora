@@ -1,6 +1,6 @@
 {
 	"name": "consultora-hys",
-	"version": "3.2.2",
+	"version": "1.0.1",
 	"private": true,
 	"dependencies": {
 		"@bugsnag/js": "^7.0.0",
@@ -24,6 +24,8 @@
 		"downshift": "3.2.10",
 		"firebase": "6.3.4",
 		"formsy-react": "1.1.5",
+		"fs": "^0.0.1-security",
+		"glob": "^7.1.6",
 		"google-map-react": "1.1.4",
 		"jsonwebtoken": "8.5.1",
 		"jss": "10.0.0-alpha.23",
@@ -89,14 +91,15 @@
 	},
 	"scripts": {
 		"start": "yarn run copylang && yarn run tailwind && react-app-rewired start",
-		"build": "yarn run copylang && yarn run tailwind && node ./purge-tailwindcss.js && cross-env GENERATE_SOURCEMAP=false react-app-rewired build",
+		"build": "yarn run copylang && yarn run tailwind && node ./purge-tailwindcss.js && cross-env GENERATE_SOURCEMAP=false react-app-rewired build && yarn sourceMap",
 		"tailwind": "./node_modules/.bin/tailwind build ./src/styles/tailwind.base.css -c ./tailwind.js -o ./src/styles/tailwind.css",
 		"test": "react-app-rewired test --env=node",
 		"eject": "react-scripts eject",
 		"build-docs": "find ./src/app/main/documentation/material-ui-components \\( -name '*.ts' -o -name '*.tsx' \\) -type f -delete && babel-node src/app/main/documentation/material-ui-components/build.js",
 		"build-stats": "yarn run build --stats",
 		"bundle-report": "yarn run build-stats && webpack-bundle-analyzer build/bundle-stats.json -m static -r build/bundle-stats.html -O",
-		"copylang": "cp ./es-modified-moment.js ./node_modules/moment/locale/es.js && cp ./es-modified-moment.js ./node_modules/moment/src/locale/es.js"
+		"copylang": "cp ./es-modified-moment.js ./node_modules/moment/locale/es.js && cp ./es-modified-moment.js ./node_modules/moment/src/locale/es.js",
+		"sourceMap": "node ./uploadSourceMap.js"
 	},
 	"eslintConfig": {
 		"extends": "react-app"
