@@ -4,8 +4,8 @@ import axios from 'axios';
 // Configure aws with your accessKeyId and your secretAccessKey
 AWS.config.update({
 	region          : 'us-east-2', // Put your aws region here
-	accessKeyId     : process.env.REACT_APP_AWSAccessKeyId,
-	secretAccessKey : process.env.REACT_APP_AWSSecretKey
+	accessKeyId     : process.env.REACT_APP_AWS_AccessKeyId,
+	secretAccessKey : process.env.REACT_APP_AWS_SecretKey
 });
 
 const S3_BUCKET = process.env.REACT_APP_Bucket;
@@ -18,7 +18,7 @@ export const SingS3 = async (fileName, fileType, folder, clientId) => {
 	const s3Params = {
 		Bucket      : S3_BUCKET,
 		Key         :
-			axios.defaults.baseURL === 'http://127.0.0.1:8000'
+			process.env.REACT_APP_Staging !== 'production'
 				? `dev/clients/${clientId}/${folder}/${fileName}`
 				: `clients/${clientId}/${folder}/${fileName}`,
 		Expires     : 500,
