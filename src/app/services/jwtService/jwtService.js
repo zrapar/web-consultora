@@ -1,7 +1,7 @@
 import axios from 'axios';
 import jwtDecode from 'jwt-decode';
 import FuseUtils from '@fuse/FuseUtils';
-import { BugsnagReporter } from '../../../utils/bugsnag';
+import { bugsnagReporter } from '../../../utils/bugsnag';
 
 class jwtService extends FuseUtils.EventEmitter {
 	init() {
@@ -80,7 +80,7 @@ class jwtService extends FuseUtils.EventEmitter {
 			if (response.data) {
 				this.setSession(response.data.access);
 				const user = await this.getInfoUser(jwtDecode(response.data.access));
-				BugsnagReporter.setUser(user.id, `${user.first_name} ${user.last_name}`, user.email);
+				bugsnagReporter.setUser(user.id, `${user.first_name} ${user.last_name}`, user.email);
 				return { success: true, user };
 			} else {
 				return { success: false, message: response.data };
@@ -100,7 +100,7 @@ class jwtService extends FuseUtils.EventEmitter {
 					if (response) {
 						this.setSession(this.getAccessToken());
 						const user = await this.getInfoUser(jwtDecode(this.getAccessToken()));
-						BugsnagReporter.setUser(user.id, `${user.first_name} ${user.last_name}`, user.email);
+						bugsnagReporter.setUser(user.id, `${user.first_name} ${user.last_name}`, user.email);
 						resolve({ user });
 					} else {
 						this.logout();
