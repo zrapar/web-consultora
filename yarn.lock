@@ -975,23 +975,23 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
-"@bugsnag/browser@^7.0.0":
-  version "7.0.0"
-  resolved "https://registry.npm.taobao.org/@bugsnag/browser/download/@bugsnag/browser-7.0.0.tgz#c0897815fcd440d3556c0586ac5d1a60db341cef"
-  integrity sha1-wIl4FfzUQNNVbAWGrF0aYNs0HO8=
+"@bugsnag/browser@^6.4.3":
+  version "6.5.2"
+  resolved "https://registry.npm.taobao.org/@bugsnag/browser/download/@bugsnag/browser-6.5.2.tgz#3f8f911dd739d2ace056fd5a38d5d25283ca4bfc"
+  integrity sha1-P4+RHdc50qzgVv1aONXSUoPKS/w=
 
-"@bugsnag/js@^7.0.0":
-  version "7.0.0"
-  resolved "https://registry.npm.taobao.org/@bugsnag/js/download/@bugsnag/js-7.0.0.tgz#fe9ce205b9f571df1a31ccc7a713ccfe87947e86"
-  integrity sha1-/pziBbn1cd8aMczHpxPM/oeUfoY=
+"@bugsnag/js@6.4.3":
+  version "6.4.3"
+  resolved "https://registry.npm.taobao.org/@bugsnag/js/download/@bugsnag/js-6.4.3.tgz#6439c8b1f3fdae45a09f6f525a2e22999b8d0329"
+  integrity sha1-ZDnIsfP9rkWgn29SWi4imZuNAyk=
   dependencies:
-    "@bugsnag/browser" "^7.0.0"
-    "@bugsnag/node" "^7.0.0"
+    "@bugsnag/browser" "^6.4.3"
+    "@bugsnag/node" "^6.4.2"
 
-"@bugsnag/node@^7.0.0":
-  version "7.0.0"
-  resolved "https://registry.npm.taobao.org/@bugsnag/node/download/@bugsnag/node-7.0.0.tgz#99102cf4092c27aae5ed0b771293f5089540ebc6"
-  integrity sha1-mRAs9AksJ6rl7Qt3EpP1CJVA68Y=
+"@bugsnag/node@^6.4.2":
+  version "6.5.2"
+  resolved "https://registry.npm.taobao.org/@bugsnag/node/download/@bugsnag/node-6.5.2.tgz#7bc2d0d1c7a682784be388404ab728a80b7ae2b9"
+  integrity sha1-e8LQ0cemgnhL44hASrcoqAt64rk=
   dependencies:
     byline "^5.0.0"
     error-stack-parser "^2.0.2"
@@ -999,10 +999,10 @@
     pump "^3.0.0"
     stack-generator "^2.0.3"
 
-"@bugsnag/plugin-react@^7.0.0":
-  version "7.0.0"
-  resolved "https://registry.npm.taobao.org/@bugsnag/plugin-react/download/@bugsnag/plugin-react-7.0.0.tgz#84919f2c8a3c5612fd03281632803a241a3de929"
-  integrity sha1-hJGfLIo8VhL9AygWMoA6JBo96Sk=
+"@bugsnag/plugin-react@6.4.0":
+  version "6.4.0"
+  resolved "https://registry.npm.taobao.org/@bugsnag/plugin-react/download/@bugsnag/plugin-react-6.4.0.tgz#945c09e2d5d2fc385ccde76a6a2b74907a62c3c6"
+  integrity sha1-lFwJ4tXS/Dhczedqait0kHpiw8Y=
 
 "@cnakazawa/watch@^1.0.3":
   version "1.0.3"
@@ -3835,10 +3835,10 @@ buffer@4.9.1, buffer@^4.3.0:
     ieee754 "^1.1.4"
     isarray "^1.0.0"
 
-bugsnag-build-reporter@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.npm.taobao.org/bugsnag-build-reporter/download/bugsnag-build-reporter-1.0.3.tgz#94300f251796a17d12a95e05e58383b77fb75b88"
-  integrity sha1-lDAPJReWoX0SqV4F5YODt3+3W4g=
+bugsnag-build-reporter@1.0.2:
+  version "1.0.2"
+  resolved "https://registry.npm.taobao.org/bugsnag-build-reporter/download/bugsnag-build-reporter-1.0.2.tgz#2449a52b24e14f81889b8939edf3a97ff208c7d1"
+  integrity sha1-JEmlKyThT4GIm4k57fOpf/IIx9E=
   dependencies:
     chalk "^2.3.0"
     concat-stream "^1.6.0"
@@ -3849,10 +3849,10 @@ bugsnag-build-reporter@^1.0.3:
     pino "^4.10.3"
     run-parallel "^1.1.6"
 
-bugsnag-sourcemaps@^1.3.0:
-  version "1.3.0"
-  resolved "https://registry.npm.taobao.org/bugsnag-sourcemaps/download/bugsnag-sourcemaps-1.3.0.tgz#0b35582050b5cde4cf7a03033cec35279e54b775"
-  integrity sha1-CzVYIFC1zeTPegMDPOw1J55Ut3U=
+bugsnag-sourcemaps@1.2.2:
+  version "1.2.2"
+  resolved "https://registry.npm.taobao.org/bugsnag-sourcemaps/download/bugsnag-sourcemaps-1.2.2.tgz#4077074e5ebeb5fd205b0042aba793c99ffec673"
+  integrity sha1-QHcHTl6+tf0gWwBCq6eTyZ/+xnM=
   dependencies:
     concat-stream "^2.0.0"
     form-data "^2.3.3"
@@ -6456,6 +6456,11 @@ fs.realpath@^1.0.0:
   resolved "https://registry.yarnpkg.com/fs.realpath/-/fs.realpath-1.0.0.tgz#1504ad2523158caa40db4a2787cb01411994ea4f"
   integrity sha1-FQStJSMVjKpA20onh8sBQRmU6k8=
 
+fs@0.0.1-security:
+  version "0.0.1-security"
+  resolved "https://registry.npm.taobao.org/fs/download/fs-0.0.1-security.tgz#8a7bd37186b6dddf3813f23858b57ecaaf5e41d4"
+  integrity sha1-invTcYa23d84E/I4WLV+yq9eQdQ=
+
 fsevents@2.0.6:
   version "2.0.6"
   resolved "https://registry.yarnpkg.com/fsevents/-/fsevents-2.0.6.tgz#87b19df0bfb4a1a51d7ddb51b01b5f3bedb40c33"
@@ -6621,6 +6626,18 @@ glob-to-regexp@^0.3.0:
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/glob-to-regexp/-/glob-to-regexp-0.3.0.tgz#8c5a1494d2066c570cc3bfe4496175acc4d502ab"
   integrity sha1-jFoUlNIGbFcMw7/kSWF1rMTVAqs=
+
+glob@7.1.6:
+  version "7.1.6"
+  resolved "https://registry.npm.taobao.org/glob/download/glob-7.1.6.tgz#141f33b81a7c2492e125594307480c46679278a6"
+  integrity sha1-FB8zuBp8JJLhJVlDB0gMRmeSeKY=
+  dependencies:
+    fs.realpath "^1.0.0"
+    inflight "^1.0.4"
+    inherits "2"
+    minimatch "^3.0.4"
+    once "^1.3.0"
+    path-is-absolute "^1.0.0"
 
 glob@^7.0.3, glob@^7.0.5, glob@^7.1.1, glob@^7.1.2, glob@^7.1.3, glob@^7.1.4:
   version "7.1.4"

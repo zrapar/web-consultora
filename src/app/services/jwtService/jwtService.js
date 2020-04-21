@@ -5,7 +5,7 @@ import { BugsnagReporter } from '../../../utils/bugsnag';
 
 class jwtService extends FuseUtils.EventEmitter {
 	init() {
-		axios.defaults.baseURL = process.env.REACT_APP_API_URL;
+		axios.defaults.baseURL = process.env.REACT_APP_API_Url;
 		axios.defaults.headers.post['Content-Type'] = 'application/json';
 		this.setInterceptors();
 		this.handleAuthentication();

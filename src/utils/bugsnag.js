@@ -1,14 +1,10 @@
-// import React from 'react';
-// import Bugsnag from '@bugsnag/js';
-// import BugsnagPluginReact from '@bugsnag/plugin-react';
+import React from 'react';
+import bugsnag from '@bugsnag/js';
+import bugsnagReact from '@bugsnag/plugin-react';
 
-// Bugsnag.start({
-// 	apiKey       : process.env.REACT_APP_Bugsnag_Key,
-// 	plugins      : [ new BugsnagPluginReact(React) ],
-// 	appType      : 'client',
-// 	releaseStage : process.env.NODE_ENV
-// });
+let bugsnagClient = bugsnag({ apiKey: process.env.REACT_APP_Bugsnag_Key, releaseStage: process.env.REACT_APP_Staging });
+bugsnagClient.use(bugsnagReact, React);
 
-// export const BugsnagReporter = Bugsnag;
+export const bugsnagReporter = bugsnagClient;
 
-// export const ErrorBoundary = BugsnagReporter.getPlugin('react');
+export const ErrorBoundary = bugsnagClient.getPlugin('react');
