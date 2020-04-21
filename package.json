@@ -92,7 +92,7 @@
 	"scripts": {
 		"start": "yarn run copylang && yarn run tailwind && react-app-rewired start",
 		"build": "yarn run copylang && yarn run tailwind && node ./purge-tailwindcss.js && cross-env GENERATE_SOURCEMAP=false react-app-rewired build && yarn sourceMap",
-		"tailwind": "node ./node_modules/tailwindcss/lib/cli.js init ./src/styles/tailwind.base.css -c ./tailwind.js -o ./src/styles/tailwind.css",
+		"tailwind": "node ./node_modules/tailwindcss/lib/cli.js build ./src/styles/tailwind.base.css -c ./tailwind.js -o ./src/styles/tailwind.css",
 		"test": "react-app-rewired test --env=node",
 		"eject": "react-scripts eject",
 		"build-docs": "find ./src/app/main/documentation/material-ui-components \\( -name '*.ts' -o -name '*.tsx' \\) -type f -delete && babel-node src/app/main/documentation/material-ui-components/build.js",
