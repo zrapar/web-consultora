@@ -351,15 +351,13 @@ const Client = (props) => {
 	};
 
 	const formalDataAddressSubmitted = () => {
-		const { partido, localidad, calleRuta, nKm, piso, depto, codigo_postal, type } = form.formalData.address;
+		const { partido, localidad, calleRuta, nKm, codigo_postal, type } = form.formalData.address;
 		let isSubmitted = false;
 		if (
 			partido.toString().length > 0 &&
 			localidad.toString().length > 0 &&
 			calleRuta.toString().length > 0 &&
 			nKm.toString().length > 0 &&
-			piso.toString().length > 0 &&
-			depto.toString().length > 0 &&
 			codigo_postal.toString().length > 0 &&
 			type.value
 		) {
@@ -377,11 +375,7 @@ const Client = (props) => {
 			name.toString().length > 0 &&
 			dni.toString().length > 0 &&
 			position.toString().length > 0 &&
-			cuil.toString().length > 0 &&
-			estatuto.length > 0 &&
-			actaDesignacion.length > 0 &&
-			poderes.length > 0 &&
-			extraPdfs.length > 0
+			cuil.toString().length > 0
 		) {
 			isSubmitted = true;
 		}
@@ -398,8 +392,6 @@ const Client = (props) => {
 			address.localidad.toString().length > 0 &&
 			address.calleRuta.toString().length > 0 &&
 			address.nKm.toString().length > 0 &&
-			address.piso.toString().length > 0 &&
-			address.depto.toString().length > 0 &&
 			address.codigo_postal.toString().length > 0 &&
 			email.toString().length > 0 &&
 			phoneContactsPlanta.length > 0 &&
@@ -1685,8 +1677,6 @@ const Client = (props) => {
 
 												<TextField
 													className='mt-8 mb-16 mr-8'
-													error={form.formalData.address.piso === ''}
-													required
 													label='Piso'
 													id='formalData.address.piso'
 													name='formalData.address.piso'
@@ -1694,10 +1684,9 @@ const Client = (props) => {
 													onChange={handleChange}
 													variant='outlined'
 												/>
+
 												<TextField
 													className='mt-8 mb-16 mr-8'
-													error={form.formalData.address.depto === ''}
-													required
 													label='Departamento'
 													id='formalData.address.depto'
 													name='formalData.address.depto'
@@ -1835,95 +1824,87 @@ const Client = (props) => {
 												</FuseAnimate>
 											</div>
 
-											{/* <input
-											accept='application/pdf'
-											// className='hidden'
-											id='button-file'
-											name='formalData.legalRepresentative.estatuto'
-											multiple
-											type='file'
-											onChange={handleUploadChange}
-										/> */}
-
 											<div className={classes.root}>
-												<Grid container spacing={3}>
-													<Grid item xs={6}>
-														<Paper className={classes.paper}>
-															<EstatutoDropZone
-																formalDataFiles={formalDataFiles}
-																files={estatuto}
-																setFormalDataFiles={setFormalDataFiles}
-																callBack={useCallback}
-																getSignedUrl={getSignedUrl}
-																loading={estatutosLoading}
-																toggleLoading={toggleLoadingFiles}
-																loadingFiles={loadingFiles}
-																deleting={estatutosDeleting}
-																toggleDelete={toggleDeleteFiles}
-																deletingFiles={deletingFiles}
-																toggleDisabledFiles={toggleDisabledFiles}
-																disabledFiles={disabledFiles}
-															/>
-														</Paper>
+												{form.formalData.clientId !== '' && (
+													<Grid container spacing={3}>
+														<Grid item xs={6}>
+															<Paper className={classes.paper}>
+																<EstatutoDropZone
+																	formalDataFiles={formalDataFiles}
+																	files={estatuto}
+																	setFormalDataFiles={setFormalDataFiles}
+																	callBack={useCallback}
+																	getSignedUrl={getSignedUrl}
+																	loading={estatutosLoading}
+																	toggleLoading={toggleLoadingFiles}
+																	loadingFiles={loadingFiles}
+																	deleting={estatutosDeleting}
+																	toggleDelete={toggleDeleteFiles}
+																	deletingFiles={deletingFiles}
+																	toggleDisabledFiles={toggleDisabledFiles}
+																	disabledFiles={disabledFiles}
+																/>
+															</Paper>
+														</Grid>
+														<Grid item xs={6}>
+															<Paper className={classes.paper}>
+																<ActaDesignacionDropZone
+																	formalDataFiles={formalDataFiles}
+																	files={actaDesignacion}
+																	setFormalDataFiles={setFormalDataFiles}
+																	callBack={useCallback}
+																	getSignedUrl={getSignedUrl}
+																	loading={actasLoading}
+																	toggleLoading={toggleLoadingFiles}
+																	loadingFiles={loadingFiles}
+																	deleting={actasDeleting}
+																	toggleDelete={toggleDeleteFiles}
+																	deletingFiles={deletingFiles}
+																	toggleDisabledFiles={toggleDisabledFiles}
+																	disabledFiles={disabledFiles}
+																/>
+															</Paper>
+														</Grid>
+														<Grid item xs={6}>
+															<Paper className={classes.paper}>
+																<PoderesDropZone
+																	formalDataFiles={formalDataFiles}
+																	files={poderes}
+																	setFormalDataFiles={setFormalDataFiles}
+																	callBack={useCallback}
+																	getSignedUrl={getSignedUrl}
+																	loading={poderesLoading}
+																	toggleLoading={toggleLoadingFiles}
+																	loadingFiles={loadingFiles}
+																	deleting={poderesDeleting}
+																	toggleDelete={toggleDeleteFiles}
+																	deletingFiles={deletingFiles}
+																	toggleDisabledFiles={toggleDisabledFiles}
+																	disabledFiles={disabledFiles}
+																/>
+															</Paper>
+														</Grid>
+														<Grid item xs={6}>
+															<Paper className={classes.paper}>
+																<ExtraDropZone
+																	formalDataFiles={formalDataFiles}
+																	files={extraPdfs}
+																	setFormalDataFiles={setFormalDataFiles}
+																	callBack={useCallback}
+																	getSignedUrl={getSignedUrl}
+																	loading={extrasLoading}
+																	toggleLoading={toggleLoadingFiles}
+																	loadingFiles={loadingFiles}
+																	deleting={extrasDeleting}
+																	toggleDelete={toggleDeleteFiles}
+																	deletingFiles={deletingFiles}
+																	toggleDisabledFiles={toggleDisabledFiles}
+																	disabledFiles={disabledFiles}
+																/>
+															</Paper>
+														</Grid>
 													</Grid>
-													<Grid item xs={6}>
-														<Paper className={classes.paper}>
-															<ActaDesignacionDropZone
-																formalDataFiles={formalDataFiles}
-																files={actaDesignacion}
-																setFormalDataFiles={setFormalDataFiles}
-																callBack={useCallback}
-																getSignedUrl={getSignedUrl}
-																loading={actasLoading}
-																toggleLoading={toggleLoadingFiles}
-																loadingFiles={loadingFiles}
-																deleting={actasDeleting}
-																toggleDelete={toggleDeleteFiles}
-																deletingFiles={deletingFiles}
-																toggleDisabledFiles={toggleDisabledFiles}
-																disabledFiles={disabledFiles}
-															/>
-														</Paper>
-													</Grid>
-													<Grid item xs={6}>
-														<Paper className={classes.paper}>
-															<PoderesDropZone
-																formalDataFiles={formalDataFiles}
-																files={poderes}
-																setFormalDataFiles={setFormalDataFiles}
-																callBack={useCallback}
-																getSignedUrl={getSignedUrl}
-																loading={poderesLoading}
-																toggleLoading={toggleLoadingFiles}
-																loadingFiles={loadingFiles}
-																deleting={poderesDeleting}
-																toggleDelete={toggleDeleteFiles}
-																deletingFiles={deletingFiles}
-																toggleDisabledFiles={toggleDisabledFiles}
-																disabledFiles={disabledFiles}
-															/>
-														</Paper>
-													</Grid>
-													<Grid item xs={6}>
-														<Paper className={classes.paper}>
-															<ExtraDropZone
-																formalDataFiles={formalDataFiles}
-																files={extraPdfs}
-																setFormalDataFiles={setFormalDataFiles}
-																callBack={useCallback}
-																getSignedUrl={getSignedUrl}
-																loading={extrasLoading}
-																toggleLoading={toggleLoadingFiles}
-																loadingFiles={loadingFiles}
-																deleting={extrasDeleting}
-																toggleDelete={toggleDeleteFiles}
-																deletingFiles={deletingFiles}
-																toggleDisabledFiles={toggleDisabledFiles}
-																disabledFiles={disabledFiles}
-															/>
-														</Paper>
-													</Grid>
-												</Grid>
+												)}
 											</div>
 										</React.Fragment>
 									)}
@@ -2016,8 +1997,6 @@ const Client = (props) => {
 											<div className='flex justify-around items-center'>
 												<TextField
 													className='mt-8 mb-16 mr-8'
-													error={form.planta.address.piso === ''}
-													required
 													label='Piso'
 													id='planta.address.piso'
 													name='planta.address.piso'
@@ -2027,8 +2006,6 @@ const Client = (props) => {
 												/>
 												<TextField
 													className='mt-8 mb-16 mr-8'
-													error={form.planta.address.depto === ''}
-													required
 													label='Departamento'
 													id='planta.address.depto'
 													name='planta.address.depto'
