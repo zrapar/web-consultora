@@ -1,25 +1,31 @@
 {
 	"name": "consultora-hys",
-	"version": "3.2.2",
+	"version": "1.0.1",
 	"private": true,
+	"web": "master.d343x6plkuc79m.amplifyapp.com",
 	"dependencies": {
 		"@date-io/date-fns": "1.3.9",
 		"@material-ui/core": "4.3.1",
 		"@material-ui/icons": "4.2.1",
 		"@material-ui/pickers": "3.2.2",
 		"@material-ui/styles": "4.3.0",
+		"@sentry/browser": "^5.15.4",
 		"auth0-lock": "11.17.1",
 		"autosuggest-highlight": "3.1.1",
 		"aws-sdk": "^2.656.0",
 		"axios": "0.19.0",
 		"axios-mock-adapter": "1.17.0",
 		"babel-plugin-root-import": "^6.5.0",
+		"bugsnag-build-reporter": "1.0.2",
+		"bugsnag-sourcemaps": "1.2.2",
 		"chart.js": "2.8.0",
 		"date-fns": "2.0.0-beta.4",
 		"dotenv": "^8.2.0",
 		"downshift": "3.2.10",
 		"firebase": "6.3.4",
 		"formsy-react": "1.1.5",
+		"fs": "^0.0.1-security",
+		"glob": "7.1.6",
 		"google-map-react": "1.1.4",
 		"jsonwebtoken": "8.5.1",
 		"jss": "10.0.0-alpha.23",
@@ -80,6 +86,7 @@
 		"js-beautify": "1.10.2",
 		"marked": "0.7.0",
 		"purgecss": "1.3.0",
+		"sentry-files": "^1.0.1",
 		"tailwindcss": "1.1.0",
 		"webpack-bundle-analyzer": "3.4.1"
 	},
@@ -92,7 +99,8 @@
 		"build-docs": "find ./src/app/main/documentation/material-ui-components \\( -name '*.ts' -o -name '*.tsx' \\) -type f -delete && babel-node src/app/main/documentation/material-ui-components/build.js",
 		"build-stats": "yarn run build --stats",
 		"bundle-report": "yarn run build-stats && webpack-bundle-analyzer build/bundle-stats.json -m static -r build/bundle-stats.html -O",
-		"copylang": "cp ./es-modified-moment.js ./node_modules/moment/locale/es.js && cp ./es-modified-moment.js ./node_modules/moment/src/locale/es.js"
+		"copylang": "cp ./es-modified-moment.js ./node_modules/moment/locale/es.js && cp ./es-modified-moment.js ./node_modules/moment/src/locale/es.js",
+		"source-map": "node ./uploadSourceMap.js"
 	},
 	"eslintConfig": {
 		"extends": "react-app"

@@ -34,6 +34,7 @@ class jwtService extends FuseUtils.EventEmitter {
 
 						this.setSession(null);
 					}
+
 					throw err;
 				});
 			}
@@ -85,7 +86,11 @@ class jwtService extends FuseUtils.EventEmitter {
 				return { success: false, message: response.data };
 			}
 		} catch (error) {
-			return { success: false, message: error.response.data };
+			console.log(error);
+			if (error.hasOwnProperty('response') && error.response.hasOwnProperty('data')) {
+				return { success: false, message: error.response.data };
+			}
+			return { success: false, message: 'Ha ocurrido un error' };
 		}
 	};
 
@@ -99,7 +104,6 @@ class jwtService extends FuseUtils.EventEmitter {
 					if (response) {
 						this.setSession(this.getAccessToken());
 						const user = await this.getInfoUser(jwtDecode(this.getAccessToken()));
-
 						resolve({ user });
 					} else {
 						this.logout();
