@@ -16,12 +16,7 @@ import { Document, Page } from 'react-pdf/dist/entry.webpack';
 import CloseIcon from '@material-ui/icons/Close';
 import { FuseAnimate } from '@fuse';
 import { makeStyles } from '@material-ui/core/styles';
-import {
-	getTitle,
-	getColumns,
-	convertData
-	// getTreeData
-} from 'utils';
+import { getTitle, getColumns, convertData } from 'utils';
 import MaterialTable from 'material-table';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 

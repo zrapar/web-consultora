@@ -71,7 +71,7 @@ export const deleteFile = async (fileName, folder, clientId, callback) => {
 	const s3Params = {
 		Bucket : S3_BUCKET,
 		Key    :
-			axios.defaults.baseURL === 'http://127.0.0.1:8000'
+			process.env.REACT_APP_Staging !== 'production'
 				? `dev/clients/${clientId}/${folder}/${fileName}`
 				: `clients/${clientId}/${folder}/${fileName}`
 	};
@@ -82,12 +82,4 @@ export const deleteFile = async (fileName, folder, clientId, callback) => {
 		}
 		return callback(true);
 	});
-
-	// try {
-	// 	const asd = await s3.deleteObject(s3Params);
-	// 	console.log(asd);
-	// } catch (err) {
-	// 	console.log('response', err.response);
-	// 	console.log('request', err.request);
-	// }
 };

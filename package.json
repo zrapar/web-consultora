@@ -4,13 +4,12 @@
 	"private": true,
 	"web": "master.d343x6plkuc79m.amplifyapp.com",
 	"dependencies": {
-		"@bugsnag/js": "6.4.3",
-		"@bugsnag/plugin-react": "6.4.0",
 		"@date-io/date-fns": "1.3.9",
 		"@material-ui/core": "4.3.1",
 		"@material-ui/icons": "4.2.1",
 		"@material-ui/pickers": "3.2.2",
 		"@material-ui/styles": "4.3.0",
+		"@sentry/browser": "^5.15.4",
 		"auth0-lock": "11.17.1",
 		"autosuggest-highlight": "3.1.1",
 		"aws-sdk": "^2.656.0",
@@ -25,7 +24,7 @@
 		"downshift": "3.2.10",
 		"firebase": "6.3.4",
 		"formsy-react": "1.1.5",
-		"fs": "0.0.1-security",
+		"fs": "^0.0.1-security",
 		"glob": "7.1.6",
 		"google-map-react": "1.1.4",
 		"jsonwebtoken": "8.5.1",
@@ -75,6 +74,10 @@
 		"typeface-muli": "0.0.71",
 		"velocity-react": "1.4.3"
 	},
+	"resolutions": {
+		"react": "16.8.6",
+		"react-dom": "16.8.6"
+	},
 	"devDependencies": {
 		"@babel/core": "7.5.5",
 		"@babel/node": "7.5.5",
@@ -83,12 +86,13 @@
 		"js-beautify": "1.10.2",
 		"marked": "0.7.0",
 		"purgecss": "1.3.0",
+		"sentry-files": "^1.0.1",
 		"tailwindcss": "1.1.0",
 		"webpack-bundle-analyzer": "3.4.1"
 	},
 	"scripts": {
 		"start": "yarn run copylang && yarn run tailwind && react-app-rewired start",
-		"build": "yarn run copylang && yarn run tailwind && node ./purge-tailwindcss.js && cross-env NODE_ENV=production react-app-rewired build && yarn source-map",
+		"build": "yarn run copylang && yarn run tailwind && node ./purge-tailwindcss.js && cross-env NODE_ENV=production react-app-rewired build",
 		"tailwind": "./node_modules/.bin/tailwind build ./src/styles/tailwind.base.css -c ./tailwind.js -o ./src/styles/tailwind.css",
 		"test": "react-app-rewired test --env=node",
 		"eject": "react-scripts eject",

@@ -1,7 +1,6 @@
 import axios from 'axios';
 import jwtDecode from 'jwt-decode';
 import FuseUtils from '@fuse/FuseUtils';
-import { bugsnagReporter } from '../../../utils/bugsnag';
 
 class jwtService extends FuseUtils.EventEmitter {
 	init() {
@@ -35,6 +34,7 @@ class jwtService extends FuseUtils.EventEmitter {
 
 						this.setSession(null);
 					}
+
 					throw err;
 				});
 			}
@@ -80,13 +80,17 @@ class jwtService extends FuseUtils.EventEmitter {
 			if (response.data) {
 				this.setSession(response.data.access);
 				const user = await this.getInfoUser(jwtDecode(response.data.access));
-				bugsnagReporter.setUser(user.id, `${user.first_name} ${user.last_name}`, user.email);
+
 				return { success: true, user };
 			} else {
 				return { success: false, message: response.data };
 			}
 		} catch (error) {
-			return { success: false, message: error.response.data };
+			console.log(error);
+			if (error.hasOwnProperty('response') && error.response.hasOwnProperty('data')) {
+				return { success: false, message: error.response.data };
+			}
+			return { success: false, message: 'Ha ocurrido un error' };
 		}
 	};
 
@@ -100,7 +104,6 @@ class jwtService extends FuseUtils.EventEmitter {
 					if (response) {
 						this.setSession(this.getAccessToken());
 						const user = await this.getInfoUser(jwtDecode(this.getAccessToken()));
-						bugsnagReporter.setUser(user.id, `${user.first_name} ${user.last_name}`, user.email);
 						resolve({ user });
 					} else {
 						this.logout();
