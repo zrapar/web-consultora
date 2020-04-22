@@ -13,7 +13,7 @@ import ReactDOM from 'react-dom';
 import * as serviceWorker from './serviceWorker';
 import * as Sentry from '@sentry/browser';
 import App from 'app/App';
-const { version } = require('./package.json');
+const { version } = require('../package.json');
 
 Sentry.init({ dsn: process.env.REACT_APP_Sentry_DSN, release: `consultora-parodi@${version}` });
 
