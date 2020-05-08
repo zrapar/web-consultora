@@ -19,6 +19,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { getTitle, getColumns, convertData } from 'utils';
 import MaterialTable from 'material-table';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
+import _ from 'lodash';
 
 const options = {
 	cMapUrl    : 'cmaps/',
@@ -91,7 +92,7 @@ const ShowInfoDialog = (props) => {
 	const [ openViewer, setOpenViewer ] = useState(false);
 
 	const handleClickOpen = (files) => {
-		setFiles(typeof files === 'string' ? [ files ] : files);
+		setFiles(_.isArray(files) ? files : [ files ]);
 		setOpen(true);
 	};
 
@@ -266,15 +267,24 @@ const ShowInfoDialog = (props) => {
 					<div className={classes.root}>
 						{showWarnings()}
 						<MaterialTable
+							options={{ search: false }}
 							title={getTitle(typeTable)}
 							columns={state.columns}
 							data={state.data}
 							// icons={isNewClient ? { Add: (props) => null } : {}}
 							icons={
 								isNewClient ? (
-									{}
+									{
+										Add         : (props) => null,
+										Search      : (props) => null,
+										ResetSearch : (props) => null
+									}
 								) : (
-									{ Add: (props) => null, Edit: (props) => null, Delete: (props) => null }
+									{
+										Add         : (props) => null,
+										Search      : (props) => null,
+										ResetSearch : (props) => null
+									}
 								)
 							}
 							localization={{
@@ -413,7 +423,9 @@ const ShowInfoDialog = (props) => {
 														});
 													}
 												}, 600);
-											})
+											}),
+										isEditable  : () => false,
+										isDeletable : () => true
 									}
 								) : (
 									{}
@@ -435,15 +447,15 @@ const ShowInfoDialog = (props) => {
 					)}
 				</DialogActions>
 			</div>
-			<Dialog onClose={handleClose} aria-labelledby='customized-dialog-title' open={open}>
+			<Dialog fullWidth maxWidth='sm' onClose={handleClose} aria-labelledby='customized-dialog-title' open={open}>
 				<DialogTitle id='customized-dialog-title' onClose={handleClose}>
 					Archivos
 				</DialogTitle>
-
+				{console.log(filesShow)}
 				<DialogContent dividers>
-					{filesShow.map((i) => (
-						<Link key={i} onClick={() => handleClickOpenViewer(i)}>
-							{i}
+					{filesShow.map((i, index) => (
+						<Link key={index} onClick={() => handleClickOpenViewer(i.url)}>
+							{i.name}
 						</Link>
 					))}
 				</DialogContent>

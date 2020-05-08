@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from '@material-ui/core';
 
 export const layoutByRole = {
-	root       : {
+	root           : {
 		layout           : {
 			style  : 'layout1',
 			config : {
@@ -25,7 +25,7 @@ export const layoutByRole = {
 			footer  : 'mainThemeDark'
 		}
 	},
-	admin      : {
+	admin          : {
 		layout           : {
 			style  : 'layout1',
 			config : {
@@ -48,7 +48,7 @@ export const layoutByRole = {
 			footer  : 'mainThemeDark'
 		}
 	},
-	technician : {
+	technician     : {
 		layout           : {
 			style  : 'layout3',
 			config : {
@@ -71,7 +71,7 @@ export const layoutByRole = {
 			footer  : 'mainThemeDark'
 		}
 	},
-	employee   : {
+	administrative : {
 		layout           : {
 			style  : 'layout2',
 			config : {
@@ -91,7 +91,7 @@ export const layoutByRole = {
 			footer  : 'mainThemeDark'
 		}
 	},
-	customer   : {
+	customer       : {
 		layout           : {
 			style  : 'layout3',
 			config : {
@@ -128,7 +128,7 @@ export const getRoleNameByUserType = (userType) => {
 			return 'customer';
 		case 4:
 		default:
-			return 'employee';
+			return 'administrative';
 	}
 };
 
@@ -138,7 +138,7 @@ export const rolesTranslate = (userType) => {
 		{ value: 1, label: 'Administrador' },
 		{ value: 2, label: 'Tecnico' },
 		{ value: 3, label: 'Cliente' },
-		{ value: 4, label: 'Empleado' }
+		{ value: 4, label: 'Administrativo' }
 	];
 
 	return roles.filter((i) => i.value === userType)[0].label;
@@ -148,19 +148,21 @@ export const tableTitles = (type) => {
 	switch (type) {
 		case 'addressFormalData':
 			return [
-				'Partido',
-				'Localidad',
 				'Calle / Ruta',
 				'N° / Km',
 				'Piso',
 				'Departamento',
+				'Localidad',
 				'Codigo Postal',
+				'Partido',
+				'Provincia',
 				'Tipo de Direccion',
 				'Acciones'
 			];
 		case 'legalRepresentativeFormalData':
 			return [
 				'Nombre',
+				'Apellido',
 				'DNI',
 				'Cargo',
 				'CUIL',
@@ -168,18 +170,20 @@ export const tableTitles = (type) => {
 				'Actas de Designación',
 				'Poderes',
 				'Otros Documentos',
+				'Documento DNI',
 				'Acciones'
 			];
 		case 'dataPlanta':
 			return [
 				'ID del Establecimiento',
-				'Partido',
-				'Localidad',
 				'Calle / Ruta',
 				'N° / Km',
 				'Piso',
 				'Departamento',
+				'Localidad',
 				'Codigo Postal',
+				'Partido',
+				'Provincia',
 				'Email de la planta',
 				'Telefono(s) de Contacto',
 				'Contacto(s) Interno(s)',
@@ -225,7 +229,18 @@ export const tableTitles = (type) => {
 export const tableIndex = (type) => {
 	switch (type) {
 		case 'addressFormalData':
-			return [ 'partido', 'localidad', 'calleRuta', 'nKm', 'piso', 'depto', 'codigo_postal', 'type', 'actions' ];
+			return [
+				'calleRuta',
+				'nKm',
+				'piso',
+				'depto',
+				'localidad',
+				'codigo_postal',
+				'partido',
+				'provincia',
+				'type',
+				'actions'
+			];
 		case 'legalRepresentativeFormalData':
 			return [
 				'name',
@@ -236,18 +251,20 @@ export const tableIndex = (type) => {
 				'actaDesignacion',
 				'poderes',
 				'extraPdfs',
+				'dniDocument',
 				'actions'
 			];
 		case 'dataPlanta':
 			return [
 				'id_establecimiento',
-				'partido',
-				'localidad',
 				'calleRuta',
 				'nKm',
 				'piso',
 				'depto',
+				'localidad',
 				'codigo_postal',
+				'partido',
+				'provincia',
 				'email',
 				'phoneContacts',
 				'innerContact',
@@ -310,13 +327,14 @@ export const getColumns = (type, handleClickOpen, setNewEditableData) => {
 	switch (type) {
 		case 'addressFormalData':
 			return [
-				{ title: 'Partido', field: 'partido' },
-				{ title: 'Localidad', field: 'localidad' },
 				{ title: 'Calle / Ruta', field: 'calleRuta' },
 				{ title: 'N° / Km', field: 'nKm' },
 				{ title: 'Piso', field: 'piso' },
 				{ title: 'Departamento', field: 'depto' },
+				{ title: 'Localidad', field: 'localidad' },
 				{ title: 'Codigo Postal', field: 'codigo_postal' },
+				{ title: 'Partido', field: 'partido' },
+				{ title: 'Provincia', field: 'provincia' },
 				{
 					title  : 'Tipo de Direccion',
 					field  : 'type',
@@ -329,7 +347,8 @@ export const getColumns = (type, handleClickOpen, setNewEditableData) => {
 			];
 		case 'legalRepresentativeFormalData':
 			return [
-				{ title: 'Nombre', field: 'name' },
+				{ title: 'Nombre', field: 'first_name' },
+				{ title: 'Apellido', field: 'last_name' },
 				{ title: 'DNI', field: 'dni' },
 				{ title: 'Cargo', field: 'position' },
 				{ title: 'CUIL', field: 'cuil' },
@@ -388,18 +407,33 @@ export const getColumns = (type, handleClickOpen, setNewEditableData) => {
 						</Button>
 					),
 					editable : 'never'
+				},
+				{
+					title    : 'DNI',
+					field    : 'dniDocument',
+					render   : (rowData) => (
+						<Button
+							className='whitespace-no-wrap '
+							variant='contained'
+							onClick={() => handleClickOpen(rowData.dniDocument)}
+						>
+							Ver el documento DNI
+						</Button>
+					),
+					editable : 'never'
 				}
 			];
 		case 'dataPlanta':
 			return [
 				{ title: 'ID del Establecimiento', field: 'id_establecimiento' },
-				{ title: 'Partido', field: 'address.partido' },
-				{ title: 'Localidad', field: 'address.localidad' },
 				{ title: 'Calle / Ruta', field: 'address.calleRuta' },
 				{ title: 'N° / Km', field: 'address.nKm' },
 				{ title: 'Piso', field: 'address.piso' },
 				{ title: 'Departamento', field: 'address.depto' },
+				{ title: 'Localidad', field: 'address.localidad' },
 				{ title: 'Codigo Postal', field: 'address.codigo_postal' },
+				{ title: 'Partido', field: 'address.partido' },
+				{ title: 'Provincia', field: 'address.provincia' },
 				{ title: 'Email de la planta', field: 'email' },
 				{
 					title    : 'Telefono(s) de Contacto',
@@ -580,44 +614,48 @@ export const dataClientShow = {
 		clientId            : '',
 		clientName          : '',
 		cuit                : '',
+		rubro               : '',
 		address             : {
-			partido       : '',
-			localidad     : '',
 			calleRuta     : '',
 			nKm           : '',
 			piso          : '',
 			depto         : '',
+			localidad     : '',
 			codigo_postal : '',
+			partido       : '',
+			provincia     : '',
 			type          : {
 				label : 'Seleccione el tipo de domicilio',
 				value : null
 			}
 		},
 		legalRepresentative : {
-			name            : '',
+			first_name      : '',
+			last_name       : '',
 			dni             : '',
 			position        : '',
 			cuil            : '',
 			estatuto        : [],
 			actaDesignacion : [],
 			poderes         : [],
-			extraPdfs       : []
+			extraPdfs       : [],
+			dniDocument     : []
 		}
 	},
 	planta     : {
-		id_establecimiento : '',
-		address            : {
-			partido       : '',
-			localidad     : '',
+		address        : {
 			calleRuta     : '',
 			nKm           : '',
 			piso          : '',
 			depto         : '',
-			codigo_postal : ''
+			localidad     : '',
+			codigo_postal : '',
+			partido       : '',
+			provincia     : ''
 		},
-		email              : '',
-		phoneContacts      : '',
-		innerContact       : {
+		email          : '',
+		phoneContacts  : '',
+		innerContact   : {
 			name     : '',
 			lastName : '',
 			phone    : '',
@@ -625,7 +663,7 @@ export const dataClientShow = {
 			position : '',
 			workArea : ''
 		},
-		govermentUsers     : {
+		govermentUsers : {
 			opds   : {
 				user : '',
 				pass : ''
@@ -643,7 +681,7 @@ export const dataClientShow = {
 				pass : ''
 			}
 		},
-		mobiliary          : {
+		mobiliary      : {
 			partidaInmobiliaria : '',
 			matricula           : '',
 			circunscripcion     : '',
@@ -656,7 +694,30 @@ export const dataClientShow = {
 			caracterUso         : '',
 			documentacion       : '',
 			observaciones       : '',
-			plancheta           : ''
+			plancheta           : '',
+			superficie          : null,
+			documentacionUso    : ''
 		}
 	}
+};
+
+export const isEmail = (email) => {
+	// eslint-disable-next-line no-useless-escape
+	const regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+	return regex.test(email);
+};
+
+export const isNaturalPositiveNumber = (number) => {
+	// eslint-disable-next-line no-useless-escape
+	const regex = /^[0-9]*$/gm;
+	return regex.test(number);
+};
+
+export const capitalize = (s) => {
+	if (s.length === 0) return s;
+	let arrString = s.split(' ');
+	arrString.forEach((s, index) => {
+		arrString[index] = s.charAt(0).toUpperCase() + s.slice(1);
+	});
+	return arrString.join(' ');
 };

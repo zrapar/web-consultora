@@ -4,7 +4,7 @@ import {
 	Tab,
 	Tabs,
 	TextField,
-	InputAdornment,
+	// InputAdornment,
 	Icon,
 	Typography,
 	Checkbox,
@@ -29,8 +29,10 @@ import withReducer from 'app/store/withReducer';
 import * as Actions from './store/actions';
 import reducer from './store/reducers';
 import { useDropzone } from 'react-dropzone';
-import { SingS3, uploadFile, deleteFile } from '../../../../utils/aws';
+import { SingS3, uploadFile, deleteFile } from 'utils/aws';
 import ShowInfoDialog from './ShowInfoDialog';
+import { isEmail, capitalize, isNaturalPositiveNumber } from 'utils';
+import NumberFormat from 'react-number-format';
 
 const useStyles = makeStyles((theme) => ({
 	root     : {
@@ -68,35 +70,43 @@ const Client = (props) => {
 	const isNew = clientId.includes('new');
 
 	const [ formalDataFiles, setFormalDataFiles ] = useState({
-		estatuto        : [],
-		actaDesignacion : [],
-		poderes         : [],
-		extraPdfs       : [],
-		planchetas      : []
+		estatuto         : [],
+		actaDesignacion  : [],
+		poderes          : [],
+		extraPdfs        : [],
+		planchetas       : [],
+		dniDocument      : [],
+		documentacionUso : []
 	});
 
 	const [ loadingFiles, toggleLoadingFiles ] = useState({
-		estatutosLoading  : false,
-		actasLoading      : false,
-		poderesLoading    : false,
-		extrasLoading     : false,
-		planchetasLoading : false
+		estatutosLoading        : false,
+		actasLoading            : false,
+		poderesLoading          : false,
+		extrasLoading           : false,
+		planchetasLoading       : false,
+		dniDocumentLoading      : false,
+		documentacionUsoLoading : false
 	});
 
 	const [ deletingFiles, toggleDeleteFiles ] = useState({
-		estatutosDeleting  : false,
-		actasDeleting      : false,
-		poderesDeleting    : false,
-		extrasDeleting     : false,
-		planchetasDeleting : false
+		estatutosDeleting        : false,
+		actasDeleting            : false,
+		poderesDeleting          : false,
+		extrasDeleting           : false,
+		planchetasDeleting       : false,
+		dniDocumentDeleting      : false,
+		documentacionUsoDeleting : false
 	});
 
 	const [ disabledFiles, toggleDisabledFiles ] = useState({
-		estatutosDisabled  : false,
-		actasDisabled      : false,
-		poderesDisabled    : false,
-		extrasDisabled     : false,
-		planchetasDisabled : false
+		estatutosDisabled        : false,
+		actasDisabled            : false,
+		poderesDisabled          : false,
+		extrasDisabled           : false,
+		planchetasDisabled       : false,
+		dniDocumentDisabled      : false,
+		documentacionUsoDisabled : false
 	});
 
 	const [ checkBox, toggleCheckBox ] = useState({
@@ -127,9 +137,35 @@ const Client = (props) => {
 
 	const { opds, ada, ina, acumar } = checkBox;
 
-	const { estatuto, actaDesignacion, poderes, extraPdfs, planchetas } = formalDataFiles;
-	const { estatutosLoading, actasLoading, poderesLoading, extrasLoading, planchetasLoading } = loadingFiles;
-	const { estatutosDeleting, actasDeleting, poderesDeleting, extrasDeleting, planchetasDeleting } = deletingFiles;
+	const {
+		estatuto,
+		actaDesignacion,
+		poderes,
+		extraPdfs,
+		planchetas,
+		dniDocument,
+		documentacionUso
+	} = formalDataFiles;
+
+	const {
+		estatutosLoading,
+		actasLoading,
+		poderesLoading,
+		extrasLoading,
+		planchetasLoading,
+		dniDocumentLoading,
+		documentacionUsoLoading
+	} = loadingFiles;
+
+	const {
+		estatutosDeleting,
+		actasDeleting,
+		poderesDeleting,
+		extrasDeleting,
+		planchetasDeleting,
+		dniDocumentDeleting,
+		documentacionUsoDeleting
+	} = deletingFiles;
 
 	const { dataTable, typeTable } = dataModal;
 
@@ -187,12 +223,12 @@ const Client = (props) => {
 						estatuto        : [],
 						actaDesignacion : [],
 						poderes         : [],
-						extraPdfs       : []
+						extraPdfs       : [],
+						dniDocument     : []
 					};
 
 					editedClient.planta = {
-						id_establecimiento : '',
-						address            : {
+						address        : {
 							partido       : '',
 							localidad     : '',
 							calleRuta     : '',
@@ -201,9 +237,9 @@ const Client = (props) => {
 							depto         : '',
 							codigo_postal : ''
 						},
-						email              : '',
-						phoneContacts      : '',
-						innerContact       : {
+						email          : '',
+						phoneContacts  : '',
+						innerContact   : {
 							name     : '',
 							lastName : '',
 							phone    : '',
@@ -211,7 +247,7 @@ const Client = (props) => {
 							position : '',
 							workArea : ''
 						},
-						govermentUsers     : {
+						govermentUsers : {
 							opds   : {
 								user : '',
 								pass : ''
@@ -229,7 +265,7 @@ const Client = (props) => {
 								pass : ''
 							}
 						},
-						mobiliary          : {
+						mobiliary      : {
 							partidaInmobiliaria : '',
 							matricula           : '',
 							circunscripcion     : '',
@@ -242,7 +278,8 @@ const Client = (props) => {
 							caracterUso         : '',
 							documentacion       : '',
 							observaciones       : '',
-							plancheta           : ''
+							plancheta           : '',
+							documentacionUso    : ''
 						}
 					};
 
@@ -351,14 +388,27 @@ const Client = (props) => {
 	};
 
 	const formalDataAddressSubmitted = () => {
-		const { partido, localidad, calleRuta, nKm, codigo_postal, type } = form.formalData.address;
+		const {
+			partido,
+			localidad,
+			calleRuta,
+			nKm,
+			piso,
+			depto,
+			codigo_postal,
+			type,
+			provincia
+		} = form.formalData.address;
 		let isSubmitted = false;
 		if (
 			partido.toString().length > 0 &&
 			localidad.toString().length > 0 &&
 			calleRuta.toString().length > 0 &&
 			nKm.toString().length > 0 &&
+			piso.toString().length > 0 &&
+			depto.toString().length > 0 &&
 			codigo_postal.toString().length > 0 &&
+			provincia.toString().length > 0 &&
 			type.value
 		) {
 			isSubmitted = true;
@@ -368,14 +418,18 @@ const Client = (props) => {
 	};
 
 	const formalDataLegalRepresentativeSubmitted = () => {
-		const { name, dni, position, cuil } = form.formalData.legalRepresentative;
-
+		const { first_name, dni, last_name, position, cuil } = form.formalData.legalRepresentative;
 		let isSubmitted = false;
 		if (
-			name.toString().length > 0 &&
-			dni.toString().length > 0 &&
-			position.toString().length > 0 &&
-			cuil.toString().length > 0
+			first_name.length > 0 &&
+			last_name.length > 0 &&
+			position.length > 0 &&
+			cuil.replace(' ', '').length > 12 &&
+			dni.replace(' ', '').length > 9
+			// estatuto.length > 0 &&
+			// actaDesignacion.length > 0 &&
+			// poderes.length > 0 &&
+			// extraPdfs.length > 0
 		) {
 			isSubmitted = true;
 		}
@@ -385,13 +439,14 @@ const Client = (props) => {
 
 	const plantaSubmitted = () => {
 		let isSubmitted = false;
-		const { id_establecimiento, address, email } = form.planta;
+		const { address, email } = form.planta;
 		if (
-			id_establecimiento.toString().length > 0 &&
 			address.partido.toString().length > 0 &&
 			address.localidad.toString().length > 0 &&
 			address.calleRuta.toString().length > 0 &&
 			address.nKm.toString().length > 0 &&
+			address.piso.toString().length > 0 &&
+			address.depto.toString().length > 0 &&
 			address.codigo_postal.toString().length > 0 &&
 			email.toString().length > 0 &&
 			phoneContactsPlanta.length > 0 &&
@@ -479,11 +534,12 @@ const Client = (props) => {
 				[`${folder}Loading`]: true
 			});
 			toggleDisabledFiles({
-				estatutosDisabled  : false,
-				actasDisabled      : true,
-				poderesDisabled    : true,
-				extrasDisabled     : true,
-				planchetasDisabled : true
+				estatutosDisabled   : false,
+				actasDisabled       : true,
+				poderesDisabled     : true,
+				extrasDisabled      : true,
+				planchetasDisabled  : true,
+				dniDocumentDisabled : true
 			});
 			getSignedUrl(uploadedFiles, folder, async (response) => {
 				const arrayPromise = await response;
@@ -501,11 +557,12 @@ const Client = (props) => {
 					[`${folder}Loading`]: false
 				});
 				toggleDisabledFiles({
-					estatutosDisabled  : false,
-					actasDisabled      : false,
-					poderesDisabled    : false,
-					extrasDisabled     : false,
-					planchetasDisabled : false
+					estatutosDisabled   : false,
+					actasDisabled       : false,
+					poderesDisabled     : false,
+					extrasDisabled      : false,
+					planchetasDisabled  : false,
+					dniDocumentDisabled : false
 				});
 			});
 		});
@@ -623,11 +680,12 @@ const Client = (props) => {
 				[`${folder}Loading`]: true
 			});
 			toggleDisabledFiles({
-				estatutosDisabled  : true,
-				actasDisabled      : false,
-				poderesDisabled    : true,
-				extrasDisabled     : true,
-				planchetasDisabled : true
+				estatutosDisabled   : true,
+				actasDisabled       : false,
+				poderesDisabled     : true,
+				extrasDisabled      : true,
+				planchetasDisabled  : true,
+				dniDocumentDisabled : true
 			});
 			getSignedUrl(uploadedFiles, folder, async (response) => {
 				const arrayPromise = await response;
@@ -645,11 +703,12 @@ const Client = (props) => {
 					[`${folder}Loading`]: false
 				});
 				toggleDisabledFiles({
-					estatutosDisabled  : false,
-					actasDisabled      : false,
-					poderesDisabled    : false,
-					extrasDisabled     : false,
-					planchetasDisabled : false
+					estatutosDisabled   : false,
+					actasDisabled       : false,
+					poderesDisabled     : false,
+					extrasDisabled      : false,
+					planchetasDisabled  : false,
+					dniDocumentDisabled : false
 				});
 			});
 		});
@@ -767,11 +826,12 @@ const Client = (props) => {
 				[`${folder}Loading`]: true
 			});
 			toggleDisabledFiles({
-				estatutosDisabled  : true,
-				actasDisabled      : true,
-				poderesDisabled    : false,
-				extrasDisabled     : true,
-				planchetasDisabled : true
+				estatutosDisabled   : true,
+				actasDisabled       : true,
+				poderesDisabled     : false,
+				extrasDisabled      : true,
+				planchetasDisabled  : true,
+				dniDocumentDisabled : true
 			});
 			getSignedUrl(uploadedFiles, folder, async (response) => {
 				const arrayPromise = await response;
@@ -789,11 +849,12 @@ const Client = (props) => {
 					[`${folder}Loading`]: false
 				});
 				toggleDisabledFiles({
-					estatutosDisabled  : false,
-					actasDisabled      : false,
-					poderesDisabled    : false,
-					extrasDisabled     : false,
-					planchetasDisabled : false
+					estatutosDisabled   : false,
+					actasDisabled       : false,
+					poderesDisabled     : false,
+					extrasDisabled      : false,
+					planchetasDisabled  : false,
+					dniDocumentDisabled : false
 				});
 			});
 		});
@@ -911,11 +972,12 @@ const Client = (props) => {
 				[`${folder}Loading`]: true
 			});
 			toggleDisabledFiles({
-				estatutosDisabled  : true,
-				actasDisabled      : true,
-				poderesDisabled    : true,
-				extrasDisabled     : false,
-				planchetasDisabled : true
+				estatutosDisabled   : true,
+				actasDisabled       : true,
+				poderesDisabled     : true,
+				extrasDisabled      : false,
+				planchetasDisabled  : true,
+				dniDocumentDisabled : true
 			});
 			getSignedUrl(uploadedFiles, folder, async (response) => {
 				const arrayPromise = await response;
@@ -933,11 +995,12 @@ const Client = (props) => {
 					[`${folder}Loading`]: false
 				});
 				toggleDisabledFiles({
-					estatutosDisabled  : false,
-					actasDisabled      : false,
-					poderesDisabled    : false,
-					extrasDisabled     : false,
-					planchetasDisabled : false
+					estatutosDisabled   : false,
+					actasDisabled       : false,
+					poderesDisabled     : false,
+					extrasDisabled      : false,
+					planchetasDisabled  : false,
+					dniDocumentDisabled : false
 				});
 			});
 		});
@@ -1049,19 +1112,21 @@ const Client = (props) => {
 		toggleDisabledFiles
 	}) => {
 		const folder = 'planchetas';
+		const folderPlanta = `${form.formalData.clientId}-${dataPlanta.length}`;
 		const onDrop = callBack(async (uploadedFiles) => {
 			toggleLoading({
 				...loadingFiles,
 				[`${folder}Loading`]: true
 			});
 			toggleDisabledFiles({
-				estatutosDisabled  : true,
-				actasDisabled      : true,
-				poderesDisabled    : true,
-				extrasDisabled     : true,
-				planchetasDisabled : false
+				estatutosDisabled   : true,
+				actasDisabled       : true,
+				poderesDisabled     : true,
+				extrasDisabled      : true,
+				planchetasDisabled  : false,
+				dniDocumentDisabled : true
 			});
-			getSignedUrl(uploadedFiles, `${folder}/${form.planta.id_establecimiento}`, async (response) => {
+			getSignedUrl(uploadedFiles, `${folder}/${folderPlanta}`, async (response) => {
 				const arrayPromise = await response;
 				const acceptedFiles = arrayPromise.filter((i) => i);
 
@@ -1078,11 +1143,12 @@ const Client = (props) => {
 					[`${folder}Loading`]: false
 				});
 				toggleDisabledFiles({
-					estatutosDisabled  : false,
-					actasDisabled      : false,
-					poderesDisabled    : false,
-					extrasDisabled     : false,
-					planchetasDisabled : false
+					estatutosDisabled   : false,
+					actasDisabled       : false,
+					poderesDisabled     : false,
+					extrasDisabled      : false,
+					planchetasDisabled  : false,
+					dniDocumentDisabled : false
 				});
 			});
 		});
@@ -1090,7 +1156,7 @@ const Client = (props) => {
 		const { getRootProps, getInputProps } = useDropzone({
 			accept   : 'application/pdf',
 			onDrop,
-			disabled : form.formalData.clientId === '' && form.planta.id_establecimiento === '',
+			disabled : form.formalData.clientId === '',
 			multiple : false
 		});
 
@@ -1099,26 +1165,21 @@ const Client = (props) => {
 				...deletingFiles,
 				[`${folder}Deleting`]: true
 			});
-			deleteFile(
-				file.replace('.pdf', ''),
-				`${folder}/${form.planta.id_establecimiento}`,
-				form.formalData.clientId,
-				(isDeleted) => {
-					if (isDeleted) {
-						const newFiles = files.filter((i) => i.path !== file);
-						setFormalDataFiles({
-							...formalDataFiles,
-							planchetas : newFiles
-						});
-					} else {
-						alert('No se pudo borrar el archivo, intente de nuevo');
-					}
-					toggleDelete({
-						...deletingFiles,
-						[`${folder}Deleting`]: false
+			deleteFile(file.replace('.pdf', ''), `${folder}/${folderPlanta}`, form.formalData.clientId, (isDeleted) => {
+				if (isDeleted) {
+					const newFiles = files.filter((i) => i.path !== file);
+					setFormalDataFiles({
+						...formalDataFiles,
+						planchetas : newFiles
 					});
+				} else {
+					alert('No se pudo borrar el archivo, intente de nuevo');
 				}
-			);
+				toggleDelete({
+					...deletingFiles,
+					[`${folder}Deleting`]: false
+				});
+			});
 		};
 
 		const fileList = files.map((item, index) => (
@@ -1141,9 +1202,7 @@ const Client = (props) => {
 					</div>
 				) : (
 					<React.Fragment>
-						{form.formalData.clientId !== '' &&
-						form.planta.id_establecimiento !== '' &&
-						!disabledFiles.planchetasDisabled ? (
+						{form.formalData.clientId !== '' && !disabledFiles.planchetasDisabled ? (
 							<div {...getRootProps()}>
 								<input {...getInputProps()} />
 								<Typography variant='h5' component='h3'>
@@ -1160,12 +1219,306 @@ const Client = (props) => {
 										Debe agregar el ID del Cliente
 									</Typography>
 								)}
-								{form.planta.id_establecimiento === '' && (
+								{disabledFiles.planchetasDisabled && (
 									<Typography variant='h5' component='h3'>
-										Debe agregar el ID del establecimiento
+										Debe esperar que termine de subir los otros archivos
+									</Typography>
+								)}
+							</React.Fragment>
+						)}
+
+						{files.length > 0 && (
+							<Grid container spacing={2} className='mt-8'>
+								<Grid item xs={12}>
+									<Typography variant='h6' className={classes.title}>
+										Archivos
+									</Typography>
+									<div className={classes.demo}>
+										<List dense={true}>{fileList}</List>
+									</div>
+								</Grid>
+							</Grid>
+						)}
+					</React.Fragment>
+				)}
+			</div>
+		);
+	};
+
+	const DocumentacionUsoDropZone = ({
+		formalDataFiles,
+		files,
+		setFormalDataFiles,
+		callBack,
+		getSignedUrl,
+		loading,
+		toggleLoading,
+		loadingFiles,
+		deleting,
+		toggleDelete,
+		deletingFiles,
+		disabledFiles,
+		toggleDisabledFiles
+	}) => {
+		const folder = 'documentacionUso';
+		const folderPlanta = `${form.formalData.clientId}-${dataPlanta.length}`;
+		const onDrop = callBack(async (uploadedFiles) => {
+			toggleLoading({
+				...loadingFiles,
+				[`${folder}Loading`]: true
+			});
+			toggleDisabledFiles({
+				estatutosDisabled        : true,
+				actasDisabled            : true,
+				poderesDisabled          : true,
+				extrasDisabled           : true,
+				planchetasDisabled       : true,
+				dniDocumentDisabled      : true,
+				documentacionUsoDisabled : false
+			});
+			getSignedUrl(uploadedFiles, `${folder}/${folderPlanta}`, async (response) => {
+				const arrayPromise = await response;
+				const acceptedFiles = arrayPromise.filter((i) => i);
+
+				if (acceptedFiles.length > 0) {
+					setFormalDataFiles({
+						...formalDataFiles,
+						documentacionUso : [ acceptedFiles[0] ]
+					});
+				} else {
+					alert('Existio un problema subiendo el (los) documento(s), intente de nuevo');
+				}
+				toggleLoading({
+					...loadingFiles,
+					[`${folder}Loading`]: false
+				});
+				toggleDisabledFiles({
+					estatutosDisabled        : false,
+					actasDisabled            : false,
+					poderesDisabled          : false,
+					extrasDisabled           : false,
+					planchetasDisabled       : false,
+					dniDocumentDisabled      : false,
+					documentacionUsoDisabled : false
+				});
+			});
+		});
+
+		const { getRootProps, getInputProps } = useDropzone({
+			accept   : 'application/pdf',
+			onDrop,
+			disabled : form.formalData.clientId === '',
+			multiple : false
+		});
+
+		const removeFile = async (file) => {
+			toggleDelete({
+				...deletingFiles,
+				[`${folder}Deleting`]: true
+			});
+			deleteFile(file.replace('.pdf', ''), `${folder}/${folderPlanta}`, form.formalData.clientId, (isDeleted) => {
+				if (isDeleted) {
+					const newFiles = files.filter((i) => i.path !== file);
+					setFormalDataFiles({
+						...formalDataFiles,
+						documentacionUso : newFiles
+					});
+				} else {
+					alert('No se pudo borrar el archivo, intente de nuevo');
+				}
+				toggleDelete({
+					...deletingFiles,
+					[`${folder}Deleting`]: false
+				});
+			});
+		};
+
+		const fileList = files.map((item, index) => (
+			<ListItem key={index} alignItems='center'>
+				<ListItemIcon className='cursor-pointer' onClick={() => removeFile(item.path)}>
+					<DeleteIcon />
+				</ListItemIcon>
+				<ListItemText className='text-justify' primary={item.path} />
+			</ListItem>
+		));
+
+		return (
+			<div className='flex flex-col min-h-128 h-full justify-around cursor-pointer'>
+				{loading || deleting ? (
+					<div className={`flex-col justify-around items-center w-full ${classes.center}`}>
+						<Typography variant='h5' component='h3'>
+							{loading ? 'Cargando Archivos...' : 'Borrando Archivo'}
+						</Typography>
+						<CircularProgress className={classes.progress} />
+					</div>
+				) : (
+					<React.Fragment>
+						{form.formalData.clientId !== '' && !disabledFiles.planchetasDisabled ? (
+							<div {...getRootProps()}>
+								<input {...getInputProps()} />
+								<Typography variant='h5' component='h3'>
+									Documentacion de uso
+								</Typography>
+								<Typography component='p'>
+									Puede arrastrar, o dar click para cargar los archivos
+								</Typography>
+							</div>
+						) : (
+							<React.Fragment>
+								{form.formalData.clientId === '' && (
+									<Typography variant='h5' component='h3'>
+										Debe agregar el ID del Cliente
 									</Typography>
 								)}
 								{disabledFiles.planchetasDisabled && (
+									<Typography variant='h5' component='h3'>
+										Debe esperar que termine de subir los otros archivos
+									</Typography>
+								)}
+							</React.Fragment>
+						)}
+
+						{files.length > 0 && (
+							<Grid container spacing={2} className='mt-8'>
+								<Grid item xs={12}>
+									<Typography variant='h6' className={classes.title}>
+										Archivos
+									</Typography>
+									<div className={classes.demo}>
+										<List dense={true}>{fileList}</List>
+									</div>
+								</Grid>
+							</Grid>
+						)}
+					</React.Fragment>
+				)}
+			</div>
+		);
+	};
+
+	const DniDocumentDropZone = ({
+		formalDataFiles,
+		files,
+		setFormalDataFiles,
+		callBack,
+		getSignedUrl,
+		loading,
+		toggleLoading,
+		loadingFiles,
+		deleting,
+		toggleDelete,
+		deletingFiles,
+		disabledFiles,
+		toggleDisabledFiles
+	}) => {
+		const folder = 'dniDocument';
+		const onDrop = callBack(async (uploadedFiles) => {
+			toggleLoading({
+				...loadingFiles,
+				[`${folder}Loading`]: true
+			});
+			toggleDisabledFiles({
+				estatutosDisabled   : true,
+				actasDisabled       : true,
+				poderesDisabled     : true,
+				extrasDisabled      : true,
+				planchetasDisabled  : true,
+				dniDocumentDisabled : false
+			});
+			getSignedUrl(uploadedFiles, folder, async (response) => {
+				const arrayPromise = await response;
+				const acceptedFiles = arrayPromise.filter((i) => i);
+
+				if (acceptedFiles.length > 0) {
+					setFormalDataFiles({
+						...formalDataFiles,
+						dniDocument : [ acceptedFiles[0] ]
+					});
+				} else {
+					alert('Existio un problema subiendo el (los) documento(s), intente de nuevo');
+				}
+				toggleLoading({
+					...loadingFiles,
+					[`${folder}Loading`]: false
+				});
+				toggleDisabledFiles({
+					estatutosDisabled   : false,
+					actasDisabled       : false,
+					poderesDisabled     : false,
+					extrasDisabled      : false,
+					planchetasDisabled  : false,
+					dniDocumentDisabled : false
+				});
+			});
+		});
+
+		const { getRootProps, getInputProps } = useDropzone({
+			accept   : 'application/pdf',
+			onDrop,
+			disabled : form.formalData.clientId === '',
+			multiple : false
+		});
+
+		const removeFile = async (file) => {
+			toggleDelete({
+				...deletingFiles,
+				[`${folder}Deleting`]: true
+			});
+			deleteFile(file.replace('.pdf', ''), folder, form.formalData.clientId, (isDeleted) => {
+				if (isDeleted) {
+					const newFiles = files.filter((i) => i.path !== file);
+					setFormalDataFiles({
+						...formalDataFiles,
+						dniDocument : newFiles
+					});
+				} else {
+					alert('No se pudo borrar el archivo, intente de nuevo');
+				}
+				toggleDelete({
+					...deletingFiles,
+					[`${folder}Deleting`]: false
+				});
+			});
+		};
+
+		const fileList = files.map((item, index) => (
+			<ListItem key={index} alignItems='center'>
+				<ListItemIcon className='cursor-pointer' onClick={() => removeFile(item.path)}>
+					<DeleteIcon />
+				</ListItemIcon>
+				<ListItemText className='text-justify' primary={item.path} />
+			</ListItem>
+		));
+
+		return (
+			<div className='flex flex-col min-h-128 h-full justify-around cursor-pointer'>
+				{loading || deleting ? (
+					<div className={`flex-col justify-around items-center w-full ${classes.center}`}>
+						<Typography variant='h5' component='h3'>
+							{loading ? 'Cargando Archivos...' : 'Borrando Archivo'}
+						</Typography>
+						<CircularProgress className={classes.progress} />
+					</div>
+				) : (
+					<React.Fragment>
+						{form.formalData.clientId !== '' && !disabledFiles.dniDocumentDisabled ? (
+							<div {...getRootProps()}>
+								<input {...getInputProps()} />
+								<Typography variant='h5' component='h3'>
+									DNI (opcional)
+								</Typography>
+								<Typography component='p'>
+									Puede arrastrar, o dar click para cargar los archivos
+								</Typography>
+							</div>
+						) : (
+							<React.Fragment>
+								{form.formalData.clientId === '' && (
+									<Typography variant='h5' component='h3'>
+										Primero debe agregar el ID del Cliente
+									</Typography>
+								)}
+								{disabledFiles.dniDocumentDisabled && (
 									<Typography variant='h5' component='h3'>
 										Debe esperar que termine de subir los otros archivos
 									</Typography>
@@ -1224,13 +1577,14 @@ const Client = (props) => {
 		setAddress(newArray);
 		setForm(
 			_.set({ ...form }, 'formalData.address', {
-				partido       : '',
-				localidad     : '',
 				calleRuta     : '',
 				nKm           : '',
 				piso          : '',
 				depto         : '',
+				localidad     : '',
 				codigo_postal : '',
+				partido       : '',
+				provincia     : '',
 				type          : {
 					label : 'Seleccione el tipo de domicilio',
 					value : null
@@ -1244,23 +1598,40 @@ const Client = (props) => {
 			...legalRepresentativeFormalData,
 			{
 				...legalRepresentative,
-				estatuto        : estatuto.map((i) => i.url),
-				actaDesignacion : actaDesignacion.map((i) => i.url),
-				poderes         : poderes.map((i) => i.url),
-				extraPdfs       : extraPdfs.map((i) => i.url)
+				estatuto        : estatuto.map((i) => {
+					return { url: i.url, name: i.fileName };
+				}),
+				actaDesignacion : actaDesignacion.map((i) => {
+					return { url: i.url, name: i.fileName };
+				}),
+				poderes         : poderes.map((i) => {
+					return { url: i.url, name: i.fileName };
+				}),
+				extraPdfs       : extraPdfs.map((i) => {
+					return { url: i.url, name: i.fileName };
+				}),
+				dniDocument     : dniDocument.map((i) => {
+					return {
+						url  : i.ur,
+						name : i.fileName
+					};
+				})
 			}
 		];
+
 		setLegalRepresentative(newArray);
 		setForm(
 			_.set({ ...form }, 'formalData.legalRepresentative', {
-				name            : '',
+				first_name      : '',
+				last_name       : '',
 				dni             : '',
 				position        : '',
 				cuil            : '',
 				estatuto        : [],
 				actaDesignacion : [],
 				poderes         : [],
-				extraPdfs       : []
+				extraPdfs       : [],
+				dniDocument     : []
 			})
 		);
 		setFormalDataFiles({
@@ -1268,7 +1639,8 @@ const Client = (props) => {
 			estatuto        : [],
 			actaDesignacion : [],
 			poderes         : [],
-			extraPdfs       : []
+			extraPdfs       : [],
+			dniDocument     : []
 		});
 	};
 
@@ -1290,28 +1662,36 @@ const Client = (props) => {
 			...dataPlanta,
 			{
 				...planta,
-				innerContact  : innerContactsPlanta,
-				phoneContacts : phoneContactsPlanta,
-				mobiliary     : mobiliaryPlanta
+				id_establecimiento :
+					dataPlanta.length > 0
+						? `${form.formalData.clientId}-${dataPlanta.length}`
+						: form.formalData.clientId,
+				innerContact       : innerContactsPlanta,
+				phoneContacts      : phoneContactsPlanta,
+				mobiliary          : mobiliaryPlanta
 			}
 		];
+
+		if (newArray.length > 1) {
+			newArray[0].id_establecimiento = `${form.formalData.clientId}-0`;
+		}
 
 		setPlanta(newArray);
 		setForm(
 			_.set({ ...form }, 'planta', {
-				id_establecimiento : '',
-				address            : {
-					partido       : '',
-					localidad     : '',
+				address        : {
 					calleRuta     : '',
 					nKm           : '',
 					piso          : '',
 					depto         : '',
-					codigo_postal : ''
+					localidad     : '',
+					codigo_postal : '',
+					partido       : '',
+					provincia     : ''
 				},
-				email              : '',
-				phoneContacts      : '',
-				innerContact       : {
+				email          : '',
+				phoneContacts  : '',
+				innerContact   : {
 					name     : '',
 					lastName : '',
 					phone    : '',
@@ -1319,7 +1699,7 @@ const Client = (props) => {
 					position : '',
 					workArea : ''
 				},
-				govermentUsers     : {
+				govermentUsers : {
 					opds   : {
 						user : '',
 						pass : ''
@@ -1337,7 +1717,7 @@ const Client = (props) => {
 						pass : ''
 					}
 				},
-				mobiliary          : {
+				mobiliary      : {
 					partidaInmobiliaria : '',
 					matricula           : '',
 					circunscripcion     : '',
@@ -1400,7 +1780,14 @@ const Client = (props) => {
 	};
 
 	const addPlantaMobiliary = (mobiliary) => {
-		const newArray = [ ...mobiliaryPlanta, { ...mobiliary, plancheta: planchetas[0].url } ];
+		const newArray = [
+			...mobiliaryPlanta,
+			{
+				...mobiliary,
+				plancheta        : { url: planchetas[0].url, name: planchetas[0].fileName },
+				documentacionUso : { url: documentacionUso[0].url, name: documentacionUso[0].fileName }
+			}
+		];
 		setMobiliary(newArray);
 		setForm(
 			_.set({ ...form }, 'planta.mobiliary', {
@@ -1416,12 +1803,15 @@ const Client = (props) => {
 				caracterUso         : '',
 				documentacion       : '',
 				observaciones       : '',
-				plancheta           : ''
+				plancheta           : '',
+				superficie          : null,
+				documentacionUso    : ''
 			})
 		);
 		setFormalDataFiles({
 			...formalDataFiles,
-			planchetas : []
+			planchetas       : [],
+			documentacionUso : []
 		});
 	};
 
@@ -1468,7 +1858,9 @@ const Client = (props) => {
 			})
 		};
 
-		dispatch(Actions.saveClient(body, props.history));
+		console.log(body);
+
+		// dispatch(Actions.saveClient(body, props.history));
 	};
 
 	const seeModalData = (data, type) => {
@@ -1578,7 +1970,12 @@ const Client = (props) => {
 												id='formalData.clientId'
 												name='formalData.clientId'
 												value={form.formalData.clientId}
-												onChange={handleChange}
+												onChange={(e) => {
+													const value = e.target.value;
+													if (isNaturalPositiveNumber(value)) {
+														setForm(_.set({ ...form }, 'formalData.clientId', value));
+													}
+												}}
 												variant='outlined'
 												fullWidth
 											/>
@@ -1590,20 +1987,37 @@ const Client = (props) => {
 												label='Nombre del Cliente'
 												id='formalData.clientName'
 												name='formalData.clientName'
-												value={form.formalData.clientName}
+												value={capitalize(form.formalData.clientName)}
 												onChange={handleChange}
 												variant='outlined'
 												fullWidth
 											/>
 
-											<TextField
+											<NumberFormat
 												className='mt-8 mb-16'
-												error={form.formalData.cuit === ''}
+												error={form.formalData.cuit.replace(' ', '').length <= 12}
 												required
 												label='CUIT'
 												id='formalData.cuit'
 												name='formalData.cuit'
 												value={form.formalData.cuit}
+												variant='outlined'
+												fullWidth
+												customInput={TextField}
+												format='##-########-#'
+												onValueChange={({ formattedValue }) => {
+													setForm(_.set({ ...form }, 'formalData.cuit', formattedValue));
+												}}
+											/>
+
+											<TextField
+												className='mt-8 mb-16'
+												error={form.formalData.rubro === ''}
+												required
+												label='Rubro'
+												id='formalData.rubro'
+												name='formalData.rubro'
+												value={form.formalData.rubro}
 												onChange={handleChange}
 												variant='outlined'
 												fullWidth
@@ -1626,88 +2040,7 @@ const Client = (props) => {
 													</FuseAnimate>
 												</div>
 											)}
-
 											<div className='flex justify-around items-center'>
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													error={form.formalData.address.partido === ''}
-													required
-													label='Partido'
-													id='formalData.address.partido'
-													name='formalData.address.partido'
-													value={form.formalData.address.partido}
-													onChange={handleChange}
-													variant='outlined'
-												/>
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													error={form.formalData.address.localidad === ''}
-													required
-													label='Localidad'
-													id='formalData.address.localidad'
-													name='formalData.address.localidad'
-													value={form.formalData.address.localidad}
-													onChange={handleChange}
-													variant='outlined'
-												/>
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													error={form.formalData.address.calleRuta === ''}
-													required
-													label='Calle / Ruta'
-													id='formalData.address.calleRuta'
-													name='formalData.address.calleRuta'
-													value={form.formalData.address.calleRuta}
-													onChange={handleChange}
-													variant='outlined'
-												/>
-											</div>
-											<div className='flex justify-around items-center'>
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													error={form.formalData.address.nKm === ''}
-													required
-													label='N° / Km'
-													id='formalData.address.nKm'
-													name='formalData.address.nKm'
-													value={form.formalData.address.nKm}
-													onChange={handleChange}
-													variant='outlined'
-												/>
-
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													label='Piso'
-													id='formalData.address.piso'
-													name='formalData.address.piso'
-													value={form.formalData.address.piso}
-													onChange={handleChange}
-													variant='outlined'
-												/>
-
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													label='Departamento'
-													id='formalData.address.depto'
-													name='formalData.address.depto'
-													value={form.formalData.address.depto}
-													onChange={handleChange}
-													variant='outlined'
-												/>
-											</div>
-											<div className='flex justify-around items-center'>
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													error={form.formalData.address.codigo_postal === ''}
-													required
-													label='Codigo Postal'
-													id='formalData.address.codigo_postal'
-													name='formalData.address.codigo_postal'
-													value={form.formalData.address.codigo_postal}
-													onChange={handleChange}
-													variant='outlined'
-												/>
-
 												<FuseChipSelect
 													className='mt-8 mb-16 mr-8 w-360'
 													value={form.formalData.address.type}
@@ -1740,6 +2073,152 @@ const Client = (props) => {
 													</Button>
 												</FuseAnimate>
 											</div>
+											<div className='flex justify-around items-center'>
+												<TextField
+													className='mt-8 mb-16 mr-8'
+													error={
+														form.formalData.address.calleRuta === '' &&
+														(addressFormalData.filter((i) => i.type === 'legal').length ===
+															0 ||
+															addressFormalData.filter((i) => i.type === 'registered')
+																.length === 0)
+													}
+													required
+													label='Calle / Ruta'
+													id='formalData.address.calleRuta'
+													name='formalData.address.calleRuta'
+													value={capitalize(form.formalData.address.calleRuta)}
+													onChange={handleChange}
+													variant='outlined'
+												/>
+
+												<TextField
+													className='mt-8 mb-16 mr-8'
+													error={
+														form.formalData.address.nKm === '' &&
+														(addressFormalData.filter((i) => i.type === 'legal').length ===
+															0 ||
+															addressFormalData.filter((i) => i.type === 'registered')
+																.length === 0)
+													}
+													required
+													label='N° / Km'
+													id='formalData.address.nKm'
+													name='formalData.address.nKm'
+													value={capitalize(form.formalData.address.nKm)}
+													onChange={handleChange}
+													variant='outlined'
+												/>
+
+												<TextField
+													className='mt-8 mb-16 mr-8'
+													error={
+														form.formalData.address.piso === '' &&
+														(addressFormalData.filter((i) => i.type === 'legal').length ===
+															0 ||
+															addressFormalData.filter((i) => i.type === 'registered')
+																.length === 0)
+													}
+													required
+													label='Piso'
+													id='formalData.address.piso'
+													name='formalData.address.piso'
+													value={capitalize(form.formalData.address.piso)}
+													onChange={handleChange}
+													variant='outlined'
+												/>
+
+												<TextField
+													className='mt-8 mb-16 mr-8'
+													error={
+														form.formalData.address.depto === '' &&
+														(addressFormalData.filter((i) => i.type === 'legal').length ===
+															0 ||
+															addressFormalData.filter((i) => i.type === 'registered')
+																.length === 0)
+													}
+													required
+													label='Departamento'
+													id='formalData.address.depto'
+													name='formalData.address.depto'
+													value={capitalize(form.formalData.address.depto)}
+													onChange={handleChange}
+													variant='outlined'
+												/>
+											</div>
+											<div className='flex justify-around items-center'>
+												<TextField
+													className='mt-8 mb-16 mr-8'
+													error={
+														form.formalData.address.localidad === '' &&
+														(addressFormalData.filter((i) => i.type === 'legal').length ===
+															0 ||
+															addressFormalData.filter((i) => i.type === 'registered')
+																.length === 0)
+													}
+													required
+													label='Localidad'
+													id='formalData.address.localidad'
+													name='formalData.address.localidad'
+													value={capitalize(form.formalData.address.localidad)}
+													onChange={handleChange}
+													variant='outlined'
+												/>
+
+												<TextField
+													className='mt-8 mb-16 mr-8'
+													error={
+														form.formalData.address.codigo_postal === '' &&
+														(addressFormalData.filter((i) => i.type === 'legal').length ===
+															0 ||
+															addressFormalData.filter((i) => i.type === 'registered')
+																.length === 0)
+													}
+													required
+													label='Codigo Postal'
+													id='formalData.address.codigo_postal'
+													name='formalData.address.codigo_postal'
+													value={form.formalData.address.codigo_postal}
+													onChange={handleChange}
+													variant='outlined'
+												/>
+
+												<TextField
+													className='mt-8 mb-16 mr-8'
+													error={
+														form.formalData.address.partido === '' &&
+														(addressFormalData.filter((i) => i.type === 'legal').length ===
+															0 ||
+															addressFormalData.filter((i) => i.type === 'registered')
+																.length === 0)
+													}
+													required
+													label='Partido'
+													id='formalData.address.partido'
+													name='formalData.address.partido'
+													value={capitalize(form.formalData.address.partido)}
+													onChange={handleChange}
+													variant='outlined'
+												/>
+
+												<TextField
+													className='mt-8 mb-16 mr-8'
+													error={
+														form.formalData.address.provincia === '' &&
+														(addressFormalData.filter((i) => i.type === 'legal').length ===
+															0 ||
+															addressFormalData.filter((i) => i.type === 'registered')
+																.length === 0)
+													}
+													required
+													label='Provincia'
+													id='formalData.address.provincia'
+													name='formalData.address.provincia'
+													value={capitalize(form.formalData.address.provincia)}
+													onChange={handleChange}
+													variant='outlined'
+												/>
+											</div>
 										</React.Fragment>
 									)}
 									{tabInnerFormal === 2 && (
@@ -1764,51 +2243,100 @@ const Client = (props) => {
 											<div className='flex justify-center items-center'>
 												<TextField
 													className='mt-8 mb-16 mr-8'
-													error={form.formalData.legalRepresentative.name === ''}
+													error={
+														form.formalData.legalRepresentative.first_name === '' &&
+														legalRepresentativeFormalData.length === 0
+													}
 													required
 													label='Nombre'
-													id='formalData.legalRepresentative.name'
-													name='formalData.legalRepresentative.name'
-													value={form.formalData.legalRepresentative.name}
+													id='formalData.legalRepresentative.first_name'
+													name='formalData.legalRepresentative.first_name'
+													value={capitalize(form.formalData.legalRepresentative.first_name)}
 													onChange={handleChange}
 													variant='outlined'
 												/>
 
 												<TextField
 													className='mt-8 mb-16 mr-8'
-													error={form.formalData.legalRepresentative.dni === ''}
+													error={
+														form.formalData.legalRepresentative.last_name === '' &&
+														legalRepresentativeFormalData.length === 0
+													}
 													required
+													label='Apellido'
+													id='formalData.legalRepresentative.last_name'
+													name='formalData.legalRepresentative.last_name'
+													value={capitalize(form.formalData.legalRepresentative.last_name)}
+													onChange={handleChange}
+													variant='outlined'
+												/>
+
+												<NumberFormat
+													variant='outlined'
+													className='mt-8 mb-16 mr-8'
 													label='DNI'
+													error={
+														form.formalData.legalRepresentative.dni.replace(' ', '')
+															.length <= 9 && legalRepresentativeFormalData.length === 0
+													}
+													required
 													id='formalData.legalRepresentative.dni'
 													name='formalData.legalRepresentative.dni'
 													value={form.formalData.legalRepresentative.dni}
-													onChange={handleChange}
-													variant='outlined'
+													customInput={TextField}
+													format='##.###.###'
+													onValueChange={({ formattedValue }) => {
+														setForm(
+															_.set(
+																{ ...form },
+																'formalData.legalRepresentative.dni',
+																formattedValue
+															)
+														);
+													}}
 												/>
 
 												<TextField
 													className='mt-8 mb-16 mr-8'
-													error={form.formalData.legalRepresentative.position === ''}
+													error={
+														form.formalData.legalRepresentative.position === '' &&
+														legalRepresentativeFormalData.length === 0
+													}
 													required
 													label='Cargo'
 													id='formalData.legalRepresentative.position'
 													name='formalData.legalRepresentative.position'
-													value={form.formalData.legalRepresentative.position}
+													value={capitalize(form.formalData.legalRepresentative.position)}
 													onChange={handleChange}
 													variant='outlined'
 												/>
 
-												<TextField
+												<NumberFormat
 													className='mt-8 mb-16 mr-8'
-													error={form.formalData.legalRepresentative.cuil === ''}
+													error={
+														legalRepresentativeFormalData.length === 0 &&
+														form.formalData.legalRepresentative.cuil.replace(' ', '')
+															.length <= 12
+													}
 													required
 													label='CUIL'
 													id='formalData.legalRepresentative.cuil'
 													name='formalData.legalRepresentative.cuil'
 													value={form.formalData.legalRepresentative.cuil}
-													onChange={handleChange}
 													variant='outlined'
+													customInput={TextField}
+													format='##-########-#'
+													onValueChange={({ formattedValue }) => {
+														setForm(
+															_.set(
+																{ ...form },
+																'formalData.legalRepresentative.cuil',
+																formattedValue
+															)
+														);
+													}}
 												/>
+
 												<FuseAnimate animation='transition.slideRightIn' delay={300}>
 													<Button
 														className='whitespace-no-wrap mt-8 mb-16 mr-8 h-56'
@@ -1825,86 +2353,108 @@ const Client = (props) => {
 											</div>
 
 											<div className={classes.root}>
-												{form.formalData.clientId !== '' && (
-													<Grid container spacing={3}>
-														<Grid item xs={6}>
-															<Paper className={classes.paper}>
-																<EstatutoDropZone
-																	formalDataFiles={formalDataFiles}
-																	files={estatuto}
-																	setFormalDataFiles={setFormalDataFiles}
-																	callBack={useCallback}
-																	getSignedUrl={getSignedUrl}
-																	loading={estatutosLoading}
-																	toggleLoading={toggleLoadingFiles}
-																	loadingFiles={loadingFiles}
-																	deleting={estatutosDeleting}
-																	toggleDelete={toggleDeleteFiles}
-																	deletingFiles={deletingFiles}
-																	toggleDisabledFiles={toggleDisabledFiles}
-																	disabledFiles={disabledFiles}
-																/>
-															</Paper>
-														</Grid>
-														<Grid item xs={6}>
-															<Paper className={classes.paper}>
-																<ActaDesignacionDropZone
-																	formalDataFiles={formalDataFiles}
-																	files={actaDesignacion}
-																	setFormalDataFiles={setFormalDataFiles}
-																	callBack={useCallback}
-																	getSignedUrl={getSignedUrl}
-																	loading={actasLoading}
-																	toggleLoading={toggleLoadingFiles}
-																	loadingFiles={loadingFiles}
-																	deleting={actasDeleting}
-																	toggleDelete={toggleDeleteFiles}
-																	deletingFiles={deletingFiles}
-																	toggleDisabledFiles={toggleDisabledFiles}
-																	disabledFiles={disabledFiles}
-																/>
-															</Paper>
-														</Grid>
-														<Grid item xs={6}>
-															<Paper className={classes.paper}>
-																<PoderesDropZone
-																	formalDataFiles={formalDataFiles}
-																	files={poderes}
-																	setFormalDataFiles={setFormalDataFiles}
-																	callBack={useCallback}
-																	getSignedUrl={getSignedUrl}
-																	loading={poderesLoading}
-																	toggleLoading={toggleLoadingFiles}
-																	loadingFiles={loadingFiles}
-																	deleting={poderesDeleting}
-																	toggleDelete={toggleDeleteFiles}
-																	deletingFiles={deletingFiles}
-																	toggleDisabledFiles={toggleDisabledFiles}
-																	disabledFiles={disabledFiles}
-																/>
-															</Paper>
-														</Grid>
-														<Grid item xs={6}>
-															<Paper className={classes.paper}>
-																<ExtraDropZone
-																	formalDataFiles={formalDataFiles}
-																	files={extraPdfs}
-																	setFormalDataFiles={setFormalDataFiles}
-																	callBack={useCallback}
-																	getSignedUrl={getSignedUrl}
-																	loading={extrasLoading}
-																	toggleLoading={toggleLoadingFiles}
-																	loadingFiles={loadingFiles}
-																	deleting={extrasDeleting}
-																	toggleDelete={toggleDeleteFiles}
-																	deletingFiles={deletingFiles}
-																	toggleDisabledFiles={toggleDisabledFiles}
-																	disabledFiles={disabledFiles}
-																/>
-															</Paper>
-														</Grid>
+												<Grid container spacing={3}>
+													<Grid item xs={6}>
+														<Paper className={classes.paper}>
+															<EstatutoDropZone
+																formalDataFiles={formalDataFiles}
+																files={estatuto}
+																setFormalDataFiles={setFormalDataFiles}
+																callBack={useCallback}
+																getSignedUrl={getSignedUrl}
+																loading={estatutosLoading}
+																toggleLoading={toggleLoadingFiles}
+																loadingFiles={loadingFiles}
+																deleting={estatutosDeleting}
+																toggleDelete={toggleDeleteFiles}
+																deletingFiles={deletingFiles}
+																toggleDisabledFiles={toggleDisabledFiles}
+																disabledFiles={disabledFiles}
+															/>
+														</Paper>
 													</Grid>
-												)}
+													<Grid item xs={6}>
+														<Paper className={classes.paper}>
+															<ActaDesignacionDropZone
+																formalDataFiles={formalDataFiles}
+																files={actaDesignacion}
+																setFormalDataFiles={setFormalDataFiles}
+																callBack={useCallback}
+																getSignedUrl={getSignedUrl}
+																loading={actasLoading}
+																toggleLoading={toggleLoadingFiles}
+																loadingFiles={loadingFiles}
+																deleting={actasDeleting}
+																toggleDelete={toggleDeleteFiles}
+																deletingFiles={deletingFiles}
+																toggleDisabledFiles={toggleDisabledFiles}
+																disabledFiles={disabledFiles}
+															/>
+														</Paper>
+													</Grid>
+													<Grid item xs={6}>
+														<Paper className={classes.paper}>
+															<PoderesDropZone
+																formalDataFiles={formalDataFiles}
+																files={poderes}
+																setFormalDataFiles={setFormalDataFiles}
+																callBack={useCallback}
+																getSignedUrl={getSignedUrl}
+																loading={poderesLoading}
+																toggleLoading={toggleLoadingFiles}
+																loadingFiles={loadingFiles}
+																deleting={poderesDeleting}
+																toggleDelete={toggleDeleteFiles}
+																deletingFiles={deletingFiles}
+																toggleDisabledFiles={toggleDisabledFiles}
+																disabledFiles={disabledFiles}
+															/>
+														</Paper>
+													</Grid>
+													<Grid item xs={6}>
+														<Paper className={classes.paper}>
+															<ExtraDropZone
+																formalDataFiles={formalDataFiles}
+																files={extraPdfs}
+																setFormalDataFiles={setFormalDataFiles}
+																callBack={useCallback}
+																getSignedUrl={getSignedUrl}
+																loading={extrasLoading}
+																toggleLoading={toggleLoadingFiles}
+																loadingFiles={loadingFiles}
+																deleting={extrasDeleting}
+																toggleDelete={toggleDeleteFiles}
+																deletingFiles={deletingFiles}
+																toggleDisabledFiles={toggleDisabledFiles}
+																disabledFiles={disabledFiles}
+															/>
+														</Paper>
+													</Grid>
+												</Grid>
+											</div>
+
+											<div className={classes.root}>
+												<Grid container spacing={3}>
+													<Grid item xs={12}>
+														<Paper className={classes.paper}>
+															<DniDocumentDropZone
+																formalDataFiles={formalDataFiles}
+																files={dniDocument}
+																setFormalDataFiles={setFormalDataFiles}
+																callBack={useCallback}
+																getSignedUrl={getSignedUrl}
+																loading={dniDocumentLoading}
+																toggleLoading={toggleLoadingFiles}
+																loadingFiles={loadingFiles}
+																deleting={dniDocumentDeleting}
+																toggleDelete={toggleDeleteFiles}
+																deletingFiles={deletingFiles}
+																toggleDisabledFiles={toggleDisabledFiles}
+																disabledFiles={disabledFiles}
+															/>
+														</Paper>
+													</Grid>
+												</Grid>
 											</div>
 										</React.Fragment>
 									)}
@@ -1928,48 +2478,22 @@ const Client = (props) => {
 									</Tabs>
 									{tabInnerPlanta === 0 && (
 										<React.Fragment>
-											<TextField
-												className='mt-8 mb-16 mr-8'
-												error={form.planta.id_establecimiento === ''}
-												required
-												label='ID del Establecimiento'
-												placeholder='1'
-												id='planta.id_establecimiento'
-												name='planta.id_establecimiento'
-												value={form.planta.id_establecimiento}
-												onChange={handleChange}
-												variant='outlined'
-												fullWidth
-												InputProps={{
-													startAdornment : (
-														<InputAdornment position='start'>{`${form.formalData
-															.clientId}`}</InputAdornment>
-													)
-												}}
-											/>
+											{form.formalData.clientId !== '' && (
+												<div className='flex justify-around items-center mb-16'>
+													<FuseAnimate animation='transition.slideLeftIn' delay={300}>
+														<Typography variant='h5'>
+															{dataPlanta.length > 0 ? (
+																`ID del establecimiento: ${form.formalData
+																	.clientId}-${dataPlanta.length}`
+															) : (
+																`ID del establecimiento: ${form.formalData.clientId}`
+															)}
+														</Typography>
+													</FuseAnimate>
+												</div>
+											)}
+
 											<div className='flex justify-around items-center'>
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													error={form.planta.address.partido === ''}
-													required
-													label='Partido'
-													id='planta.address.partido'
-													name='planta.address.partido'
-													value={form.planta.address.partido}
-													onChange={handleChange}
-													variant='outlined'
-												/>
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													error={form.planta.address.localidad === ''}
-													required
-													label='Localidad'
-													id='planta.address.localidad'
-													name='planta.address.localidad'
-													value={form.planta.address.localidad}
-													onChange={handleChange}
-													variant='outlined'
-												/>
 												<TextField
 													className='mt-8 mb-16 mr-8'
 													error={form.planta.address.calleRuta === ''}
@@ -1977,7 +2501,7 @@ const Client = (props) => {
 													label='Calle / Ruta'
 													id='planta.address.calleRuta'
 													name='planta.address.calleRuta'
-													value={form.planta.address.calleRuta}
+													value={capitalize(form.planta.address.calleRuta)}
 													onChange={handleChange}
 													variant='outlined'
 												/>
@@ -1989,7 +2513,31 @@ const Client = (props) => {
 													label='N° / Km'
 													id='planta.address.nKm'
 													name='planta.address.nKm'
-													value={form.planta.address.nKm}
+													value={capitalize(form.planta.address.nKm)}
+													onChange={handleChange}
+													variant='outlined'
+												/>
+
+												<TextField
+													className='mt-8 mb-16 mr-8'
+													error={form.planta.address.piso === ''}
+													required
+													label='Piso'
+													id='planta.address.piso'
+													name='planta.address.piso'
+													value={capitalize(form.planta.address.piso)}
+													onChange={handleChange}
+													variant='outlined'
+												/>
+
+												<TextField
+													className='mt-8 mb-16 mr-8'
+													error={form.planta.address.depto === ''}
+													required
+													label='Departamento'
+													id='planta.address.depto'
+													name='planta.address.depto'
+													value={capitalize(form.planta.address.depto)}
 													onChange={handleChange}
 													variant='outlined'
 												/>
@@ -1997,19 +2545,12 @@ const Client = (props) => {
 											<div className='flex justify-around items-center'>
 												<TextField
 													className='mt-8 mb-16 mr-8'
-													label='Piso'
-													id='planta.address.piso'
-													name='planta.address.piso'
-													value={form.planta.address.piso}
-													onChange={handleChange}
-													variant='outlined'
-												/>
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													label='Departamento'
-													id='planta.address.depto'
-													name='planta.address.depto'
-													value={form.planta.address.depto}
+													error={form.planta.address.localidad === ''}
+													required
+													label='Localidad'
+													id='planta.address.localidad'
+													name='planta.address.localidad'
+													value={capitalize(form.planta.address.localidad)}
 													onChange={handleChange}
 													variant='outlined'
 												/>
@@ -2021,7 +2562,31 @@ const Client = (props) => {
 													label='Codigo Postal'
 													id='planta.address.codigo_postal'
 													name='planta.address.codigo_postal'
-													value={form.planta.address.codigo_postal}
+													value={capitalize(form.planta.address.codigo_postal)}
+													onChange={handleChange}
+													variant='outlined'
+												/>
+
+												<TextField
+													className='mt-8 mb-16 mr-8'
+													error={form.planta.address.partido === ''}
+													required
+													label='Partido'
+													id='planta.address.partido'
+													name='planta.address.partido'
+													value={capitalize(form.planta.address.partido)}
+													onChange={handleChange}
+													variant='outlined'
+												/>
+
+												<TextField
+													className='mt-8 mb-16 mr-8'
+													error={form.planta.address.provincia === ''}
+													required
+													label='Provincia'
+													id='planta.address.provincia'
+													name='planta.address.provincia'
+													value={capitalize(form.planta.address.provincia)}
 													onChange={handleChange}
 													variant='outlined'
 												/>
@@ -2035,6 +2600,7 @@ const Client = (props) => {
 												label='Email de la planta'
 												id='planta.email'
 												name='planta.email'
+												error={!isEmail(form.planta.email)}
 												value={form.planta.email}
 												onChange={handleChange}
 												variant='outlined'
@@ -2118,7 +2684,7 @@ const Client = (props) => {
 													label='Nombre del contacto interno'
 													id='planta.innerContact.name'
 													name='planta.innerContact.name'
-													value={form.planta.innerContact.name}
+													value={capitalize(form.planta.innerContact.name)}
 													onChange={handleChange}
 													variant='outlined'
 													fullWidth
@@ -2128,7 +2694,7 @@ const Client = (props) => {
 													label='Apellido del contacto interno'
 													id='planta.innerContact.lastName'
 													name='planta.innerContact.lastName'
-													value={form.planta.innerContact.lastName}
+													value={capitalize(form.planta.innerContact.lastName)}
 													onChange={handleChange}
 													variant='outlined'
 													fullWidth
@@ -2167,6 +2733,7 @@ const Client = (props) => {
 													label='Email del contacto'
 													id='planta.innerContact.email'
 													name='planta.innerContact.email'
+													error={!isEmail(form.planta.innerContact.email)}
 													value={form.planta.innerContact.email}
 													onChange={handleChange}
 													variant='outlined'
@@ -2191,7 +2758,7 @@ const Client = (props) => {
 													label='Cargo'
 													id='planta.innerContact.position'
 													name='planta.innerContact.position'
-													value={form.planta.innerContact.position}
+													value={capitalize(form.planta.innerContact.position)}
 													onChange={handleChange}
 													variant='outlined'
 													fullWidth
@@ -2201,7 +2768,7 @@ const Client = (props) => {
 													label='Area'
 													id='planta.innerContact.workArea'
 													name='planta.innerContact.workArea'
-													value={form.planta.innerContact.workArea}
+													value={capitalize(form.planta.innerContact.workArea)}
 													onChange={handleChange}
 													variant='outlined'
 													fullWidth
@@ -2393,6 +2960,16 @@ const Client = (props) => {
 													<Button
 														className='whitespace-no-wrap'
 														variant='contained'
+														// disabled={!plantaMobiliarySubmitted()}
+														onClick={() => console.log('hola')}
+													>
+														Escoger campos a llenar
+													</Button>
+												</FuseAnimate>
+												<FuseAnimate animation='transition.slideRightIn' delay={300}>
+													<Button
+														className='whitespace-no-wrap'
+														variant='contained'
 														disabled={!plantaMobiliarySubmitted()}
 														onClick={() => addPlantaMobiliary(form.planta.mobiliary)}
 													>
@@ -2460,12 +3037,13 @@ const Client = (props) => {
 														/>
 													</FuseAnimate>
 												)}
+
 												<TextField
 													className='mt-8 mb-16 mr-8'
-													label='CIRCUNSCRICIÓN'
+													label='Circunscripción'
 													id='planta.mobiliary.circunscripcion'
 													name='planta.mobiliary.circunscripcion'
-													value={form.planta.mobiliary.circunscripcion}
+													value={capitalize(form.planta.mobiliary.circunscripcion)}
 													onChange={handleChange}
 													variant='outlined'
 													fullWidth
@@ -2473,10 +3051,10 @@ const Client = (props) => {
 
 												<TextField
 													className='mt-8 mb-16 mr-8'
-													label='SECCION'
+													label='Sección'
 													id='planta.mobiliary.seccion'
 													name='planta.mobiliary.seccion'
-													value={form.planta.mobiliary.seccion}
+													value={capitalize(form.planta.mobiliary.seccion)}
 													onChange={handleChange}
 													variant='outlined'
 													fullWidth
@@ -2493,7 +3071,7 @@ const Client = (props) => {
 															>
 																<TextField
 																	className='mt-8 mb-16 mr-8'
-																	label='FRACCION'
+																	label='Fracción'
 																	id='planta.mobiliary.fraccion'
 																	name='planta.mobiliary.fraccion'
 																	value={form.planta.mobiliary.fraccion}
@@ -2511,7 +3089,7 @@ const Client = (props) => {
 															>
 																<TextField
 																	className='mt-8 mb-16 mr-8'
-																	label='MANZANA'
+																	label='Manzana'
 																	id='planta.mobiliary.manzana'
 																	name='planta.mobiliary.manzana'
 																	value={form.planta.mobiliary.manzana}
@@ -2521,6 +3099,7 @@ const Client = (props) => {
 																/>
 															</FuseAnimate>
 														)}
+
 														{form.planta.mobiliary.manzana.length > 0 && (
 															<FuseAnimate
 																animation='transition.slideRightIn'
@@ -2528,7 +3107,7 @@ const Client = (props) => {
 															>
 																<TextField
 																	className='mt-8 mb-16 mr-8'
-																	label='PARCELA'
+																	label='Parcela'
 																	id='planta.mobiliary.parcela'
 																	name='planta.mobiliary.parcela'
 																	value={form.planta.mobiliary.parcela}
@@ -2546,7 +3125,7 @@ const Client = (props) => {
 															>
 																<TextField
 																	className='mt-8 mb-16 mr-8'
-																	label='POLIGONO'
+																	label='Poligono'
 																	id='planta.mobiliary.poligono'
 																	name='planta.mobiliary.poligono'
 																	value={form.planta.mobiliary.poligono}
@@ -2559,13 +3138,14 @@ const Client = (props) => {
 													</div>
 												</FuseAnimate>
 											)}
+
 											<div className='flex'>
 												<TextField
 													className='mt-8 mb-16 mr-8'
-													label='PROPIETARIO'
+													label='Propietario'
 													id='planta.mobiliary.propietario'
 													name='planta.mobiliary.propietario'
-													value={form.planta.mobiliary.propietario}
+													value={capitalize(form.planta.mobiliary.propietario)}
 													onChange={handleChange}
 													variant='outlined'
 													fullWidth
@@ -2573,10 +3153,22 @@ const Client = (props) => {
 
 												<TextField
 													className='mt-8 mb-16 mr-8'
-													label='CARACTER USO DE SUELO'
+													label='Caracter de uso de suelo'
 													id='planta.mobiliary.caracterUso'
 													name='planta.mobiliary.caracterUso'
-													value={form.planta.mobiliary.caracterUso}
+													value={capitalize(form.planta.mobiliary.caracterUso)}
+													onChange={handleChange}
+													variant='outlined'
+													fullWidth
+												/>
+
+												<TextField
+													className='mt-8 mb-16 mr-8'
+													label='Superficie numérica'
+													id='planta.mobiliary.superficie'
+													name='planta.mobiliary.superficie'
+													placeholder='24541,10'
+													value={form.planta.mobiliary.superficie}
 													onChange={handleChange}
 													variant='outlined'
 													fullWidth
@@ -2586,10 +3178,10 @@ const Client = (props) => {
 													<FuseAnimate animation='transition.slideRightIn' delay={300}>
 														<TextField
 															className='mt-8 mb-16 mr-8'
-															label='TIENE DOCUMENTACIÓN'
+															label='Tiene Documentación'
 															id='planta.mobiliary.documentacion'
 															name='planta.mobiliary.documentacion'
-															value={form.planta.mobiliary.documentacion}
+															value={capitalize(form.planta.mobiliary.documentacion)}
 															onChange={handleChange}
 															variant='outlined'
 															fullWidth
@@ -2599,7 +3191,7 @@ const Client = (props) => {
 											</div>
 											<div className={classes.root}>
 												<Grid container spacing={3}>
-													<Grid item xs={12}>
+													<Grid item xs={6}>
 														<Paper className={classes.paper}>
 															<PlanchetaDropZone
 																formalDataFiles={formalDataFiles}
@@ -2618,6 +3210,25 @@ const Client = (props) => {
 															/>
 														</Paper>
 													</Grid>
+													<Grid item xs={6}>
+														<Paper className={classes.paper}>
+															<DocumentacionUsoDropZone
+																formalDataFiles={formalDataFiles}
+																files={documentacionUso}
+																setFormalDataFiles={setFormalDataFiles}
+																callBack={useCallback}
+																getSignedUrl={getSignedUrl}
+																loading={documentacionUsoLoading}
+																toggleLoading={toggleLoadingFiles}
+																loadingFiles={loadingFiles}
+																deleting={documentacionUsoDeleting}
+																toggleDelete={toggleDeleteFiles}
+																deletingFiles={deletingFiles}
+																toggleDisabledFiles={toggleDisabledFiles}
+																disabledFiles={disabledFiles}
+															/>
+														</Paper>
+													</Grid>
 												</Grid>
 											</div>
 											{form.planta.mobiliary.documentacion.length > 0 && (
@@ -2627,7 +3238,7 @@ const Client = (props) => {
 														id='planta.mobiliary.observaciones'
 														name='planta.mobiliary.observaciones'
 														onChange={handleChange}
-														label='OBSERVACIONES'
+														label='Observaciones'
 														type='text'
 														value={form.planta.mobiliary.observaciones}
 														multiline

@@ -11668,6 +11668,14 @@ react-input-autosize@^2.2.1:
   dependencies:
     prop-types "^15.5.8"
 
+react-input-mask@^2.0.4:
+  version "2.0.4"
+  resolved "https://registry.npm.taobao.org/react-input-mask/download/react-input-mask-2.0.4.tgz#9ade5cf8196f4a856dbf010820fe75a795f3eb14"
+  integrity sha1-mt5c+BlvSoVtvwEIIP51p5Xz6xQ=
+  dependencies:
+    invariant "^2.2.4"
+    warning "^4.0.2"
+
 react-is@^16.3.2, react-is@^16.5.2, react-is@^16.6.0, react-is@^16.7.0, react-is@^16.8.1, react-is@^16.8.4, react-is@^16.8.6:
   version "16.9.0"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.9.0.tgz#21ca9561399aad0ff1a7701c01683e8ca981edcb"
@@ -11683,10 +11691,10 @@ react-masonry-css@1.0.12:
   resolved "https://registry.yarnpkg.com/react-masonry-css/-/react-masonry-css-1.0.12.tgz#e252a74c0e6d5272f759588232487d707608298a"
   integrity sha512-tDO4dJugSLorlsqZ7WD/yW+OGIWFhUdrSv3VeGYOaFwqwwYwdcXOHh/rsu1PItb/kkmA8iQmpVcweKcZ6RIjmQ==
 
-react-number-format@4.2.0:
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/react-number-format/-/react-number-format-4.2.0.tgz#297efac961504b72cdd3fd0c33442302191c52d8"
-  integrity sha512-LJY0+JUEdQG1Taj6qbL1Cd/8CfBn3X4ohBPGewWNRyRAGyxV/+zP02CQrMkCfPh1iXXx6V3oguJcZWXUwpQ3ow==
+react-number-format@^4.4.1:
+  version "4.4.1"
+  resolved "https://registry.npm.taobao.org/react-number-format/download/react-number-format-4.4.1.tgz#d5614dd25edfc21ed48b97356213440081437a94"
+  integrity sha1-1WFN0l7fwh7Ui5c1YhNEAIFDepQ=
   dependencies:
     prop-types "^15.7.2"
 
@@ -11891,9 +11899,9 @@ react-table@6.10.0:
   dependencies:
     classnames "^2.2.5"
 
-react-text-mask@5.4.3:
+react-text-mask@^5.4.3:
   version "5.4.3"
-  resolved "https://registry.yarnpkg.com/react-text-mask/-/react-text-mask-5.4.3.tgz#991efb4299e30c2e6c2c46d13f617169463e0d2d"
+  resolved "https://registry.npm.taobao.org/react-text-mask/download/react-text-mask-5.4.3.tgz#991efb4299e30c2e6c2c46d13f617169463e0d2d"
   integrity sha1-mR77QpnjDC5sLEbRP2FxaUY+DS0=
   dependencies:
     prop-types "^15.5.6"

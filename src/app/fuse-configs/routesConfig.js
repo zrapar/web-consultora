@@ -21,7 +21,13 @@ const routes = [
 	//if you want to make whole app auth protected by default change defaultAuth for example:
 	// ...FuseUtils.generateRoutesFromConfigs(routeConfigs, ['admin','staff','user']),
 	// The individual route configs which has auth option won't be overridden.
-	...FuseUtils.generateRoutesFromConfigs(routeConfigs, [ 'root', 'admin', 'employee', 'technician', 'customer' ]),
+	...FuseUtils.generateRoutesFromConfigs(routeConfigs, [
+		'root',
+		'admin',
+		'administrative',
+		'technician',
+		'customer'
+	]),
 	{
 		path      : '/',
 		exact     : true,

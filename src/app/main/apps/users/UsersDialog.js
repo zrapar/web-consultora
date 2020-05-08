@@ -16,13 +16,15 @@ import * as Actions from './store/actions';
 import { useDispatch, useSelector } from 'react-redux';
 import { FuseChipSelect } from '@fuse';
 import _ from '@lodash';
+import NumberFormat from 'react-number-format';
+import { isEmail, capitalize } from 'utils';
 
 let defaultFormState = {
 	username   : '',
 	email      : '',
 	userType   : {
 		value : 4,
-		label : 'Empleado'
+		label : 'Administrativo'
 	},
 	first_name : '',
 	last_name  : '',
@@ -31,7 +33,7 @@ let defaultFormState = {
 const roles = [
 	{ value: '1', label: 'Administrador' },
 	{ value: '2', label: 'Tecnico' },
-	{ value: '4', label: 'Empleado' }
+	{ value: '4', label: 'Administrativo' }
 	// { value: '', label: 'Cliente' },
 ];
 
@@ -94,7 +96,8 @@ const UsersDialog = (props) => {
 				user_type : form.userType.value,
 				password  : form.username
 			};
-			dispatch(Actions.addUser(body));
+			console.log(body);
+			// dispatch(Actions.addUser(body));
 		} else {
 			const body = {
 				...form,
@@ -162,7 +165,8 @@ const UsersDialog = (props) => {
 							label='Nombre'
 							id='first_name'
 							name='first_name'
-							value={form.first_name}
+							error={form.first_name === ''}
+							value={capitalize(form.first_name)}
 							onChange={handleChange}
 							variant='outlined'
 							fullWidth
@@ -173,7 +177,8 @@ const UsersDialog = (props) => {
 							label='Apellido'
 							id='last_name'
 							name='last_name'
-							value={form.last_name}
+							error={form.last_name === ''}
+							value={capitalize(form.last_name)}
 							onChange={handleChange}
 							variant='outlined'
 							fullWidth
@@ -186,6 +191,7 @@ const UsersDialog = (props) => {
 							label='Correo Electronico'
 							id='email'
 							name='email'
+							error={!isEmail(form.email)}
 							value={form.email}
 							onChange={handleChange}
 							variant='outlined'
@@ -196,7 +202,8 @@ const UsersDialog = (props) => {
 							label='Nombre de usuario'
 							id='username'
 							name='username'
-							value={form.username}
+							value={capitalize(form.username)}
+							error={form.username === ''}
 							onChange={handleChange}
 							variant='outlined'
 							fullWidth
@@ -204,15 +211,20 @@ const UsersDialog = (props) => {
 					</div>
 
 					<div className='flex'>
-						<TextField
+						<NumberFormat
 							className='mt-8 mb-16 mr-8'
 							label='DNI'
 							id='dni'
 							name='dni'
-							value={form.dni}
-							onChange={handleChange}
 							variant='outlined'
 							fullWidth
+							customInput={TextField}
+							value={form.dni}
+							format='##.###.###'
+							error={form.dni.length < 10}
+							onValueChange={({ formattedValue }) => {
+								setForm(_.set({ ...form }, 'dni', formattedValue));
+							}}
 						/>
 					</div>
 				</DialogContent>
