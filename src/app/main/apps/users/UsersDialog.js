@@ -96,8 +96,8 @@ const UsersDialog = (props) => {
 				user_type : form.userType.value,
 				password  : form.username
 			};
-			console.log(body);
-			// dispatch(Actions.addUser(body));
+
+			dispatch(Actions.addUser(body));
 		} else {
 			const body = {
 				...form,

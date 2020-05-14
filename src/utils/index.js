@@ -218,6 +218,7 @@ export const tableTitles = (type) => {
 				'Caracter uso de suelo',
 				'Tiene Documentación',
 				'Observaciones',
+				'Superficie',
 				'Acciones'
 			];
 
@@ -290,11 +291,15 @@ export const tableIndex = (type) => {
 				'caracterUso',
 				'documentacion',
 				'observaciones',
+				'superficie',
 				'plancheta',
+				'documentacionUso',
 				'actions'
 			];
 		case 'phoneContactsPlanta':
 			return [ 'index', 'actions' ];
+		case 'govermentUsers':
+			return [ 'type', 'user', 'pass', 'actions' ];
 		case 'innerContactsEmailPlanta':
 			return [ 'index', 'actions' ];
 		default:
@@ -318,6 +323,8 @@ export const getTitle = (type) => {
 			return 'Emails del Contacto Interno';
 		case 'mobiliaryPlanta':
 			return 'Inmuebles de la planta agregados';
+		case 'govermentUsers':
+			return 'Usuarios Gubernamentales';
 		default:
 			return 'Titulo';
 	}
@@ -465,6 +472,21 @@ export const getColumns = (type, handleClickOpen, setNewEditableData) => {
 					),
 					editable : 'never'
 				},
+				{
+					title    : 'Usuarios Gubernamentales',
+					field    : 'govermentUsers',
+					render   : (rowData) => (
+						<Button
+							className='whitespace-no-wrap '
+							variant='contained'
+							onClick={() =>
+								setNewEditableData('govermentUsers', rowData.govermentUsers, rowData.tableData.id)}
+						>
+							Ver Usuarios Gubernamentales
+						</Button>
+					),
+					editable : 'never'
+				},
 
 				{
 					title    : 'Inmueble(s)',
@@ -473,8 +495,10 @@ export const getColumns = (type, handleClickOpen, setNewEditableData) => {
 						<Button
 							className='whitespace-no-wrap '
 							variant='contained'
-							onClick={() =>
-								setNewEditableData('mobiliaryPlanta', rowData.mobiliary, rowData.tableData.id)}
+							onClick={() => {
+								// console.log(rowData.mobiliary);
+								setNewEditableData('mobiliaryPlanta', rowData.mobiliary, rowData.tableData.id);
+							}}
 						>
 							Ver inmuebles
 						</Button>
@@ -509,6 +533,12 @@ export const getColumns = (type, handleClickOpen, setNewEditableData) => {
 			];
 		case 'innerContactsEmailPlanta':
 			return [ { title: 'Emails del Contacto', field: 'email' } ];
+		case 'govermentUsers':
+			return [
+				{ title: 'Cuenta', field: 'type' },
+				{ title: 'Usuario', field: 'user' },
+				{ title: 'Contraseña', field: 'pass' }
+			];
 		case 'mobiliaryPlanta':
 			return [
 				{ title: 'Partida Inmobiliara Provincial', field: 'partidaInmobiliaria' },
@@ -522,6 +552,7 @@ export const getColumns = (type, handleClickOpen, setNewEditableData) => {
 				{ title: 'Propietario', field: 'propietario' },
 				{ title: 'Caracter uso de suelo', field: 'caracterUso' },
 				{ title: 'Tiene Documentación', field: 'documentacion' },
+				{ title: 'Superficie Númerica', field: 'superficie' },
 				{ title: 'Observaciones', field: 'observaciones' },
 				{
 					title    : 'Plancheta',
@@ -533,6 +564,23 @@ export const getColumns = (type, handleClickOpen, setNewEditableData) => {
 							onClick={() => handleClickOpen(rowData.plancheta)}
 						>
 							Ver plancheta
+						</Button>
+					),
+					editable : 'never'
+				},
+				{
+					title    : 'Documentacion de Uso',
+					field    : 'documentacionUso',
+					render   : (rowData) => (
+						<Button
+							className='whitespace-no-wrap '
+							variant='contained'
+							onClick={() => {
+								const data = rowData.documentacionUso ? rowData.documentacionUso : [];
+								handleClickOpen(data);
+							}}
+						>
+							Ver Documentacion de uso
 						</Button>
 					),
 					editable : 'never'
@@ -556,6 +604,14 @@ export const convertData = (type, data, getSame = false) => {
 			case 'innerContactsEmailPlanta':
 				return data.map((o) => {
 					return { email: o };
+				});
+			case 'govermentUsers':
+				return Object.keys(data).map((i) => {
+					return {
+						type : i.toUpperCase(),
+						user : data[i].user,
+						pass : data[i].pass
+					};
 				});
 
 			case 'innerContactsPlanta':
@@ -686,16 +742,16 @@ export const dataClientShow = {
 			matricula           : '',
 			circunscripcion     : '',
 			seccion             : '',
+			plancheta           : '',
 			fraccion            : '',
 			manzana             : '',
 			parcela             : '',
 			poligono            : '',
 			propietario         : '',
 			caracterUso         : '',
-			documentacion       : '',
+			documentacion       : 'NO',
 			observaciones       : '',
-			plancheta           : '',
-			superficie          : null,
+			superficie          : '',
 			documentacionUso    : ''
 		}
 	}
@@ -710,6 +766,12 @@ export const isEmail = (email) => {
 export const isNaturalPositiveNumber = (number) => {
 	// eslint-disable-next-line no-useless-escape
 	const regex = /^[0-9]*$/gm;
+	return regex.test(number);
+};
+
+export const isValidDecimalNumber = (number) => {
+	// eslint-disable-next-line no-useless-escape
+	const regex = /^[0-9]*\,?[0-9]+$/g;
 	return regex.test(number);
 };
 

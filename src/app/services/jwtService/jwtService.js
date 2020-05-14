@@ -86,7 +86,7 @@ class jwtService extends FuseUtils.EventEmitter {
 				return { success: false, message: response.data };
 			}
 		} catch (error) {
-			console.log(error);
+			// console.log(error);
 			if (error.hasOwnProperty('response') && error.response.hasOwnProperty('data')) {
 				return { success: false, message: error.response.data };
 			}
