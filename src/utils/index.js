@@ -496,7 +496,7 @@ export const getColumns = (type, handleClickOpen, setNewEditableData) => {
 							className='whitespace-no-wrap '
 							variant='contained'
 							onClick={() => {
-								console.log(rowData.mobiliary);
+								// console.log(rowData.mobiliary);
 								setNewEditableData('mobiliaryPlanta', rowData.mobiliary, rowData.tableData.id);
 							}}
 						>
@@ -575,7 +575,10 @@ export const getColumns = (type, handleClickOpen, setNewEditableData) => {
 						<Button
 							className='whitespace-no-wrap '
 							variant='contained'
-							onClick={() => handleClickOpen(rowData.documentacionUso)}
+							onClick={() => {
+								const data = rowData.documentacionUso ? rowData.documentacionUso : [];
+								handleClickOpen(data);
+							}}
 						>
 							Ver Documentacion de uso
 						</Button>
@@ -746,7 +749,7 @@ export const dataClientShow = {
 			poligono            : '',
 			propietario         : '',
 			caracterUso         : '',
-			documentacion       : '',
+			documentacion       : 'NO',
 			observaciones       : '',
 			superficie          : '',
 			documentacionUso    : ''

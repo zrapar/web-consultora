@@ -65,7 +65,7 @@ const useStyles = makeStyles((theme) => ({
 const Client = (props) => {
 	const dispatch = useDispatch();
 	const client = useSelector(({ clients: { clients } }) => clients.client);
-	console.log(client);
+	// console.log(client);
 
 	const classes = useStyles(props);
 	const [ tabValue, setTabValue ] = useState(0);
@@ -131,7 +131,6 @@ const Client = (props) => {
 		poligono         : false,
 		propietario      : false,
 		matricula        : false,
-		documentacion    : false,
 		observaciones    : false,
 		superficie       : false,
 		documentacionUso : false
@@ -303,7 +302,7 @@ const Client = (props) => {
 							poligono            : '',
 							propietario         : '',
 							caracterUso         : '',
-							documentacion       : '',
+							documentacion       : 'NO',
 							observaciones       : '',
 							superficie          : '',
 							documentacionUso    : ''
@@ -415,25 +414,13 @@ const Client = (props) => {
 	};
 
 	const formalDataAddressSubmitted = () => {
-		const {
-			partido,
-			localidad,
-			calleRuta,
-			nKm,
-			piso,
-			depto,
-			codigo_postal,
-			type,
-			provincia
-		} = form.formalData.address;
+		const { partido, localidad, calleRuta, nKm, codigo_postal, type, provincia } = form.formalData.address;
 		let isSubmitted = false;
 		if (
 			partido.toString().length > 0 &&
 			localidad.toString().length > 0 &&
 			calleRuta.toString().length > 0 &&
 			nKm.toString().length > 0 &&
-			piso.toString().length > 0 &&
-			depto.toString().length > 0 &&
 			codigo_postal.toString().length > 0 &&
 			provincia.toString().length > 0 &&
 			type.value
@@ -472,8 +459,6 @@ const Client = (props) => {
 			address.localidad.toString().length > 0 &&
 			address.calleRuta.toString().length > 0 &&
 			address.nKm.toString().length > 0 &&
-			address.piso.toString().length > 0 &&
-			address.depto.toString().length > 0 &&
 			address.codigo_postal.toString().length > 0 &&
 			email.toString().length > 0 &&
 			phoneContactsPlanta.length > 0 &&
@@ -544,8 +529,8 @@ const Client = (props) => {
 		if (checkBoxMobiliary.superficie && !isValidDecimalNumber(form.planta.mobiliary.superficie)) {
 			isSubmitted = false;
 		}
-		console.log(documentacionUso.length);
-		console.log(checkBoxMobiliary.documentacionUso);
+		// console.log(documentacionUso.length);
+		// console.log(checkBoxMobiliary.documentacionUso);
 
 		if (checkBoxMobiliary.documentacionUso && documentacionUso.length === 0) {
 			isSubmitted = false;
@@ -1782,7 +1767,7 @@ const Client = (props) => {
 					poligono            : '',
 					propietario         : '',
 					caracterUso         : '',
-					documentacion       : '',
+					documentacion       : 'NO',
 					observaciones       : ''
 				}
 			})
@@ -1858,7 +1843,7 @@ const Client = (props) => {
 				poligono            : '',
 				propietario         : '',
 				caracterUso         : '',
-				documentacion       : '',
+				documentacion       : 'NO',
 				observaciones       : '',
 				superficie          : null,
 				documentacionUso    : ''
@@ -1877,7 +1862,6 @@ const Client = (props) => {
 			poligono         : false,
 			propietario      : false,
 			matricula        : false,
-			documentacion    : false,
 			observaciones    : false,
 			superficie       : false,
 			documentacionUso : false
@@ -1934,14 +1918,19 @@ const Client = (props) => {
 							superficie       :
 								m.superficie.length > 0 ? parseFloat(m.superficie.replace(',', '.')) : null,
 							plancheta        : m.plancheta.url,
-							documentacionUso : m.documentacionUso.url
+							documentacionUso :
+								m.documentacionUso && m.documentacionUso.hasOwnProperty('url')
+									? m.documentacionUso.url
+									: null,
+							documentacion    :
+								m.documentacionUso && m.documentacionUso.hasOwnProperty('url') ? 'SI' : 'NO'
 						};
 					})
 				};
 			})
 		};
 
-		console.log(body);
+		// console.log(body);
 
 		dispatch(Actions.saveClient(body, props.history));
 	};
@@ -2217,14 +2206,6 @@ const Client = (props) => {
 
 												<TextField
 													className='mt-8 mb-16 mr-8'
-													error={
-														form.formalData.address.piso === '' &&
-														(addressFormalData.filter((i) => i.type === 'legal').length ===
-															0 ||
-															addressFormalData.filter((i) => i.type === 'registered')
-																.length === 0)
-													}
-													required
 													label='Piso'
 													id='formalData.address.piso'
 													name='formalData.address.piso'
@@ -2235,14 +2216,6 @@ const Client = (props) => {
 
 												<TextField
 													className='mt-8 mb-16 mr-8'
-													error={
-														form.formalData.address.depto === '' &&
-														(addressFormalData.filter((i) => i.type === 'legal').length ===
-															0 ||
-															addressFormalData.filter((i) => i.type === 'registered')
-																.length === 0)
-													}
-													required
 													label='Departamento'
 													id='formalData.address.depto'
 													name='formalData.address.depto'
@@ -2625,8 +2598,6 @@ const Client = (props) => {
 
 												<TextField
 													className='mt-8 mb-16 mr-8'
-													error={form.planta.address.piso === ''}
-													required
 													label='Piso'
 													id='planta.address.piso'
 													name='planta.address.piso'
@@ -2637,8 +2608,6 @@ const Client = (props) => {
 
 												<TextField
 													className='mt-8 mb-16 mr-8'
-													error={form.planta.address.depto === ''}
-													required
 													label='Departamento'
 													id='planta.address.depto'
 													name='planta.address.depto'
@@ -3253,7 +3222,6 @@ const Client = (props) => {
 
 											{(checkBoxMobiliary.propietario ||
 												checkBoxMobiliary.matricula ||
-												checkBoxMobiliary.documentacion ||
 												checkBoxMobiliary.superficie) && (
 												<FuseAnimate animation='transition.fadeIn' delay={300}>
 													<div className='flex'>
@@ -3277,19 +3245,6 @@ const Client = (props) => {
 																id='planta.mobiliary.matricula'
 																name='planta.mobiliary.matricula'
 																value={form.planta.mobiliary.matricula}
-																onChange={handleChange}
-																variant='outlined'
-																fullWidth
-															/>
-														)}
-
-														{checkBoxMobiliary.documentacion && (
-															<TextField
-																className='mt-8 mb-16 mr-8'
-																label='Tiene Documentación'
-																id='planta.mobiliary.documentacion'
-																name='planta.mobiliary.documentacion'
-																value={capitalize(form.planta.mobiliary.documentacion)}
 																onChange={handleChange}
 																variant='outlined'
 																fullWidth
@@ -3499,18 +3454,7 @@ const Client = (props) => {
 									}
 									label='Posee Matricula en registro de la propiedad'
 								/>
-								<FormControlLabel
-									control={
-										<Checkbox
-											checked={checkBoxMobiliary.documentacion}
-											onChange={() => {
-												saveFieldsMobiliary('documentacion', !checkBoxMobiliary.documentacion);
-											}}
-											value='gola'
-										/>
-									}
-									label='Tiene Documentación'
-								/>
+
 								<FormControlLabel
 									control={
 										<Checkbox

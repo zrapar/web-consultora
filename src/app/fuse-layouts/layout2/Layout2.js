@@ -61,7 +61,7 @@ const useStyles = makeStyles((theme) => ({
 
 function Layout2(props) {
 	const config = useSelector(({ fuse }) => fuse.settings.current.layout.config);
-	console.log('config', config);
+	// console.log('config', config);
 
 	const classes = useStyles(props);
 

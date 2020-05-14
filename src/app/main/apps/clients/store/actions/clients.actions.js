@@ -83,10 +83,12 @@ export const getClient = (client) => async (dispatch) => {
 								name : p.split('poderes/')[1]
 							};
 						}),
-						dniDocument     : {
-							url  : o.dniDocument,
-							name : o.dniDocument.split('dniDocument/')[1]
-						}
+						dniDocument     : o.dniDocument
+							? {
+									url  : o.dniDocument,
+									name : o.dniDocument.split('dniDocument/')[1]
+								}
+							: ''
 					};
 				})
 			},
@@ -97,10 +99,12 @@ export const getClient = (client) => async (dispatch) => {
 						return {
 							...m,
 							superficie       : m.superficie ? m.superficie.replace('.', ',') : '',
-							documentacionUso : {
-								url  : m.documentacionUso,
-								name : m.documentacionUso.split(`documentacionUso/${clientId}-${index}/`)[1]
-							},
+							documentacionUso : m.documentacionUso
+								? {
+										url  : m.documentacionUso,
+										name : m.documentacionUso.split(`documentacionUso/${clientId}-${index}/`)[1]
+									}
+								: '',
 							plancheta        : {
 								url  : m.plancheta,
 								name : m.plancheta.split(`planchetas/${clientId}-${index}/`)[1]
