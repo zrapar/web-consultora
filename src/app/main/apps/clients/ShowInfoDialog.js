@@ -4,11 +4,11 @@ import {
 	Dialog,
 	DialogActions,
 	DialogContent,
-	DialogTitle,
 	IconButton,
 	Typography,
 	Toolbar,
 	AppBar,
+	DialogTitle,
 	Link
 	// CircularProgress
 } from '@material-ui/core';
@@ -451,6 +451,7 @@ const ShowInfoDialog = (props) => {
 				<DialogTitle id='customized-dialog-title' onClose={handleClose}>
 					Archivos
 				</DialogTitle>
+				{console.log(filesShow)}
 				<DialogContent dividers>
 					{filesShow.map((i, index) => (
 						<Link key={index} onClick={() => handleClickOpenViewer(i.url)}>

@@ -16,15 +16,8 @@ import {
 	ListItem,
 	ListItemText,
 	ListItemIcon,
-	CircularProgress,
-	Dialog,
-	DialogActions,
-	DialogContent,
-	Toolbar,
-	AppBar,
-	IconButton
+	CircularProgress
 } from '@material-ui/core';
-import CloseIcon from '@material-ui/icons/Close';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { makeStyles } from '@material-ui/styles';
 import { FuseAnimate, FusePageCarded, FuseChipSelect } from '@fuse';
@@ -38,7 +31,7 @@ import reducer from './store/reducers';
 import { useDropzone } from 'react-dropzone';
 import { SingS3, uploadFile, deleteFile } from 'utils/aws';
 import ShowInfoDialog from './ShowInfoDialog';
-import { isEmail, capitalize, isNaturalPositiveNumber, isValidDecimalNumber } from 'utils';
+import { isEmail, capitalize, isNaturalPositiveNumber } from 'utils';
 import NumberFormat from 'react-number-format';
 
 const useStyles = makeStyles((theme) => ({
@@ -65,7 +58,6 @@ const useStyles = makeStyles((theme) => ({
 const Client = (props) => {
 	const dispatch = useDispatch();
 	const client = useSelector(({ clients: { clients } }) => clients.client);
-	console.log(client);
 
 	const classes = useStyles(props);
 	const [ tabValue, setTabValue ] = useState(0);
@@ -124,19 +116,6 @@ const Client = (props) => {
 		acumar : false
 	});
 
-	const [ checkBoxMobiliary, toggleCheckBoxMobiliary ] = useState({
-		fraccion         : false,
-		manzana          : false,
-		parcela          : false,
-		poligono         : false,
-		propietario      : false,
-		matricula        : false,
-		documentacion    : false,
-		observaciones    : false,
-		superficie       : false,
-		documentacionUso : false
-	});
-
 	const [ addressFormalData, setAddress ] = useState([]);
 	const [ legalRepresentativeFormalData, setLegalRepresentative ] = useState([]);
 	const [ dataPlanta, setPlanta ] = useState([]);
@@ -146,8 +125,6 @@ const Client = (props) => {
 	const [ mobiliaryPlanta, setMobiliary ] = useState([]);
 
 	const [ showModal, closeModal ] = useState(false);
-	const [ showMobiliaryModal, closeMobiliaryModal ] = useState(false);
-
 	const [ dataModal, setDataModal ] = useState({
 		dataTable : [],
 		typeTable : ''
@@ -225,14 +202,13 @@ const Client = (props) => {
 					setPlanta(editedClient.planta);
 
 					editedClient.formalData.address = {
+						partido       : '',
+						localidad     : '',
 						calleRuta     : '',
 						nKm           : '',
 						piso          : '',
 						depto         : '',
-						localidad     : '',
 						codigo_postal : '',
-						partido       : '',
-						provincia     : '',
 						type          : {
 							label : 'Seleccione el tipo de domicilio',
 							value : null
@@ -240,8 +216,7 @@ const Client = (props) => {
 					};
 
 					editedClient.formalData.legalRepresentative = {
-						first_name      : '',
-						last_name       : '',
+						name            : '',
 						dni             : '',
 						position        : '',
 						cuil            : '',
@@ -254,14 +229,13 @@ const Client = (props) => {
 
 					editedClient.planta = {
 						address        : {
+							partido       : '',
+							localidad     : '',
 							calleRuta     : '',
 							nKm           : '',
 							piso          : '',
 							depto         : '',
-							localidad     : '',
-							codigo_postal : '',
-							partido       : '',
-							provincia     : ''
+							codigo_postal : ''
 						},
 						email          : '',
 						phoneContacts  : '',
@@ -296,7 +270,6 @@ const Client = (props) => {
 							matricula           : '',
 							circunscripcion     : '',
 							seccion             : '',
-							plancheta           : '',
 							fraccion            : '',
 							manzana             : '',
 							parcela             : '',
@@ -305,7 +278,7 @@ const Client = (props) => {
 							caracterUso         : '',
 							documentacion       : '',
 							observaciones       : '',
-							superficie          : '',
+							plancheta           : '',
 							documentacionUso    : ''
 						}
 					};
@@ -498,7 +471,7 @@ const Client = (props) => {
 
 	const plantaInnerContactEmailSubmitted = () => {
 		let isSubmitted = false;
-		if (form.planta.innerContact.email.length > 0 && isEmail(form.planta.innerContact.email)) {
+		if (form.planta.innerContact.email.length > 0) {
 			isSubmitted = true;
 		}
 
@@ -523,32 +496,17 @@ const Client = (props) => {
 	};
 
 	const plantaMobiliarySubmitted = () => {
-		const { partidaInmobiliaria, circunscripcion, seccion, caracterUso } = form.planta.mobiliary;
+		const { partidaInmobiliaria, circunscripcion, seccion, propietario, caracterUso } = form.planta.mobiliary;
 		let isSubmitted = false;
 		if (
 			partidaInmobiliaria.toString().length > 0 &&
 			circunscripcion.toString().length > 0 &&
 			seccion.toString().length > 0 &&
+			propietario.toString().length > 0 &&
 			caracterUso.toString().length > 0 &&
 			planchetas.length > 0
 		) {
 			isSubmitted = true;
-		}
-
-		_.forEach(checkBoxMobiliary, (value, key) => {
-			if (value && !form.planta.mobiliary[key] && key !== 'documentacionUso') {
-				isSubmitted = false;
-			}
-		});
-
-		if (checkBoxMobiliary.superficie && !isValidDecimalNumber(form.planta.mobiliary.superficie)) {
-			isSubmitted = false;
-		}
-		console.log(documentacionUso.length);
-		console.log(checkBoxMobiliary.documentacionUso);
-
-		if (checkBoxMobiliary.documentacionUso && documentacionUso.length === 0) {
-			isSubmitted = false;
 		}
 
 		return isSubmitted;
@@ -576,13 +534,12 @@ const Client = (props) => {
 				[`${folder}Loading`]: true
 			});
 			toggleDisabledFiles({
-				estatutosDisabled        : false,
-				actasDisabled            : true,
-				poderesDisabled          : true,
-				extrasDisabled           : true,
-				planchetasDisabled       : true,
-				dniDocumentDisabled      : true,
-				documentacionUsoDisabled : true
+				estatutosDisabled   : false,
+				actasDisabled       : true,
+				poderesDisabled     : true,
+				extrasDisabled      : true,
+				planchetasDisabled  : true,
+				dniDocumentDisabled : true
 			});
 			getSignedUrl(uploadedFiles, folder, async (response) => {
 				const arrayPromise = await response;
@@ -600,13 +557,12 @@ const Client = (props) => {
 					[`${folder}Loading`]: false
 				});
 				toggleDisabledFiles({
-					estatutosDisabled        : false,
-					actasDisabled            : false,
-					poderesDisabled          : false,
-					extrasDisabled           : false,
-					planchetasDisabled       : false,
-					dniDocumentDisabled      : false,
-					documentacionUsoDisabled : false
+					estatutosDisabled   : false,
+					actasDisabled       : false,
+					poderesDisabled     : false,
+					extrasDisabled      : false,
+					planchetasDisabled  : false,
+					dniDocumentDisabled : false
 				});
 			});
 		});
@@ -724,13 +680,12 @@ const Client = (props) => {
 				[`${folder}Loading`]: true
 			});
 			toggleDisabledFiles({
-				estatutosDisabled        : true,
-				actasDisabled            : false,
-				poderesDisabled          : true,
-				extrasDisabled           : true,
-				planchetasDisabled       : true,
-				dniDocumentDisabled      : true,
-				documentacionUsoDisabled : true
+				estatutosDisabled   : true,
+				actasDisabled       : false,
+				poderesDisabled     : true,
+				extrasDisabled      : true,
+				planchetasDisabled  : true,
+				dniDocumentDisabled : true
 			});
 			getSignedUrl(uploadedFiles, folder, async (response) => {
 				const arrayPromise = await response;
@@ -748,13 +703,12 @@ const Client = (props) => {
 					[`${folder}Loading`]: false
 				});
 				toggleDisabledFiles({
-					estatutosDisabled        : false,
-					actasDisabled            : false,
-					poderesDisabled          : false,
-					extrasDisabled           : false,
-					planchetasDisabled       : false,
-					dniDocumentDisabled      : false,
-					documentacionUsoDisabled : false
+					estatutosDisabled   : false,
+					actasDisabled       : false,
+					poderesDisabled     : false,
+					extrasDisabled      : false,
+					planchetasDisabled  : false,
+					dniDocumentDisabled : false
 				});
 			});
 		});
@@ -872,13 +826,12 @@ const Client = (props) => {
 				[`${folder}Loading`]: true
 			});
 			toggleDisabledFiles({
-				estatutosDisabled        : true,
-				actasDisabled            : true,
-				poderesDisabled          : false,
-				extrasDisabled           : true,
-				planchetasDisabled       : true,
-				dniDocumentDisabled      : true,
-				documentacionUsoDisabled : true
+				estatutosDisabled   : true,
+				actasDisabled       : true,
+				poderesDisabled     : false,
+				extrasDisabled      : true,
+				planchetasDisabled  : true,
+				dniDocumentDisabled : true
 			});
 			getSignedUrl(uploadedFiles, folder, async (response) => {
 				const arrayPromise = await response;
@@ -896,13 +849,12 @@ const Client = (props) => {
 					[`${folder}Loading`]: false
 				});
 				toggleDisabledFiles({
-					estatutosDisabled        : false,
-					actasDisabled            : false,
-					poderesDisabled          : false,
-					extrasDisabled           : false,
-					planchetasDisabled       : false,
-					dniDocumentDisabled      : false,
-					documentacionUsoDisabled : false
+					estatutosDisabled   : false,
+					actasDisabled       : false,
+					poderesDisabled     : false,
+					extrasDisabled      : false,
+					planchetasDisabled  : false,
+					dniDocumentDisabled : false
 				});
 			});
 		});
@@ -1020,13 +972,12 @@ const Client = (props) => {
 				[`${folder}Loading`]: true
 			});
 			toggleDisabledFiles({
-				estatutosDisabled        : true,
-				actasDisabled            : true,
-				poderesDisabled          : true,
-				extrasDisabled           : false,
-				planchetasDisabled       : true,
-				dniDocumentDisabled      : true,
-				documentacionUsoDisabled : true
+				estatutosDisabled   : true,
+				actasDisabled       : true,
+				poderesDisabled     : true,
+				extrasDisabled      : false,
+				planchetasDisabled  : true,
+				dniDocumentDisabled : true
 			});
 			getSignedUrl(uploadedFiles, folder, async (response) => {
 				const arrayPromise = await response;
@@ -1044,13 +995,12 @@ const Client = (props) => {
 					[`${folder}Loading`]: false
 				});
 				toggleDisabledFiles({
-					estatutosDisabled        : false,
-					actasDisabled            : false,
-					poderesDisabled          : false,
-					extrasDisabled           : false,
-					planchetasDisabled       : false,
-					dniDocumentDisabled      : false,
-					documentacionUsoDisabled : false
+					estatutosDisabled   : false,
+					actasDisabled       : false,
+					poderesDisabled     : false,
+					extrasDisabled      : false,
+					planchetasDisabled  : false,
+					dniDocumentDisabled : false
 				});
 			});
 		});
@@ -1169,13 +1119,12 @@ const Client = (props) => {
 				[`${folder}Loading`]: true
 			});
 			toggleDisabledFiles({
-				estatutosDisabled        : true,
-				actasDisabled            : true,
-				poderesDisabled          : true,
-				extrasDisabled           : true,
-				planchetasDisabled       : false,
-				dniDocumentDisabled      : true,
-				documentacionUsoDisabled : true
+				estatutosDisabled   : true,
+				actasDisabled       : true,
+				poderesDisabled     : true,
+				extrasDisabled      : true,
+				planchetasDisabled  : false,
+				dniDocumentDisabled : true
 			});
 			getSignedUrl(uploadedFiles, `${folder}/${folderPlanta}`, async (response) => {
 				const arrayPromise = await response;
@@ -1194,13 +1143,12 @@ const Client = (props) => {
 					[`${folder}Loading`]: false
 				});
 				toggleDisabledFiles({
-					estatutosDisabled        : false,
-					actasDisabled            : false,
-					poderesDisabled          : false,
-					extrasDisabled           : false,
-					planchetasDisabled       : false,
-					dniDocumentDisabled      : false,
-					documentacionUsoDisabled : false
+					estatutosDisabled   : false,
+					actasDisabled       : false,
+					poderesDisabled     : false,
+					extrasDisabled      : false,
+					planchetasDisabled  : false,
+					dniDocumentDisabled : false
 				});
 			});
 		});
@@ -1405,7 +1353,7 @@ const Client = (props) => {
 					</div>
 				) : (
 					<React.Fragment>
-						{form.formalData.clientId !== '' && !disabledFiles.documentacionUsoDisabled ? (
+						{form.formalData.clientId !== '' && !disabledFiles.planchetasDisabled ? (
 							<div {...getRootProps()}>
 								<input {...getInputProps()} />
 								<Typography variant='h5' component='h3'>
@@ -1422,7 +1370,7 @@ const Client = (props) => {
 										Debe agregar el ID del Cliente
 									</Typography>
 								)}
-								{disabledFiles.documentacionUsoDisabled && (
+								{disabledFiles.planchetasDisabled && (
 									<Typography variant='h5' component='h3'>
 										Debe esperar que termine de subir los otros archivos
 									</Typography>
@@ -1470,13 +1418,12 @@ const Client = (props) => {
 				[`${folder}Loading`]: true
 			});
 			toggleDisabledFiles({
-				estatutosDisabled        : true,
-				actasDisabled            : true,
-				poderesDisabled          : true,
-				extrasDisabled           : true,
-				planchetasDisabled       : true,
-				dniDocumentDisabled      : false,
-				documentacionUsoDisabled : true
+				estatutosDisabled   : true,
+				actasDisabled       : true,
+				poderesDisabled     : true,
+				extrasDisabled      : true,
+				planchetasDisabled  : true,
+				dniDocumentDisabled : false
 			});
 			getSignedUrl(uploadedFiles, folder, async (response) => {
 				const arrayPromise = await response;
@@ -1495,13 +1442,12 @@ const Client = (props) => {
 					[`${folder}Loading`]: false
 				});
 				toggleDisabledFiles({
-					estatutosDisabled        : false,
-					actasDisabled            : false,
-					poderesDisabled          : false,
-					extrasDisabled           : false,
-					planchetasDisabled       : false,
-					dniDocumentDisabled      : false,
-					documentacionUsoDisabled : false
+					estatutosDisabled   : false,
+					actasDisabled       : false,
+					poderesDisabled     : false,
+					extrasDisabled      : false,
+					planchetasDisabled  : false,
+					dniDocumentDisabled : false
 				});
 			});
 		});
@@ -1666,7 +1612,7 @@ const Client = (props) => {
 				}),
 				dniDocument     : dniDocument.map((i) => {
 					return {
-						url  : i.url,
+						url  : i.ur,
 						name : i.fileName
 					};
 				})
@@ -1839,9 +1785,7 @@ const Client = (props) => {
 			{
 				...mobiliary,
 				plancheta        : { url: planchetas[0].url, name: planchetas[0].fileName },
-				documentacionUso : documentacionUso[0]
-					? { url: documentacionUso[0].url, name: documentacionUso[0].fileName }
-					: null
+				documentacionUso : { url: documentacionUso[0].url, name: documentacionUso[0].fileName }
 			}
 		];
 		setMobiliary(newArray);
@@ -1851,7 +1795,6 @@ const Client = (props) => {
 				matricula           : '',
 				circunscripcion     : '',
 				seccion             : '',
-				plancheta           : '',
 				fraccion            : '',
 				manzana             : '',
 				parcela             : '',
@@ -1860,6 +1803,7 @@ const Client = (props) => {
 				caracterUso         : '',
 				documentacion       : '',
 				observaciones       : '',
+				plancheta           : '',
 				superficie          : null,
 				documentacionUso    : ''
 			})
@@ -1868,19 +1812,6 @@ const Client = (props) => {
 			...formalDataFiles,
 			planchetas       : [],
 			documentacionUso : []
-		});
-
-		toggleCheckBoxMobiliary({
-			fraccion         : false,
-			manzana          : false,
-			parcela          : false,
-			poligono         : false,
-			propietario      : false,
-			matricula        : false,
-			documentacion    : false,
-			observaciones    : false,
-			superficie       : false,
-			documentacionUso : false
 		});
 	};
 
@@ -1897,14 +1828,7 @@ const Client = (props) => {
 				if (i.hasOwnProperty('tableData')) {
 					delete i.tableData;
 				}
-				return {
-					...i,
-					dniDocument     : i.dniDocument[0].url,
-					estatuto        : i.estatuto.map((es) => es.url),
-					actaDesignacion : i.actaDesignacion.map((ac) => ac.url),
-					poderes         : i.poderes.map((power) => power.url),
-					extraPdfs       : i.extraPdfs.map((extra) => extra.url)
-				};
+				return i;
 			}),
 			planta              : dataPlanta.map((i) => {
 				if (i.hasOwnProperty('tableData')) {
@@ -1928,14 +1852,7 @@ const Client = (props) => {
 						if (m.hasOwnProperty('tableData')) {
 							delete m.tableData;
 						}
-
-						return {
-							...m,
-							superficie       :
-								m.superficie.length > 0 ? parseFloat(m.superficie.replace(',', '.')) : null,
-							plancheta        : m.plancheta.url,
-							documentacionUso : m.documentacionUso.url
-						};
+						return m;
 					})
 				};
 			})
@@ -1943,7 +1860,7 @@ const Client = (props) => {
 
 		console.log(body);
 
-		dispatch(Actions.saveClient(body, props.history));
+		// dispatch(Actions.saveClient(body, props.history));
 	};
 
 	const seeModalData = (data, type) => {
@@ -1953,28 +1870,6 @@ const Client = (props) => {
 		});
 
 		closeModal(true);
-	};
-
-	const saveFieldsMobiliary = (name, value) => {
-		const options = {};
-		toggleCheckBoxMobiliary({
-			...checkBoxMobiliary,
-			[name] : value
-		});
-
-		if (value) {
-			options[name] = '';
-			setForm(
-				_.set({ ...form }, 'planta.mobiliary', {
-					...form.planta.mobiliary,
-					...options
-				})
-			);
-		}
-	};
-
-	const closeModalMobiliary = () => {
-		closeMobiliaryModal(!showMobiliaryModal);
 	};
 
 	return (
@@ -2122,7 +2017,7 @@ const Client = (props) => {
 												label='Rubro'
 												id='formalData.rubro'
 												name='formalData.rubro'
-												value={capitalize(form.formalData.rubro)}
+												value={form.formalData.rubro}
 												onChange={handleChange}
 												variant='outlined'
 												fullWidth
@@ -3065,12 +2960,12 @@ const Client = (props) => {
 													<Button
 														className='whitespace-no-wrap'
 														variant='contained'
-														onClick={() => closeMobiliaryModal(!showMobiliaryModal)}
+														// disabled={!plantaMobiliarySubmitted()}
+														onClick={() => console.log('hola')}
 													>
 														Escoger campos a llenar
 													</Button>
 												</FuseAnimate>
-
 												<FuseAnimate animation='transition.slideRightIn' delay={300}>
 													<Button
 														className='whitespace-no-wrap'
@@ -3126,9 +3021,22 @@ const Client = (props) => {
 													onChange={handleChange}
 													variant='outlined'
 													fullWidth
-													required
-													error={form.planta.mobiliary.partidaInmobiliaria === ''}
 												/>
+
+												{form.planta.mobiliary.partidaInmobiliaria.length > 0 && (
+													<FuseAnimate animation='transition.slideRightIn' delay={300}>
+														<TextField
+															className='mt-8 mb-16 mr-8'
+															label='Matricula en registro de la propiedad'
+															id='planta.mobiliary.matricula'
+															name='planta.mobiliary.matricula'
+															value={form.planta.mobiliary.matricula}
+															onChange={handleChange}
+															variant='outlined'
+															fullWidth
+														/>
+													</FuseAnimate>
+												)}
 
 												<TextField
 													className='mt-8 mb-16 mr-8'
@@ -3139,8 +3047,6 @@ const Client = (props) => {
 													onChange={handleChange}
 													variant='outlined'
 													fullWidth
-													required
-													error={form.planta.mobiliary.circunscripcion === ''}
 												/>
 
 												<TextField
@@ -3152,31 +3058,13 @@ const Client = (props) => {
 													onChange={handleChange}
 													variant='outlined'
 													fullWidth
-													required
-													error={form.planta.mobiliary.seccion === ''}
-												/>
-
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													label='Caracter de uso de suelo'
-													id='planta.mobiliary.caracterUso'
-													name='planta.mobiliary.caracterUso'
-													value={capitalize(form.planta.mobiliary.caracterUso)}
-													onChange={handleChange}
-													variant='outlined'
-													fullWidth
-													required
-													error={form.planta.mobiliary.caracterUso === ''}
 												/>
 											</div>
 
-											{(checkBoxMobiliary.fraccion ||
-												checkBoxMobiliary.manzana ||
-												checkBoxMobiliary.parcela ||
-												checkBoxMobiliary.poligono) && (
-												<FuseAnimate animation='transition.fadeIn' delay={300}>
+											{form.planta.mobiliary.seccion.length > 0 && (
+												<FuseAnimate animation='transition.slideRightIn' delay={300}>
 													<div className='flex'>
-														{checkBoxMobiliary.fraccion && (
+														{form.planta.mobiliary.seccion.length > 0 && (
 															<FuseAnimate
 																animation='transition.slideRightIn'
 																delay={300}
@@ -3194,7 +3082,7 @@ const Client = (props) => {
 															</FuseAnimate>
 														)}
 
-														{checkBoxMobiliary.manzana && (
+														{form.planta.mobiliary.fraccion.length > 0 && (
 															<FuseAnimate
 																animation='transition.slideRightIn'
 																delay={300}
@@ -3212,7 +3100,7 @@ const Client = (props) => {
 															</FuseAnimate>
 														)}
 
-														{checkBoxMobiliary.parcela && (
+														{form.planta.mobiliary.manzana.length > 0 && (
 															<FuseAnimate
 																animation='transition.slideRightIn'
 																delay={300}
@@ -3230,7 +3118,7 @@ const Client = (props) => {
 															</FuseAnimate>
 														)}
 
-														{checkBoxMobiliary.poligono && (
+														{form.planta.mobiliary.parcela.length > 0 && (
 															<FuseAnimate
 																animation='transition.slideRightIn'
 																delay={300}
@@ -3251,76 +3139,59 @@ const Client = (props) => {
 												</FuseAnimate>
 											)}
 
-											{(checkBoxMobiliary.propietario ||
-												checkBoxMobiliary.matricula ||
-												checkBoxMobiliary.documentacion ||
-												checkBoxMobiliary.superficie) && (
-												<FuseAnimate animation='transition.fadeIn' delay={300}>
-													<div className='flex'>
-														{checkBoxMobiliary.propietario && (
-															<TextField
-																className='mt-8 mb-16 mr-8'
-																label='Propietario'
-																id='planta.mobiliary.propietario'
-																name='planta.mobiliary.propietario'
-																value={capitalize(form.planta.mobiliary.propietario)}
-																onChange={handleChange}
-																variant='outlined'
-																fullWidth
-															/>
-														)}
+											<div className='flex'>
+												<TextField
+													className='mt-8 mb-16 mr-8'
+													label='Propietario'
+													id='planta.mobiliary.propietario'
+													name='planta.mobiliary.propietario'
+													value={capitalize(form.planta.mobiliary.propietario)}
+													onChange={handleChange}
+													variant='outlined'
+													fullWidth
+												/>
 
-														{checkBoxMobiliary.matricula && (
-															<TextField
-																className='mt-8 mb-16 mr-8'
-																label='Matricula en registro de la propiedad'
-																id='planta.mobiliary.matricula'
-																name='planta.mobiliary.matricula'
-																value={form.planta.mobiliary.matricula}
-																onChange={handleChange}
-																variant='outlined'
-																fullWidth
-															/>
-														)}
+												<TextField
+													className='mt-8 mb-16 mr-8'
+													label='Caracter de uso de suelo'
+													id='planta.mobiliary.caracterUso'
+													name='planta.mobiliary.caracterUso'
+													value={capitalize(form.planta.mobiliary.caracterUso)}
+													onChange={handleChange}
+													variant='outlined'
+													fullWidth
+												/>
 
-														{checkBoxMobiliary.documentacion && (
-															<TextField
-																className='mt-8 mb-16 mr-8'
-																label='Tiene Documentación'
-																id='planta.mobiliary.documentacion'
-																name='planta.mobiliary.documentacion'
-																value={capitalize(form.planta.mobiliary.documentacion)}
-																onChange={handleChange}
-																variant='outlined'
-																fullWidth
-															/>
-														)}
+												<TextField
+													className='mt-8 mb-16 mr-8'
+													label='Superficie numérica'
+													id='planta.mobiliary.superficie'
+													name='planta.mobiliary.superficie'
+													placeholder='24541,10'
+													value={form.planta.mobiliary.superficie}
+													onChange={handleChange}
+													variant='outlined'
+													fullWidth
+												/>
 
-														{checkBoxMobiliary.superficie && (
-															<TextField
-																className='mt-8 mb-16 mr-8'
-																label='Superficie numérica'
-																id='planta.mobiliary.superficie'
-																name='planta.mobiliary.superficie'
-																placeholder='24512,52'
-																value={form.planta.mobiliary.superficie}
-																onChange={handleChange}
-																error={
-																	!isValidDecimalNumber(
-																		form.planta.mobiliary.superficie
-																	)
-																}
-																variant='outlined'
-																fullWidth
-															/>
-														)}
-													</div>
-												</FuseAnimate>
-											)}
-
+												{form.planta.mobiliary.caracterUso.length > 0 && (
+													<FuseAnimate animation='transition.slideRightIn' delay={300}>
+														<TextField
+															className='mt-8 mb-16 mr-8'
+															label='Tiene Documentación'
+															id='planta.mobiliary.documentacion'
+															name='planta.mobiliary.documentacion'
+															value={capitalize(form.planta.mobiliary.documentacion)}
+															onChange={handleChange}
+															variant='outlined'
+															fullWidth
+														/>
+													</FuseAnimate>
+												)}
+											</div>
 											<div className={classes.root}>
 												<Grid container spacing={3}>
-													<Grid item xs={checkBoxMobiliary.documentacionUso ? 6 : 12}>
+													<Grid item xs={6}>
 														<Paper className={classes.paper}>
 															<PlanchetaDropZone
 																formalDataFiles={formalDataFiles}
@@ -3339,34 +3210,29 @@ const Client = (props) => {
 															/>
 														</Paper>
 													</Grid>
-													{checkBoxMobiliary.documentacionUso && (
-														<FuseAnimate animation='transition.fadeIn' delay={300}>
-															<Grid item xs={6}>
-																<Paper className={classes.paper}>
-																	<DocumentacionUsoDropZone
-																		formalDataFiles={formalDataFiles}
-																		files={documentacionUso}
-																		setFormalDataFiles={setFormalDataFiles}
-																		callBack={useCallback}
-																		getSignedUrl={getSignedUrl}
-																		loading={documentacionUsoLoading}
-																		toggleLoading={toggleLoadingFiles}
-																		loadingFiles={loadingFiles}
-																		deleting={documentacionUsoDeleting}
-																		toggleDelete={toggleDeleteFiles}
-																		deletingFiles={deletingFiles}
-																		toggleDisabledFiles={toggleDisabledFiles}
-																		disabledFiles={disabledFiles}
-																	/>
-																</Paper>
-															</Grid>
-														</FuseAnimate>
-													)}
+													<Grid item xs={6}>
+														<Paper className={classes.paper}>
+															<DocumentacionUsoDropZone
+																formalDataFiles={formalDataFiles}
+																files={documentacionUso}
+																setFormalDataFiles={setFormalDataFiles}
+																callBack={useCallback}
+																getSignedUrl={getSignedUrl}
+																loading={documentacionUsoLoading}
+																toggleLoading={toggleLoadingFiles}
+																loadingFiles={loadingFiles}
+																deleting={documentacionUsoDeleting}
+																toggleDelete={toggleDeleteFiles}
+																deletingFiles={deletingFiles}
+																toggleDisabledFiles={toggleDisabledFiles}
+																disabledFiles={disabledFiles}
+															/>
+														</Paper>
+													</Grid>
 												</Grid>
 											</div>
-
-											{checkBoxMobiliary.observaciones && (
-												<FuseAnimate animation='transition.fadeIn' delay={300}>
+											{form.planta.mobiliary.documentacion.length > 0 && (
+												<FuseAnimate animation='transition.slideRightIn' delay={300}>
 													<TextField
 														className='mt-8 mb-16'
 														id='planta.mobiliary.observaciones'
@@ -3401,166 +3267,6 @@ const Client = (props) => {
 				isNewClient={isNew}
 				history={props.history}
 			/>
-			<Dialog
-				classes={{
-					paper : 'm-24'
-				}}
-				open={showMobiliaryModal}
-				onClose={() => closeModalMobiliary()}
-				fullWidth
-				maxWidth='md'
-			>
-				<AppBar position='static' elevation={1}>
-					<Toolbar className='flex w-full'>
-						<IconButton
-							edge='start'
-							color='inherit'
-							onClick={() => closeModalMobiliary()}
-							aria-label='close'
-						>
-							<CloseIcon />
-						</IconButton>
-						<Typography>Campos opcionales del inmueble</Typography>
-					</Toolbar>
-				</AppBar>
-				<div className='flex flex-col overflow-hidden'>
-					<DialogContent classes={{ root: 'p-24' }}>
-						<div className={classes.root}>
-							<FormGroup row>
-								<FormControlLabel
-									control={
-										<Checkbox
-											checked={checkBoxMobiliary.fraccion}
-											onChange={() => {
-												saveFieldsMobiliary('fraccion', !checkBoxMobiliary.fraccion);
-											}}
-											value='gola'
-										/>
-									}
-									label='Posee Fracción'
-								/>
-								<FormControlLabel
-									control={
-										<Checkbox
-											checked={checkBoxMobiliary.manzana}
-											onChange={() => {
-												saveFieldsMobiliary('manzana', !checkBoxMobiliary.manzana);
-											}}
-											value='gola'
-										/>
-									}
-									label='Posee Manzana'
-								/>
-								<FormControlLabel
-									control={
-										<Checkbox
-											checked={checkBoxMobiliary.parcela}
-											onChange={() => {
-												saveFieldsMobiliary('parcela', !checkBoxMobiliary.parcela);
-											}}
-											value='gola'
-										/>
-									}
-									label='Posee Parcela'
-								/>
-								<FormControlLabel
-									control={
-										<Checkbox
-											checked={checkBoxMobiliary.poligono}
-											onChange={() => {
-												saveFieldsMobiliary('poligono', !checkBoxMobiliary.poligono);
-											}}
-											value='gola'
-										/>
-									}
-									label='Posee Poligono'
-								/>
-								<FormControlLabel
-									control={
-										<Checkbox
-											checked={checkBoxMobiliary.propietario}
-											onChange={() => {
-												saveFieldsMobiliary('propietario', !checkBoxMobiliary.propietario);
-											}}
-											value='gola'
-										/>
-									}
-									label='Posee Propietario'
-								/>
-								<FormControlLabel
-									control={
-										<Checkbox
-											checked={checkBoxMobiliary.matricula}
-											onChange={() => {
-												saveFieldsMobiliary('matricula', !checkBoxMobiliary.matricula);
-											}}
-											value='gola'
-										/>
-									}
-									label='Posee Matricula en registro de la propiedad'
-								/>
-								<FormControlLabel
-									control={
-										<Checkbox
-											checked={checkBoxMobiliary.documentacion}
-											onChange={() => {
-												saveFieldsMobiliary('documentacion', !checkBoxMobiliary.documentacion);
-											}}
-											value='gola'
-										/>
-									}
-									label='Tiene Documentación'
-								/>
-								<FormControlLabel
-									control={
-										<Checkbox
-											checked={checkBoxMobiliary.observaciones}
-											onChange={() => {
-												saveFieldsMobiliary('observaciones', !checkBoxMobiliary.observaciones);
-											}}
-											value='gola'
-										/>
-									}
-									label='Posee observaciones'
-								/>
-								<FormControlLabel
-									control={
-										<Checkbox
-											checked={checkBoxMobiliary.superficie}
-											onChange={() => {
-												saveFieldsMobiliary('superficie', !checkBoxMobiliary.superficie);
-											}}
-											value='gola'
-										/>
-									}
-									label='Posee Superficie numérica'
-								/>
-								<FormControlLabel
-									control={
-										<Checkbox
-											checked={checkBoxMobiliary.documentacionUso}
-											onChange={() => {
-												saveFieldsMobiliary(
-													'documentacionUso',
-													!checkBoxMobiliary.documentacionUso
-												);
-											}}
-											value='gola'
-										/>
-									}
-									label='Posee documentacion de uso'
-								/>
-							</FormGroup>
-						</div>
-					</DialogContent>
-
-					<DialogActions className='justify-between pl-16'>
-						<Button variant='contained' color='primary' onClick={() => closeModalMobiliary()}>
-							Cerrar
-						</Button>
-					</DialogActions>
-				</div>
-			</Dialog>
 		</React.Fragment>
 	);
 };

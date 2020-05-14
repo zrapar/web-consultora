@@ -42,9 +42,10 @@ export const setClientsSearchText = (event) => ({
 });
 
 export const getClient = (client) => async (dispatch) => {
+	console.log(client);
 	const response = await axios.get(`/clients/${client}`);
 	const data = typeof response.data === 'string' ? JSON.parse(response.data) : response.data;
-	const { id, clientId, clientName, cuit, rubro, address, legalRepresentative, planta } = data;
+	const { id, clientId, clientName, cuit, address, legalRepresentative, planta } = data;
 
 	return dispatch({
 		type    : GET_CLIENT,
@@ -55,60 +56,9 @@ export const getClient = (client) => async (dispatch) => {
 				clientName,
 				cuit,
 				address,
-				rubro,
-				legalRepresentative : legalRepresentative.map((o) => {
-					return {
-						...o,
-						actaDesignacion : o.actaDesignacion.map((p) => {
-							return {
-								url  : p,
-								name : p.split('actas/')[1]
-							};
-						}),
-						estatuto        : o.estatuto.map((p) => {
-							return {
-								url  : p,
-								name : p.split('estatutos/')[1]
-							};
-						}),
-						extraPdfs       : o.extraPdfs.map((p) => {
-							return {
-								url  : p,
-								name : p.split('extras/')[1]
-							};
-						}),
-						poderes         : o.poderes.map((p) => {
-							return {
-								url  : p,
-								name : p.split('poderes/')[1]
-							};
-						}),
-						dniDocument     : {
-							url  : o.dniDocument,
-							name : o.dniDocument.split('dniDocument/')[1]
-						}
-					};
-				})
+				legalRepresentative
 			},
-			planta     : planta.map((p, index) => {
-				return {
-					...p,
-					mobiliary : p.mobiliary.map((m) => {
-						return {
-							...m,
-							superficie       : m.superficie ? m.superficie.replace('.', ',') : '',
-							documentacionUso : {
-								url  : m.documentacionUso,
-								name : m.documentacionUso.split(`documentacionUso/${clientId}-${index}/`)[1]
-							},
-							plancheta        : {
-								url  : m.plancheta,
-								name : m.plancheta.split(`planchetas/${clientId}-${index}/`)[1]
-							}
-						};
-					})
-				};
-			})
+			planta
 		}
 	});
 };
