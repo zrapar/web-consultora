@@ -1899,7 +1899,7 @@ const Client = (props) => {
 				}
 				return {
 					...i,
-					dniDocument     : i.dniDocument[0].url,
+					dniDocument     : i.dniDocument.length > 0 ? i.dniDocument[0].url : null,
 					estatuto        : i.estatuto.map((es) => es.url),
 					actaDesignacion : i.actaDesignacion.map((ac) => ac.url),
 					poderes         : i.poderes.map((power) => power.url),
