@@ -1718,7 +1718,7 @@ const Client = (props) => {
 				...planta,
 				id_establecimiento :
 					dataPlanta.length > 0
-						? `${form.formalData.clientId}-${dataPlanta.length}`
+						? `${form.formalData.clientId}-${dataPlanta.length + 1}`
 						: form.formalData.clientId,
 				innerContact       : innerContactsPlanta,
 				phoneContacts      : phoneContactsPlanta,
@@ -1727,7 +1727,7 @@ const Client = (props) => {
 		];
 
 		if (newArray.length > 1) {
-			newArray[0].id_establecimiento = `${form.formalData.clientId}-0`;
+			newArray[0].id_establecimiento = `${form.formalData.clientId}-1`;
 		}
 
 		setPlanta(newArray);
@@ -2589,7 +2589,7 @@ const Client = (props) => {
 														<Typography variant='h5'>
 															{dataPlanta.length > 0 ? (
 																`ID del establecimiento: ${form.formalData
-																	.clientId}-${dataPlanta.length}`
+																	.clientId}-${dataPlanta.length + 1}`
 															) : (
 																`ID del establecimiento: ${form.formalData.clientId}`
 															)}
