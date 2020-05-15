@@ -1768,7 +1768,8 @@ const Client = (props) => {
 					propietario         : '',
 					caracterUso         : '',
 					documentacion       : 'NO',
-					observaciones       : ''
+					observaciones       : '',
+					superficie          : ''
 				}
 			})
 		);
@@ -1867,7 +1868,7 @@ const Client = (props) => {
 			documentacionUso : false
 		});
 	};
-
+	console.log(dataPlanta);
 	const saveClientData = (form) => {
 		const body = {
 			...form.formalData,
