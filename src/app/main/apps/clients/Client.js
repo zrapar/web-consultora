@@ -1845,7 +1845,7 @@ const Client = (props) => {
 				caracterUso         : '',
 				documentacion       : 'NO',
 				observaciones       : '',
-				superficie          : null,
+				superficie          : '',
 				documentacionUso    : ''
 			})
 		);
@@ -1912,7 +1912,6 @@ const Client = (props) => {
 						if (m.hasOwnProperty('tableData')) {
 							delete m.tableData;
 						}
-
 						return {
 							...m,
 							superficie       :
@@ -1930,7 +1929,7 @@ const Client = (props) => {
 			})
 		};
 
-		// console.log(body);
+		console.log(body);
 
 		dispatch(Actions.saveClient(body, props.history));
 	};
