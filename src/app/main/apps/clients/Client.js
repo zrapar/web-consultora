@@ -1703,7 +1703,7 @@ const Client = (props) => {
 				...planta,
 				id_establecimiento :
 					dataPlanta.length > 0
-						? `${form.formalData.clientId}-${dataPlanta.length}`
+						? `${form.formalData.clientId}-${dataPlanta.length + 1}`
 						: form.formalData.clientId,
 				innerContact       : innerContactsPlanta,
 				phoneContacts      : phoneContactsPlanta,
@@ -1768,7 +1768,8 @@ const Client = (props) => {
 					propietario         : '',
 					caracterUso         : '',
 					documentacion       : 'NO',
-					observaciones       : ''
+					observaciones       : '',
+					superficie          : ''
 				}
 			})
 		);
@@ -1845,7 +1846,7 @@ const Client = (props) => {
 				caracterUso         : '',
 				documentacion       : 'NO',
 				observaciones       : '',
-				superficie          : null,
+				superficie          : '',
 				documentacionUso    : ''
 			})
 		);
@@ -1867,7 +1868,7 @@ const Client = (props) => {
 			documentacionUso : false
 		});
 	};
-
+	console.log(dataPlanta);
 	const saveClientData = (form) => {
 		const body = {
 			...form.formalData,
@@ -1912,7 +1913,6 @@ const Client = (props) => {
 						if (m.hasOwnProperty('tableData')) {
 							delete m.tableData;
 						}
-
 						return {
 							...m,
 							superficie       :
@@ -1930,7 +1930,7 @@ const Client = (props) => {
 			})
 		};
 
-		// console.log(body);
+		console.log(body);
 
 		dispatch(Actions.saveClient(body, props.history));
 	};
@@ -2562,7 +2562,7 @@ const Client = (props) => {
 														<Typography variant='h5'>
 															{dataPlanta.length > 0 ? (
 																`ID del establecimiento: ${form.formalData
-																	.clientId}-${dataPlanta.length}`
+																	.clientId}-${dataPlanta.length + 1}`
 															) : (
 																`ID del establecimiento: ${form.formalData.clientId}`
 															)}
