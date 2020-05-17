@@ -102,12 +102,12 @@ export const getClient = (client) => async (dispatch) => {
 							documentacionUso : m.documentacionUso
 								? {
 										url  : m.documentacionUso,
-										name : m.documentacionUso.split(`documentacionUso/${clientId}-${index}/`)[1]
+										name : m.documentacionUso.split(`documentacionUso/${clientId}-${index + 1}/`)[1]
 									}
 								: '',
 							plancheta        : {
 								url  : m.plancheta,
-								name : m.plancheta.split(`planchetas/${clientId}-${index}/`)[1]
+								name : m.plancheta.split(`planchetas/${clientId}-${index + 1}/`)[1]
 							}
 						};
 					})

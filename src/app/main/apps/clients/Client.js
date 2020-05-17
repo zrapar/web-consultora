@@ -1130,7 +1130,7 @@ const Client = (props) => {
 			</div>
 		);
 	};
-
+	console.log(dataPlanta);
 	const PlanchetaDropZone = ({
 		formalDataFiles,
 		files,
@@ -1147,7 +1147,10 @@ const Client = (props) => {
 		toggleDisabledFiles
 	}) => {
 		const folder = 'planchetas';
-		const folderPlanta = `${form.formalData.clientId}-${dataPlanta.length}`;
+		const folderPlanta =
+			dataPlanta.length === 0
+				? `${form.formalData.clientId}-1`
+				: `${form.formalData.clientId}-${dataPlanta.length + 1}`;
 		const onDrop = callBack(async (uploadedFiles) => {
 			toggleLoading({
 				...loadingFiles,
@@ -1298,7 +1301,10 @@ const Client = (props) => {
 		toggleDisabledFiles
 	}) => {
 		const folder = 'documentacionUso';
-		const folderPlanta = `${form.formalData.clientId}-${dataPlanta.length}`;
+		const folderPlanta =
+			dataPlanta.length === 0
+				? `${form.formalData.clientId}-1`
+				: `${form.formalData.clientId}-${dataPlanta.length + 1}`;
 		const onDrop = callBack(async (uploadedFiles) => {
 			toggleLoading({
 				...loadingFiles,
@@ -1868,7 +1874,7 @@ const Client = (props) => {
 			documentacionUso : false
 		});
 	};
-	console.log(dataPlanta);
+
 	const saveClientData = (form) => {
 		const body = {
 			...form.formalData,
@@ -1965,7 +1971,7 @@ const Client = (props) => {
 	const closeModalMobiliary = () => {
 		closeMobiliaryModal(!showMobiliaryModal);
 	};
-
+	console.log(addressFormalData);
 	return (
 		<React.Fragment>
 			<FusePageCarded
