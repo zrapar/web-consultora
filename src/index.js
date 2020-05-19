@@ -15,7 +15,12 @@ import * as Sentry from '@sentry/browser';
 import App from 'app/App';
 const { version } = require('../package.json');
 
-Sentry.init({ dsn: process.env.REACT_APP_Sentry_DSN, release: `consultora-parodi@${version}` });
+Sentry.init({
+	dsn         : process.env.REACT_APP_Sentry_DSN,
+	release     : `consultora-parodi@${version}`,
+	enabled     : process.env.REACT_APP_Staging === 'production',
+	environment : process.env.REACT_APP_Staging
+});
 
 ReactDOM.render(<App />, document.getElementById('root'));
 
