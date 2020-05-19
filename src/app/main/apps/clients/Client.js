@@ -40,6 +40,7 @@ import { SingS3, uploadFile, deleteFile } from 'utils/aws';
 import ShowInfoDialog from './ShowInfoDialog';
 import { isEmail, capitalize, isNaturalPositiveNumber, isValidDecimalNumber } from 'utils';
 import NumberFormat from 'react-number-format';
+import * as Sentry from '@sentry/browser';
 
 const useStyles = makeStyles((theme) => ({
 	root     : {
@@ -1972,51 +1973,50 @@ const Client = (props) => {
 	const closeModalMobiliary = () => {
 		closeMobiliaryModal(!showMobiliaryModal);
 	};
+	try {
+		return (
+			<React.Fragment>
+				<FusePageCarded
+					classes={{
+						toolbar : 'p-0',
+						header  : 'min-h-72 h-72 sm:h-136 sm:min-h-136'
+					}}
+					header={
+						form && (
+							<div className='flex flex-1 w-full items-center justify-between'>
+								<div className='flex flex-col items-start max-w-full'>
+									<FuseAnimate animation='transition.slideRightIn' delay={300}>
+										<Typography
+											className='normal-case flex items-center sm:mb-12'
+											component={Link}
+											role='button'
+											to='/apps/clients'
+											color='inherit'
+										>
+											<Icon className='mr-4 text-20'>arrow_back</Icon>
+											Clientes
+										</Typography>
+									</FuseAnimate>
 
-	return (
-		<React.Fragment>
-			<FusePageCarded
-				classes={{
-					toolbar : 'p-0',
-					header  : 'min-h-72 h-72 sm:h-136 sm:min-h-136'
-				}}
-				header={
-					form && (
-						<div className='flex flex-1 w-full items-center justify-between'>
-							<div className='flex flex-col items-start max-w-full'>
-								<FuseAnimate animation='transition.slideRightIn' delay={300}>
-									<Typography
-										className='normal-case flex items-center sm:mb-12'
-										component={Link}
-										role='button'
-										to='/apps/clients'
-										color='inherit'
-									>
-										<Icon className='mr-4 text-20'>arrow_back</Icon>
-										Clientes
-									</Typography>
-								</FuseAnimate>
-
-								<div className='flex items-center max-w-full'>
-									<div className='flex flex-col min-w-0'>
-										<FuseAnimate animation='transition.slideLeftIn' delay={300}>
-											<Typography className='text-16 sm:text-20 truncate'>
-												{form.formalData.clientName ? (
-													form.formalData.clientName
-												) : (
-													'Cliente Nuevo'
-												)}
-											</Typography>
-										</FuseAnimate>
-										<FuseAnimate animation='transition.slideLeftIn' delay={300}>
-											<Typography variant='caption'>Detalles del cliente</Typography>
-										</FuseAnimate>
+									<div className='flex items-center max-w-full'>
+										<div className='flex flex-col min-w-0'>
+											<FuseAnimate animation='transition.slideLeftIn' delay={300}>
+												<Typography className='text-16 sm:text-20 truncate'>
+													{form.formalData.clientName ? (
+														form.formalData.clientName
+													) : (
+														'Cliente Nuevo'
+													)}
+												</Typography>
+											</FuseAnimate>
+											<FuseAnimate animation='transition.slideLeftIn' delay={300}>
+												<Typography variant='caption'>Detalles del cliente</Typography>
+											</FuseAnimate>
+										</div>
 									</div>
 								</div>
-							</div>
 
-							<FuseAnimate animation='transition.slideRightIn' delay={300}>
-								{isNew && (
+								<FuseAnimate animation='transition.slideRightIn' delay={300}>
 									<Button
 										className='whitespace-no-wrap'
 										variant='contained'
@@ -2025,1496 +2025,1529 @@ const Client = (props) => {
 									>
 										{isNew ? 'Guardar' : 'Actualizar'}
 									</Button>
-								)}
-							</FuseAnimate>
-						</div>
-					)
-				}
-				contentToolbar={
-					<Tabs
-						value={tabValue}
-						onChange={handleChangeTab}
-						indicatorColor='secondary'
-						textColor='secondary'
-						variant='scrollable'
-						scrollButtons='auto'
-						classes={{ root: 'w-full h-64' }}
-					>
-						<Tab className='h-64 normal-case' label='Datos Formales' />
-						<Tab className='h-64 normal-case' label='Plantas' />
-					</Tabs>
-				}
-				content={
-					form && (
-						<div className='p-16 sm:p-24 sm:pt-2 max-w-2xl'>
-							{tabValue === 0 && (
-								<div>
-									<Tabs
-										value={tabInnerFormal}
-										onChange={(e, value) => handleChangeInnerTab(value, 'Formal')}
-										indicatorColor='secondary'
-										textColor='secondary'
-										variant='scrollable'
-										scrollButtons='auto'
-										classes={{ root: 'w-full mb-16 pb-8' }}
-									>
-										<Tab className='h-64 normal-case' label='Datos Basicos' />
-										<Tab className='h-64 normal-case' label='Domicilios' />
-										<Tab className='h-64 normal-case' label='Representantes Legales' />
-									</Tabs>
-									{tabInnerFormal === 0 && (
-										<React.Fragment>
-											<TextField
-												className='mt-8 mb-16'
-												error={form.formalData.clientId === ''}
-												required
-												label='ID del Cliente'
-												id='formalData.clientId'
-												name='formalData.clientId'
-												value={form.formalData.clientId}
-												onChange={(e) => {
-													const value = e.target.value;
-													if (isNaturalPositiveNumber(value)) {
-														setForm(_.set({ ...form }, 'formalData.clientId', value));
-													}
-												}}
-												variant='outlined'
-												fullWidth
-											/>
-
-											<TextField
-												className='mt-8 mb-16'
-												error={form.formalData.clientName === ''}
-												required
-												label='Nombre del Cliente'
-												id='formalData.clientName'
-												name='formalData.clientName'
-												value={capitalize(form.formalData.clientName)}
-												onChange={handleChange}
-												variant='outlined'
-												fullWidth
-											/>
-
-											<NumberFormat
-												className='mt-8 mb-16'
-												error={form.formalData.cuit.replace(' ', '').length <= 12}
-												required
-												label='CUIT'
-												id='formalData.cuit'
-												name='formalData.cuit'
-												value={form.formalData.cuit}
-												variant='outlined'
-												fullWidth
-												customInput={TextField}
-												format='##-########-#'
-												onValueChange={({ formattedValue }) => {
-													setForm(_.set({ ...form }, 'formalData.cuit', formattedValue));
-												}}
-											/>
-
-											<TextField
-												className='mt-8 mb-16'
-												error={form.formalData.rubro === ''}
-												required
-												label='Rubro'
-												id='formalData.rubro'
-												name='formalData.rubro'
-												value={capitalize(form.formalData.rubro)}
-												onChange={handleChange}
-												variant='outlined'
-												fullWidth
-											/>
-										</React.Fragment>
-									)}
-									{tabInnerFormal === 1 && (
-										<React.Fragment>
-											{addressFormalData.length > 0 && (
-												<div className='flex justify-around items-center mb-16'>
-													<FuseAnimate animation='transition.slideRightIn' delay={300}>
-														<Button
-															className='whitespace-no-wrap '
-															variant='contained'
-															onClick={() =>
-																seeModalData(addressFormalData, 'addressFormalData')}
-														>
-															Ver domicilios agregados
-														</Button>
-													</FuseAnimate>
-												</div>
-											)}
-											<div className='flex justify-around items-center'>
-												<FuseChipSelect
-													className='mt-8 mb-16 mr-8 w-360'
-													value={form.formalData.address.type}
-													onChange={(value) =>
-														handleChipChange(value, 'formalData.address.type')}
-													placeholder='Seleccione el tipo de domicilio'
-													textFieldProps={{
-														label           : 'Domicilio',
-														InputLabelProps : {
-															shrink : true
-														},
-														variant         : 'outlined'
+								</FuseAnimate>
+							</div>
+						)
+					}
+					contentToolbar={
+						<Tabs
+							value={tabValue}
+							onChange={handleChangeTab}
+							indicatorColor='secondary'
+							textColor='secondary'
+							variant='scrollable'
+							scrollButtons='auto'
+							classes={{ root: 'w-full h-64' }}
+						>
+							<Tab className='h-64 normal-case' label='Datos Formales' />
+							<Tab className='h-64 normal-case' label='Plantas' />
+						</Tabs>
+					}
+					content={
+						form && (
+							<div className='p-16 sm:p-24 sm:pt-2 max-w-2xl'>
+								{tabValue === 0 && (
+									<div>
+										<Tabs
+											value={tabInnerFormal}
+											onChange={(e, value) => handleChangeInnerTab(value, 'Formal')}
+											indicatorColor='secondary'
+											textColor='secondary'
+											variant='scrollable'
+											scrollButtons='auto'
+											classes={{ root: 'w-full mb-16 pb-8' }}
+										>
+											<Tab className='h-64 normal-case' label='Datos Basicos' />
+											<Tab className='h-64 normal-case' label='Domicilios' />
+											<Tab className='h-64 normal-case' label='Representantes Legales' />
+										</Tabs>
+										{tabInnerFormal === 0 && (
+											<React.Fragment>
+												<TextField
+													className='mt-8 mb-16'
+													error={form.formalData.clientId === ''}
+													required
+													label='ID del Cliente'
+													id='formalData.clientId'
+													name='formalData.clientId'
+													value={form.formalData.clientId}
+													onChange={(e) => {
+														const value = e.target.value;
+														if (isNaturalPositiveNumber(value)) {
+															setForm(_.set({ ...form }, 'formalData.clientId', value));
+														}
 													}}
-													options={[
-														{ value: 'legal', label: 'Domicilio Legal' },
-														{ value: 'registered', label: 'Domicilio Constituido' },
-														{ value: 'additional', label: 'Otro Domicilio' }
-													]}
-													variant='fixed'
-												/>
-
-												<FuseAnimate animation='transition.slideRightIn' delay={300}>
-													<Button
-														className='whitespace-no-wrap mt-8 mb-16 mr-8 h-56'
-														variant='contained'
-														disabled={!formalDataAddressSubmitted()}
-														onClick={() => addFormalDataAddress(form.formalData.address)}
-													>
-														Crear Domicilio
-													</Button>
-												</FuseAnimate>
-											</div>
-											<div className='flex justify-around items-center'>
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													error={
-														form.formalData.address.calleRuta === '' &&
-														(addressFormalData.filter((i) => i.type === 'legal').length ===
-															0 ||
-															addressFormalData.filter((i) => i.type === 'registered')
-																.length === 0)
-													}
-													required
-													label='Calle / Ruta'
-													id='formalData.address.calleRuta'
-													name='formalData.address.calleRuta'
-													value={capitalize(form.formalData.address.calleRuta)}
-													onChange={handleChange}
 													variant='outlined'
+													fullWidth
 												/>
 
 												<TextField
-													className='mt-8 mb-16 mr-8'
-													error={
-														form.formalData.address.nKm === '' &&
-														(addressFormalData.filter((i) => i.type === 'legal').length ===
-															0 ||
-															addressFormalData.filter((i) => i.type === 'registered')
-																.length === 0)
-													}
+													className='mt-8 mb-16'
+													error={form.formalData.clientName === ''}
 													required
-													label='N° / Km'
-													id='formalData.address.nKm'
-													name='formalData.address.nKm'
-													value={capitalize(form.formalData.address.nKm)}
+													label='Nombre del Cliente'
+													id='formalData.clientName'
+													name='formalData.clientName'
+													value={capitalize(form.formalData.clientName)}
 													onChange={handleChange}
 													variant='outlined'
-												/>
-
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													label='Piso'
-													id='formalData.address.piso'
-													name='formalData.address.piso'
-													value={capitalize(form.formalData.address.piso)}
-													onChange={handleChange}
-													variant='outlined'
-												/>
-
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													label='Departamento'
-													id='formalData.address.depto'
-													name='formalData.address.depto'
-													value={capitalize(form.formalData.address.depto)}
-													onChange={handleChange}
-													variant='outlined'
-												/>
-											</div>
-											<div className='flex justify-around items-center'>
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													error={
-														form.formalData.address.localidad === '' &&
-														(addressFormalData.filter((i) => i.type === 'legal').length ===
-															0 ||
-															addressFormalData.filter((i) => i.type === 'registered')
-																.length === 0)
-													}
-													required
-													label='Localidad'
-													id='formalData.address.localidad'
-													name='formalData.address.localidad'
-													value={capitalize(form.formalData.address.localidad)}
-													onChange={handleChange}
-													variant='outlined'
-												/>
-
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													error={
-														form.formalData.address.codigo_postal === '' &&
-														(addressFormalData.filter((i) => i.type === 'legal').length ===
-															0 ||
-															addressFormalData.filter((i) => i.type === 'registered')
-																.length === 0)
-													}
-													required
-													label='Codigo Postal'
-													id='formalData.address.codigo_postal'
-													name='formalData.address.codigo_postal'
-													value={form.formalData.address.codigo_postal}
-													onChange={handleChange}
-													variant='outlined'
-												/>
-
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													error={
-														form.formalData.address.partido === '' &&
-														(addressFormalData.filter((i) => i.type === 'legal').length ===
-															0 ||
-															addressFormalData.filter((i) => i.type === 'registered')
-																.length === 0)
-													}
-													required
-													label='Partido'
-													id='formalData.address.partido'
-													name='formalData.address.partido'
-													value={capitalize(form.formalData.address.partido)}
-													onChange={handleChange}
-													variant='outlined'
-												/>
-
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													error={
-														form.formalData.address.provincia === '' &&
-														(addressFormalData.filter((i) => i.type === 'legal').length ===
-															0 ||
-															addressFormalData.filter((i) => i.type === 'registered')
-																.length === 0)
-													}
-													required
-													label='Provincia'
-													id='formalData.address.provincia'
-													name='formalData.address.provincia'
-													value={capitalize(form.formalData.address.provincia)}
-													onChange={handleChange}
-													variant='outlined'
-												/>
-											</div>
-										</React.Fragment>
-									)}
-									{tabInnerFormal === 2 && (
-										<React.Fragment>
-											{legalRepresentativeFormalData.length > 0 && (
-												<div className='flex justify-around items-center mb-16'>
-													<FuseAnimate animation='transition.slideRightIn' delay={300}>
-														<Button
-															className='whitespace-no-wrap '
-															variant='contained'
-															onClick={() =>
-																seeModalData(
-																	legalRepresentativeFormalData,
-																	'legalRepresentativeFormalData'
-																)}
-														>
-															Ver representantes agregados
-														</Button>
-													</FuseAnimate>
-												</div>
-											)}
-											<div className='flex justify-center items-center'>
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													error={
-														form.formalData.legalRepresentative.first_name === '' &&
-														legalRepresentativeFormalData.length === 0
-													}
-													required
-													label='Nombre'
-													id='formalData.legalRepresentative.first_name'
-													name='formalData.legalRepresentative.first_name'
-													value={capitalize(form.formalData.legalRepresentative.first_name)}
-													onChange={handleChange}
-													variant='outlined'
-												/>
-
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													error={
-														form.formalData.legalRepresentative.last_name === '' &&
-														legalRepresentativeFormalData.length === 0
-													}
-													required
-													label='Apellido'
-													id='formalData.legalRepresentative.last_name'
-													name='formalData.legalRepresentative.last_name'
-													value={capitalize(form.formalData.legalRepresentative.last_name)}
-													onChange={handleChange}
-													variant='outlined'
+													fullWidth
 												/>
 
 												<NumberFormat
-													variant='outlined'
-													className='mt-8 mb-16 mr-8'
-													label='DNI'
-													error={
-														form.formalData.legalRepresentative.dni.replace(' ', '')
-															.length <= 9 && legalRepresentativeFormalData.length === 0
-													}
+													className='mt-8 mb-16'
+													error={form.formalData.cuit.replace(' ', '').length <= 12}
 													required
-													id='formalData.legalRepresentative.dni'
-													name='formalData.legalRepresentative.dni'
-													value={form.formalData.legalRepresentative.dni}
-													customInput={TextField}
-													format='##.###.###'
-													onValueChange={({ formattedValue }) => {
-														setForm(
-															_.set(
-																{ ...form },
-																'formalData.legalRepresentative.dni',
-																formattedValue
-															)
-														);
-													}}
-												/>
-
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													error={
-														form.formalData.legalRepresentative.position === '' &&
-														legalRepresentativeFormalData.length === 0
-													}
-													required
-													label='Cargo'
-													id='formalData.legalRepresentative.position'
-													name='formalData.legalRepresentative.position'
-													value={capitalize(form.formalData.legalRepresentative.position)}
-													onChange={handleChange}
+													label='CUIT'
+													id='formalData.cuit'
+													name='formalData.cuit'
+													value={form.formalData.cuit}
 													variant='outlined'
-												/>
-
-												<NumberFormat
-													className='mt-8 mb-16 mr-8'
-													error={
-														legalRepresentativeFormalData.length === 0 &&
-														form.formalData.legalRepresentative.cuil.replace(' ', '')
-															.length <= 12
-													}
-													required
-													label='CUIL'
-													id='formalData.legalRepresentative.cuil'
-													name='formalData.legalRepresentative.cuil'
-													value={form.formalData.legalRepresentative.cuil}
-													variant='outlined'
+													fullWidth
 													customInput={TextField}
 													format='##-########-#'
 													onValueChange={({ formattedValue }) => {
-														setForm(
-															_.set(
-																{ ...form },
-																'formalData.legalRepresentative.cuil',
-																formattedValue
-															)
-														);
+														setForm(_.set({ ...form }, 'formalData.cuit', formattedValue));
 													}}
 												/>
 
-												<FuseAnimate animation='transition.slideRightIn' delay={300}>
-													<Button
-														className='whitespace-no-wrap mt-8 mb-16 mr-8 h-56'
-														variant='contained'
-														disabled={!formalDataLegalRepresentativeSubmitted()}
-														onClick={() =>
-															addFormalDataLegalRepresentative(
-																form.formalData.legalRepresentative
-															)}
-													>
-														Guardar
-													</Button>
-												</FuseAnimate>
-											</div>
+												<TextField
+													className='mt-8 mb-16'
+													error={form.formalData.rubro === ''}
+													required
+													label='Rubro'
+													id='formalData.rubro'
+													name='formalData.rubro'
+													value={capitalize(form.formalData.rubro)}
+													onChange={handleChange}
+													variant='outlined'
+													fullWidth
+												/>
+											</React.Fragment>
+										)}
+										{tabInnerFormal === 1 && (
+											<React.Fragment>
+												{addressFormalData.length > 0 && (
+													<div className='flex justify-around items-center mb-16'>
+														<FuseAnimate animation='transition.slideRightIn' delay={300}>
+															<Button
+																className='whitespace-no-wrap '
+																variant='contained'
+																onClick={() =>
+																	seeModalData(
+																		addressFormalData,
+																		'addressFormalData'
+																	)}
+															>
+																Ver domicilios agregados
+															</Button>
+														</FuseAnimate>
+													</div>
+												)}
+												<div className='flex justify-around items-center'>
+													<FuseChipSelect
+														className='mt-8 mb-16 mr-8 w-360'
+														value={form.formalData.address.type}
+														onChange={(value) =>
+															handleChipChange(value, 'formalData.address.type')}
+														placeholder='Seleccione el tipo de domicilio'
+														textFieldProps={{
+															label           : 'Domicilio',
+															InputLabelProps : {
+																shrink : true
+															},
+															variant         : 'outlined'
+														}}
+														options={[
+															{ value: 'legal', label: 'Domicilio Legal' },
+															{ value: 'registered', label: 'Domicilio Constituido' },
+															{ value: 'additional', label: 'Otro Domicilio' }
+														]}
+														variant='fixed'
+													/>
 
-											<div className={classes.root}>
-												<Grid container spacing={3}>
-													<Grid item xs={6}>
-														<Paper className={classes.paper}>
-															<EstatutoDropZone
-																formalDataFiles={formalDataFiles}
-																files={estatuto}
-																setFormalDataFiles={setFormalDataFiles}
-																callBack={useCallback}
-																getSignedUrl={getSignedUrl}
-																loading={estatutosLoading}
-																toggleLoading={toggleLoadingFiles}
-																loadingFiles={loadingFiles}
-																deleting={estatutosDeleting}
-																toggleDelete={toggleDeleteFiles}
-																deletingFiles={deletingFiles}
-																toggleDisabledFiles={toggleDisabledFiles}
-																disabledFiles={disabledFiles}
-															/>
-														</Paper>
-													</Grid>
-													<Grid item xs={6}>
-														<Paper className={classes.paper}>
-															<ActaDesignacionDropZone
-																formalDataFiles={formalDataFiles}
-																files={actaDesignacion}
-																setFormalDataFiles={setFormalDataFiles}
-																callBack={useCallback}
-																getSignedUrl={getSignedUrl}
-																loading={actasLoading}
-																toggleLoading={toggleLoadingFiles}
-																loadingFiles={loadingFiles}
-																deleting={actasDeleting}
-																toggleDelete={toggleDeleteFiles}
-																deletingFiles={deletingFiles}
-																toggleDisabledFiles={toggleDisabledFiles}
-																disabledFiles={disabledFiles}
-															/>
-														</Paper>
-													</Grid>
-													<Grid item xs={6}>
-														<Paper className={classes.paper}>
-															<PoderesDropZone
-																formalDataFiles={formalDataFiles}
-																files={poderes}
-																setFormalDataFiles={setFormalDataFiles}
-																callBack={useCallback}
-																getSignedUrl={getSignedUrl}
-																loading={poderesLoading}
-																toggleLoading={toggleLoadingFiles}
-																loadingFiles={loadingFiles}
-																deleting={poderesDeleting}
-																toggleDelete={toggleDeleteFiles}
-																deletingFiles={deletingFiles}
-																toggleDisabledFiles={toggleDisabledFiles}
-																disabledFiles={disabledFiles}
-															/>
-														</Paper>
-													</Grid>
-													<Grid item xs={6}>
-														<Paper className={classes.paper}>
-															<ExtraDropZone
-																formalDataFiles={formalDataFiles}
-																files={extraPdfs}
-																setFormalDataFiles={setFormalDataFiles}
-																callBack={useCallback}
-																getSignedUrl={getSignedUrl}
-																loading={extrasLoading}
-																toggleLoading={toggleLoadingFiles}
-																loadingFiles={loadingFiles}
-																deleting={extrasDeleting}
-																toggleDelete={toggleDeleteFiles}
-																deletingFiles={deletingFiles}
-																toggleDisabledFiles={toggleDisabledFiles}
-																disabledFiles={disabledFiles}
-															/>
-														</Paper>
-													</Grid>
-												</Grid>
-											</div>
-
-											<div className={classes.root}>
-												<Grid container spacing={3}>
-													<Grid item xs={12}>
-														<Paper className={classes.paper}>
-															<DniDocumentDropZone
-																formalDataFiles={formalDataFiles}
-																files={dniDocument}
-																setFormalDataFiles={setFormalDataFiles}
-																callBack={useCallback}
-																getSignedUrl={getSignedUrl}
-																loading={dniDocumentLoading}
-																toggleLoading={toggleLoadingFiles}
-																loadingFiles={loadingFiles}
-																deleting={dniDocumentDeleting}
-																toggleDelete={toggleDeleteFiles}
-																deletingFiles={deletingFiles}
-																toggleDisabledFiles={toggleDisabledFiles}
-																disabledFiles={disabledFiles}
-															/>
-														</Paper>
-													</Grid>
-												</Grid>
-											</div>
-										</React.Fragment>
-									)}
-								</div>
-							)}
-							{tabValue === 1 && (
-								<React.Fragment>
-									<Tabs
-										value={tabInnerPlanta}
-										onChange={(e, value) => handleChangeInnerTab(value, 'Planta')}
-										indicatorColor='secondary'
-										textColor='secondary'
-										variant='scrollable'
-										scrollButtons='auto'
-										classes={{ root: 'w-full mb-16 pb-8' }}
-									>
-										<Tab className='h-64 normal-case' label='Datos Basicos' />
-										<Tab className='h-64 normal-case' label='Contactos' />
-										<Tab className='h-64 normal-case' label='Usuarios Gubernamentales' />
-										<Tab className='h-64 normal-case' label='Inmuebles' />
-									</Tabs>
-									{tabInnerPlanta === 0 && (
-										<React.Fragment>
-											{form.formalData.clientId !== '' && (
-												<div className='flex justify-around items-center mb-16'>
-													<FuseAnimate animation='transition.slideLeftIn' delay={300}>
-														<Typography variant='h5'>
-															{dataPlanta.length > 0 ? (
-																`ID del establecimiento: ${form.formalData
-																	.clientId}-${dataPlanta.length + 1}`
-															) : (
-																`ID del establecimiento: ${form.formalData.clientId}`
-															)}
-														</Typography>
+													<FuseAnimate animation='transition.slideRightIn' delay={300}>
+														<Button
+															className='whitespace-no-wrap mt-8 mb-16 mr-8 h-56'
+															variant='contained'
+															disabled={!formalDataAddressSubmitted()}
+															onClick={() =>
+																addFormalDataAddress(form.formalData.address)}
+														>
+															Crear Domicilio
+														</Button>
 													</FuseAnimate>
 												</div>
-											)}
+												<div className='flex justify-around items-center'>
+													<TextField
+														className='mt-8 mb-16 mr-8'
+														error={
+															form.formalData.address.calleRuta === '' &&
+															(addressFormalData.filter((i) => i.type === 'legal')
+																.length === 0 ||
+																addressFormalData.filter((i) => i.type === 'registered')
+																	.length === 0)
+														}
+														required
+														label='Calle / Ruta'
+														id='formalData.address.calleRuta'
+														name='formalData.address.calleRuta'
+														value={capitalize(form.formalData.address.calleRuta)}
+														onChange={handleChange}
+														variant='outlined'
+													/>
 
-											<div className='flex justify-around items-center'>
+													<TextField
+														className='mt-8 mb-16 mr-8'
+														error={
+															form.formalData.address.nKm === '' &&
+															(addressFormalData.filter((i) => i.type === 'legal')
+																.length === 0 ||
+																addressFormalData.filter((i) => i.type === 'registered')
+																	.length === 0)
+														}
+														required
+														label='N° / Km'
+														id='formalData.address.nKm'
+														name='formalData.address.nKm'
+														value={capitalize(form.formalData.address.nKm)}
+														onChange={handleChange}
+														variant='outlined'
+													/>
+
+													<TextField
+														className='mt-8 mb-16 mr-8'
+														label='Piso'
+														id='formalData.address.piso'
+														name='formalData.address.piso'
+														value={capitalize(form.formalData.address.piso)}
+														onChange={handleChange}
+														variant='outlined'
+													/>
+
+													<TextField
+														className='mt-8 mb-16 mr-8'
+														label='Departamento'
+														id='formalData.address.depto'
+														name='formalData.address.depto'
+														value={capitalize(form.formalData.address.depto)}
+														onChange={handleChange}
+														variant='outlined'
+													/>
+												</div>
+												<div className='flex justify-around items-center'>
+													<TextField
+														className='mt-8 mb-16 mr-8'
+														error={
+															form.formalData.address.localidad === '' &&
+															(addressFormalData.filter((i) => i.type === 'legal')
+																.length === 0 ||
+																addressFormalData.filter((i) => i.type === 'registered')
+																	.length === 0)
+														}
+														required
+														label='Localidad'
+														id='formalData.address.localidad'
+														name='formalData.address.localidad'
+														value={capitalize(form.formalData.address.localidad)}
+														onChange={handleChange}
+														variant='outlined'
+													/>
+
+													<TextField
+														className='mt-8 mb-16 mr-8'
+														error={
+															form.formalData.address.codigo_postal === '' &&
+															(addressFormalData.filter((i) => i.type === 'legal')
+																.length === 0 ||
+																addressFormalData.filter((i) => i.type === 'registered')
+																	.length === 0)
+														}
+														required
+														label='Codigo Postal'
+														id='formalData.address.codigo_postal'
+														name='formalData.address.codigo_postal'
+														value={form.formalData.address.codigo_postal}
+														onChange={handleChange}
+														variant='outlined'
+													/>
+
+													<TextField
+														className='mt-8 mb-16 mr-8'
+														error={
+															form.formalData.address.partido === '' &&
+															(addressFormalData.filter((i) => i.type === 'legal')
+																.length === 0 ||
+																addressFormalData.filter((i) => i.type === 'registered')
+																	.length === 0)
+														}
+														required
+														label='Partido'
+														id='formalData.address.partido'
+														name='formalData.address.partido'
+														value={capitalize(form.formalData.address.partido)}
+														onChange={handleChange}
+														variant='outlined'
+													/>
+
+													<TextField
+														className='mt-8 mb-16 mr-8'
+														error={
+															form.formalData.address.provincia === '' &&
+															(addressFormalData.filter((i) => i.type === 'legal')
+																.length === 0 ||
+																addressFormalData.filter((i) => i.type === 'registered')
+																	.length === 0)
+														}
+														required
+														label='Provincia'
+														id='formalData.address.provincia'
+														name='formalData.address.provincia'
+														value={capitalize(form.formalData.address.provincia)}
+														onChange={handleChange}
+														variant='outlined'
+													/>
+												</div>
+											</React.Fragment>
+										)}
+										{tabInnerFormal === 2 && (
+											<React.Fragment>
+												{legalRepresentativeFormalData.length > 0 && (
+													<div className='flex justify-around items-center mb-16'>
+														<FuseAnimate animation='transition.slideRightIn' delay={300}>
+															<Button
+																className='whitespace-no-wrap '
+																variant='contained'
+																onClick={() =>
+																	seeModalData(
+																		legalRepresentativeFormalData,
+																		'legalRepresentativeFormalData'
+																	)}
+															>
+																Ver representantes agregados
+															</Button>
+														</FuseAnimate>
+													</div>
+												)}
+												<div className='flex justify-center items-center'>
+													<TextField
+														className='mt-8 mb-16 mr-8'
+														error={
+															form.formalData.legalRepresentative.first_name === '' &&
+															legalRepresentativeFormalData.length === 0
+														}
+														required
+														label='Nombre'
+														id='formalData.legalRepresentative.first_name'
+														name='formalData.legalRepresentative.first_name'
+														value={capitalize(
+															form.formalData.legalRepresentative.first_name
+														)}
+														onChange={handleChange}
+														variant='outlined'
+													/>
+
+													<TextField
+														className='mt-8 mb-16 mr-8'
+														error={
+															form.formalData.legalRepresentative.last_name === '' &&
+															legalRepresentativeFormalData.length === 0
+														}
+														required
+														label='Apellido'
+														id='formalData.legalRepresentative.last_name'
+														name='formalData.legalRepresentative.last_name'
+														value={capitalize(
+															form.formalData.legalRepresentative.last_name
+														)}
+														onChange={handleChange}
+														variant='outlined'
+													/>
+
+													<NumberFormat
+														variant='outlined'
+														className='mt-8 mb-16 mr-8'
+														label='DNI'
+														error={
+															form.formalData.legalRepresentative.dni.replace(' ', '')
+																.length <= 9 &&
+															legalRepresentativeFormalData.length === 0
+														}
+														required
+														id='formalData.legalRepresentative.dni'
+														name='formalData.legalRepresentative.dni'
+														value={form.formalData.legalRepresentative.dni}
+														customInput={TextField}
+														format='##.###.###'
+														onValueChange={({ formattedValue }) => {
+															setForm(
+																_.set(
+																	{ ...form },
+																	'formalData.legalRepresentative.dni',
+																	formattedValue
+																)
+															);
+														}}
+													/>
+
+													<TextField
+														className='mt-8 mb-16 mr-8'
+														error={
+															form.formalData.legalRepresentative.position === '' &&
+															legalRepresentativeFormalData.length === 0
+														}
+														required
+														label='Cargo'
+														id='formalData.legalRepresentative.position'
+														name='formalData.legalRepresentative.position'
+														value={capitalize(form.formalData.legalRepresentative.position)}
+														onChange={handleChange}
+														variant='outlined'
+													/>
+
+													<NumberFormat
+														className='mt-8 mb-16 mr-8'
+														error={
+															legalRepresentativeFormalData.length === 0 &&
+															form.formalData.legalRepresentative.cuil.replace(' ', '')
+																.length <= 12
+														}
+														required
+														label='CUIL'
+														id='formalData.legalRepresentative.cuil'
+														name='formalData.legalRepresentative.cuil'
+														value={form.formalData.legalRepresentative.cuil}
+														variant='outlined'
+														customInput={TextField}
+														format='##-########-#'
+														onValueChange={({ formattedValue }) => {
+															setForm(
+																_.set(
+																	{ ...form },
+																	'formalData.legalRepresentative.cuil',
+																	formattedValue
+																)
+															);
+														}}
+													/>
+
+													<FuseAnimate animation='transition.slideRightIn' delay={300}>
+														<Button
+															className='whitespace-no-wrap mt-8 mb-16 mr-8 h-56'
+															variant='contained'
+															disabled={!formalDataLegalRepresentativeSubmitted()}
+															onClick={() =>
+																addFormalDataLegalRepresentative(
+																	form.formalData.legalRepresentative
+																)}
+														>
+															Guardar
+														</Button>
+													</FuseAnimate>
+												</div>
+
+												<div className={classes.root}>
+													<Grid container spacing={3}>
+														<Grid item xs={6}>
+															<Paper className={classes.paper}>
+																<EstatutoDropZone
+																	formalDataFiles={formalDataFiles}
+																	files={estatuto}
+																	setFormalDataFiles={setFormalDataFiles}
+																	callBack={useCallback}
+																	getSignedUrl={getSignedUrl}
+																	loading={estatutosLoading}
+																	toggleLoading={toggleLoadingFiles}
+																	loadingFiles={loadingFiles}
+																	deleting={estatutosDeleting}
+																	toggleDelete={toggleDeleteFiles}
+																	deletingFiles={deletingFiles}
+																	toggleDisabledFiles={toggleDisabledFiles}
+																	disabledFiles={disabledFiles}
+																/>
+															</Paper>
+														</Grid>
+														<Grid item xs={6}>
+															<Paper className={classes.paper}>
+																<ActaDesignacionDropZone
+																	formalDataFiles={formalDataFiles}
+																	files={actaDesignacion}
+																	setFormalDataFiles={setFormalDataFiles}
+																	callBack={useCallback}
+																	getSignedUrl={getSignedUrl}
+																	loading={actasLoading}
+																	toggleLoading={toggleLoadingFiles}
+																	loadingFiles={loadingFiles}
+																	deleting={actasDeleting}
+																	toggleDelete={toggleDeleteFiles}
+																	deletingFiles={deletingFiles}
+																	toggleDisabledFiles={toggleDisabledFiles}
+																	disabledFiles={disabledFiles}
+																/>
+															</Paper>
+														</Grid>
+														<Grid item xs={6}>
+															<Paper className={classes.paper}>
+																<PoderesDropZone
+																	formalDataFiles={formalDataFiles}
+																	files={poderes}
+																	setFormalDataFiles={setFormalDataFiles}
+																	callBack={useCallback}
+																	getSignedUrl={getSignedUrl}
+																	loading={poderesLoading}
+																	toggleLoading={toggleLoadingFiles}
+																	loadingFiles={loadingFiles}
+																	deleting={poderesDeleting}
+																	toggleDelete={toggleDeleteFiles}
+																	deletingFiles={deletingFiles}
+																	toggleDisabledFiles={toggleDisabledFiles}
+																	disabledFiles={disabledFiles}
+																/>
+															</Paper>
+														</Grid>
+														<Grid item xs={6}>
+															<Paper className={classes.paper}>
+																<ExtraDropZone
+																	formalDataFiles={formalDataFiles}
+																	files={extraPdfs}
+																	setFormalDataFiles={setFormalDataFiles}
+																	callBack={useCallback}
+																	getSignedUrl={getSignedUrl}
+																	loading={extrasLoading}
+																	toggleLoading={toggleLoadingFiles}
+																	loadingFiles={loadingFiles}
+																	deleting={extrasDeleting}
+																	toggleDelete={toggleDeleteFiles}
+																	deletingFiles={deletingFiles}
+																	toggleDisabledFiles={toggleDisabledFiles}
+																	disabledFiles={disabledFiles}
+																/>
+															</Paper>
+														</Grid>
+													</Grid>
+												</div>
+
+												<div className={classes.root}>
+													<Grid container spacing={3}>
+														<Grid item xs={12}>
+															<Paper className={classes.paper}>
+																<DniDocumentDropZone
+																	formalDataFiles={formalDataFiles}
+																	files={dniDocument}
+																	setFormalDataFiles={setFormalDataFiles}
+																	callBack={useCallback}
+																	getSignedUrl={getSignedUrl}
+																	loading={dniDocumentLoading}
+																	toggleLoading={toggleLoadingFiles}
+																	loadingFiles={loadingFiles}
+																	deleting={dniDocumentDeleting}
+																	toggleDelete={toggleDeleteFiles}
+																	deletingFiles={deletingFiles}
+																	toggleDisabledFiles={toggleDisabledFiles}
+																	disabledFiles={disabledFiles}
+																/>
+															</Paper>
+														</Grid>
+													</Grid>
+												</div>
+											</React.Fragment>
+										)}
+									</div>
+								)}
+								{tabValue === 1 && (
+									<React.Fragment>
+										<Tabs
+											value={tabInnerPlanta}
+											onChange={(e, value) => handleChangeInnerTab(value, 'Planta')}
+											indicatorColor='secondary'
+											textColor='secondary'
+											variant='scrollable'
+											scrollButtons='auto'
+											classes={{ root: 'w-full mb-16 pb-8' }}
+										>
+											<Tab className='h-64 normal-case' label='Datos Basicos' />
+											<Tab className='h-64 normal-case' label='Contactos' />
+											<Tab className='h-64 normal-case' label='Usuarios Gubernamentales' />
+											<Tab className='h-64 normal-case' label='Inmuebles' />
+										</Tabs>
+										{tabInnerPlanta === 0 && (
+											<React.Fragment>
+												{form.formalData.clientId !== '' && (
+													<div className='flex justify-around items-center mb-16'>
+														<FuseAnimate animation='transition.slideLeftIn' delay={300}>
+															<Typography variant='h5'>
+																{dataPlanta.length > 0 ? (
+																	`ID del establecimiento: ${form.formalData
+																		.clientId}-${dataPlanta.length + 1}`
+																) : (
+																	`ID del establecimiento: ${form.formalData
+																		.clientId}`
+																)}
+															</Typography>
+														</FuseAnimate>
+													</div>
+												)}
+
+												<div className='flex justify-around items-center'>
+													<TextField
+														className='mt-8 mb-16 mr-8'
+														error={form.planta.address.calleRuta === ''}
+														required
+														label='Calle / Ruta'
+														id='planta.address.calleRuta'
+														name='planta.address.calleRuta'
+														value={capitalize(form.planta.address.calleRuta)}
+														onChange={handleChange}
+														variant='outlined'
+													/>
+
+													<TextField
+														className='mt-8 mb-16 mr-8'
+														error={form.planta.address.nKm === ''}
+														required
+														label='N° / Km'
+														id='planta.address.nKm'
+														name='planta.address.nKm'
+														value={capitalize(form.planta.address.nKm)}
+														onChange={handleChange}
+														variant='outlined'
+													/>
+
+													<TextField
+														className='mt-8 mb-16 mr-8'
+														label='Piso'
+														id='planta.address.piso'
+														name='planta.address.piso'
+														value={capitalize(form.planta.address.piso)}
+														onChange={handleChange}
+														variant='outlined'
+													/>
+
+													<TextField
+														className='mt-8 mb-16 mr-8'
+														label='Departamento'
+														id='planta.address.depto'
+														name='planta.address.depto'
+														value={capitalize(form.planta.address.depto)}
+														onChange={handleChange}
+														variant='outlined'
+													/>
+												</div>
+												<div className='flex justify-around items-center'>
+													<TextField
+														className='mt-8 mb-16 mr-8'
+														error={form.planta.address.localidad === ''}
+														required
+														label='Localidad'
+														id='planta.address.localidad'
+														name='planta.address.localidad'
+														value={capitalize(form.planta.address.localidad)}
+														onChange={handleChange}
+														variant='outlined'
+													/>
+
+													<TextField
+														className='mt-8 mb-16 mr-8'
+														error={form.planta.address.codigo_postal === ''}
+														required
+														label='Codigo Postal'
+														id='planta.address.codigo_postal'
+														name='planta.address.codigo_postal'
+														value={capitalize(form.planta.address.codigo_postal)}
+														onChange={handleChange}
+														variant='outlined'
+													/>
+
+													<TextField
+														className='mt-8 mb-16 mr-8'
+														error={form.planta.address.partido === ''}
+														required
+														label='Partido'
+														id='planta.address.partido'
+														name='planta.address.partido'
+														value={capitalize(form.planta.address.partido)}
+														onChange={handleChange}
+														variant='outlined'
+													/>
+
+													<TextField
+														className='mt-8 mb-16 mr-8'
+														error={form.planta.address.provincia === ''}
+														required
+														label='Provincia'
+														id='planta.address.provincia'
+														name='planta.address.provincia'
+														value={capitalize(form.planta.address.provincia)}
+														onChange={handleChange}
+														variant='outlined'
+													/>
+												</div>
+											</React.Fragment>
+										)}
+										{tabInnerPlanta === 1 && (
+											<div>
 												<TextField
 													className='mt-8 mb-16 mr-8'
-													error={form.planta.address.calleRuta === ''}
-													required
-													label='Calle / Ruta'
-													id='planta.address.calleRuta'
-													name='planta.address.calleRuta'
-													value={capitalize(form.planta.address.calleRuta)}
+													label='Email de la planta'
+													id='planta.email'
+													name='planta.email'
+													error={!isEmail(form.planta.email)}
+													value={form.planta.email}
 													onChange={handleChange}
 													variant='outlined'
+													fullWidth
 												/>
 
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													error={form.planta.address.nKm === ''}
-													required
-													label='N° / Km'
-													id='planta.address.nKm'
-													name='planta.address.nKm'
-													value={capitalize(form.planta.address.nKm)}
-													onChange={handleChange}
-													variant='outlined'
-												/>
+												{phoneContactsPlanta.length > 0 && (
+													<div className='flex flex-row justify-around items-center mb-16'>
+														<FuseAnimate animation='transition.slideRightIn' delay={300}>
+															<Button
+																className='whitespace-no-wrap '
+																variant='contained'
+																onClick={() =>
+																	seeModalData(
+																		phoneContactsPlanta,
+																		'phoneContactsPlanta'
+																	)}
+															>
+																Ver telefonos agregados
+															</Button>
+														</FuseAnimate>
+													</div>
+												)}
 
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													label='Piso'
-													id='planta.address.piso'
-													name='planta.address.piso'
-													value={capitalize(form.planta.address.piso)}
-													onChange={handleChange}
-													variant='outlined'
-												/>
+												<div className='flex'>
+													<TextField
+														className='mt-8 mb-16 mr-8'
+														label='Telefono(s) de Contacto'
+														id='planta.phoneContacts'
+														name='planta.phoneContacts'
+														value={form.planta.phoneContacts}
+														onChange={handleChange}
+														variant='outlined'
+														fullWidth
+													/>
 
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													label='Departamento'
-													id='planta.address.depto'
-													name='planta.address.depto'
-													value={capitalize(form.planta.address.depto)}
-													onChange={handleChange}
-													variant='outlined'
-												/>
-											</div>
-											<div className='flex justify-around items-center'>
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													error={form.planta.address.localidad === ''}
-													required
-													label='Localidad'
-													id='planta.address.localidad'
-													name='planta.address.localidad'
-													value={capitalize(form.planta.address.localidad)}
-													onChange={handleChange}
-													variant='outlined'
-												/>
+													<FuseAnimate animation='transition.slideRightIn' delay={300}>
+														<Button
+															className='whitespace-no-wrap mt-8 mb-16 mr-8 h-56'
+															variant='contained'
+															disabled={!plantaPhoneContactsSubmitted()}
+															onClick={() =>
+																addPlantaPhoneContacts(form.planta.phoneContacts)}
+														>
+															Guardar telefono
+														</Button>
+													</FuseAnimate>
+												</div>
 
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													error={form.planta.address.codigo_postal === ''}
-													required
-													label='Codigo Postal'
-													id='planta.address.codigo_postal'
-													name='planta.address.codigo_postal'
-													value={capitalize(form.planta.address.codigo_postal)}
-													onChange={handleChange}
-													variant='outlined'
-												/>
-
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													error={form.planta.address.partido === ''}
-													required
-													label='Partido'
-													id='planta.address.partido'
-													name='planta.address.partido'
-													value={capitalize(form.planta.address.partido)}
-													onChange={handleChange}
-													variant='outlined'
-												/>
-
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													error={form.planta.address.provincia === ''}
-													required
-													label='Provincia'
-													id='planta.address.provincia'
-													name='planta.address.provincia'
-													value={capitalize(form.planta.address.provincia)}
-													onChange={handleChange}
-													variant='outlined'
-												/>
-											</div>
-										</React.Fragment>
-									)}
-									{tabInnerPlanta === 1 && (
-										<div>
-											<TextField
-												className='mt-8 mb-16 mr-8'
-												label='Email de la planta'
-												id='planta.email'
-												name='planta.email'
-												error={!isEmail(form.planta.email)}
-												value={form.planta.email}
-												onChange={handleChange}
-												variant='outlined'
-												fullWidth
-											/>
-
-											{phoneContactsPlanta.length > 0 && (
 												<div className='flex flex-row justify-around items-center mb-16'>
 													<FuseAnimate animation='transition.slideRightIn' delay={300}>
 														<Button
-															className='whitespace-no-wrap '
+															className='whitespace-no-wrap'
 															variant='contained'
+															disabled={!plantaInnerContactsSubmitted()}
 															onClick={() =>
-																seeModalData(
-																	phoneContactsPlanta,
-																	'phoneContactsPlanta'
-																)}
+																addPlantaInnerContacts(form.planta.innerContact)}
 														>
-															Ver telefonos agregados
+															Crear contacto interno
 														</Button>
 													</FuseAnimate>
-												</div>
-											)}
-
-											<div className='flex'>
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													label='Telefono(s) de Contacto'
-													id='planta.phoneContacts'
-													name='planta.phoneContacts'
-													value={form.planta.phoneContacts}
-													onChange={handleChange}
-													variant='outlined'
-													fullWidth
-												/>
-
-												<FuseAnimate animation='transition.slideRightIn' delay={300}>
-													<Button
-														className='whitespace-no-wrap mt-8 mb-16 mr-8 h-56'
-														variant='contained'
-														disabled={!plantaPhoneContactsSubmitted()}
-														onClick={() =>
-															addPlantaPhoneContacts(form.planta.phoneContacts)}
-													>
-														Guardar telefono
-													</Button>
-												</FuseAnimate>
-											</div>
-
-											<div className='flex flex-row justify-around items-center mb-16'>
-												<FuseAnimate animation='transition.slideRightIn' delay={300}>
-													<Button
-														className='whitespace-no-wrap'
-														variant='contained'
-														disabled={!plantaInnerContactsSubmitted()}
-														onClick={() => addPlantaInnerContacts(form.planta.innerContact)}
-													>
-														Crear contacto interno
-													</Button>
-												</FuseAnimate>
-												{innerContactsPlanta.length > 0 && (
-													<FuseAnimate animation='transition.slideRightIn' delay={300}>
-														<Button
-															className='whitespace-no-wrap '
-															variant='contained'
-															onClick={() =>
-																seeModalData(
-																	innerContactsPlanta,
-																	'innerContactsPlanta'
-																)}
-														>
-															Ver contactos creados
-														</Button>
-													</FuseAnimate>
-												)}
-											</div>
-
-											<div className='flex'>
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													label='Nombre del contacto interno'
-													id='planta.innerContact.name'
-													name='planta.innerContact.name'
-													value={capitalize(form.planta.innerContact.name)}
-													onChange={handleChange}
-													variant='outlined'
-													fullWidth
-												/>
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													label='Apellido del contacto interno'
-													id='planta.innerContact.lastName'
-													name='planta.innerContact.lastName'
-													value={capitalize(form.planta.innerContact.lastName)}
-													onChange={handleChange}
-													variant='outlined'
-													fullWidth
-												/>
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													label='Telefono del Contacto interno'
-													id='planta.innerContact.phone'
-													name='planta.innerContact.phone'
-													value={form.planta.innerContact.phone}
-													onChange={handleChange}
-													variant='outlined'
-													fullWidth
-												/>
-											</div>
-											{innerContactsEmailPlanta.length > 0 && (
-												<div className='flex flex-row justify-around items-center mb-16'>
-													<FuseAnimate animation='transition.slideRightIn' delay={300}>
-														<Button
-															className='whitespace-no-wrap '
-															variant='contained'
-															onClick={() =>
-																seeModalData(
-																	innerContactsEmailPlanta,
-																	'innerContactsEmailPlanta'
-																)}
-														>
-															Ver correos agregados
-														</Button>
-													</FuseAnimate>
-												</div>
-											)}
-											<div className='flex'>
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													label='Email del contacto'
-													id='planta.innerContact.email'
-													name='planta.innerContact.email'
-													error={!isEmail(form.planta.innerContact.email)}
-													value={form.planta.innerContact.email}
-													onChange={handleChange}
-													variant='outlined'
-													fullWidth
-												/>
-
-												<FuseAnimate animation='transition.slideRightIn' delay={300}>
-													<Button
-														className='whitespace-no-wrap mt-8 mb-16 mr-8 h-56'
-														variant='contained'
-														disabled={!plantaInnerContactEmailSubmitted()}
-														onClick={() =>
-															addPlantaInnerContactsEmail(form.planta.innerContact.email)}
-													>
-														Guardar email
-													</Button>
-												</FuseAnimate>
-											</div>
-											<div className='flex'>
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													label='Cargo'
-													id='planta.innerContact.position'
-													name='planta.innerContact.position'
-													value={capitalize(form.planta.innerContact.position)}
-													onChange={handleChange}
-													variant='outlined'
-													fullWidth
-												/>
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													label='Area'
-													id='planta.innerContact.workArea'
-													name='planta.innerContact.workArea'
-													value={capitalize(form.planta.innerContact.workArea)}
-													onChange={handleChange}
-													variant='outlined'
-													fullWidth
-												/>
-											</div>
-										</div>
-									)}
-									{tabInnerPlanta === 2 && (
-										<div>
-											<FormGroup row>
-												<FormControlLabel
-													control={
-														<Checkbox
-															checked={opds}
-															onChange={() => {
-																toggleCheckBox({
-																	...checkBox,
-																	opds : !opds
-																});
-															}}
-															value='gola'
-														/>
-													}
-													label='Tiene cuenta OPDS'
-												/>
-
-												<FormControlLabel
-													control={
-														<Checkbox
-															checked={ada}
-															onChange={() => {
-																toggleCheckBox({
-																	...checkBox,
-																	ada : !ada
-																});
-															}}
-															value='gola'
-														/>
-													}
-													label='Tiene cuenta ADA'
-												/>
-
-												<FormControlLabel
-													control={
-														<Checkbox
-															checked={ina}
-															onChange={() => {
-																toggleCheckBox({
-																	...checkBox,
-																	ina : !ina
-																});
-															}}
-															value='gola'
-														/>
-													}
-													label='Tiene cuenta INA'
-												/>
-
-												<FormControlLabel
-													control={
-														<Checkbox
-															checked={acumar}
-															onChange={() => {
-																toggleCheckBox({
-																	...checkBox,
-																	acumar : !acumar
-																});
-															}}
-															value='gola'
-														/>
-													}
-													label='Tiene cuenta ACUMAR'
-												/>
-											</FormGroup>
-											{opds && (
-												<div className='flex'>
-													<TextField
-														className='mt-8 mb-16 mr-8'
-														label='Usuario (OPDS)'
-														id='planta.govermentUsers.opds.user'
-														name='planta.govermentUsers.opds.user'
-														value={form.planta.govermentUsers.opds.user}
-														error={form.planta.govermentUsers.opds.user === ''}
-														onChange={handleChange}
-														variant='outlined'
-														fullWidth
-													/>
-
-													<TextField
-														className='mt-8 mb-16 mr-8'
-														label='Clave (OPDS)'
-														id='planta.govermentUsers.opds.pass'
-														name='planta.govermentUsers.opds.pass'
-														value={form.planta.govermentUsers.opds.pass}
-														error={form.planta.govermentUsers.opds.pass === ''}
-														onChange={handleChange}
-														variant='outlined'
-														fullWidth
-													/>
-												</div>
-											)}
-											{ada && (
-												<div className='flex'>
-													<TextField
-														className='mt-8 mb-16 mr-8'
-														label='Usuario (ADA)'
-														id='planta.govermentUsers.ada.user'
-														name='planta.govermentUsers.ada.user'
-														value={form.planta.govermentUsers.ada.user}
-														error={form.planta.govermentUsers.ada.user === ''}
-														onChange={handleChange}
-														variant='outlined'
-														fullWidth
-													/>
-
-													<TextField
-														className='mt-8 mb-16 mr-8'
-														label='Clave (ADA)'
-														id='planta.govermentUsers.ada.pass'
-														name='planta.govermentUsers.ada.pass'
-														value={form.planta.govermentUsers.ada.pass}
-														error={form.planta.govermentUsers.ada.pass === ''}
-														onChange={handleChange}
-														variant='outlined'
-														fullWidth
-													/>
-												</div>
-											)}
-											{ina && (
-												<div className='flex'>
-													<TextField
-														className='mt-8 mb-16 mr-8'
-														label='Usuario (INA)'
-														id='planta.govermentUsers.ina.user'
-														name='planta.govermentUsers.ina.user'
-														value={form.planta.govermentUsers.ina.user}
-														error={form.planta.govermentUsers.ina.user === ''}
-														onChange={handleChange}
-														variant='outlined'
-														fullWidth
-													/>
-
-													<TextField
-														className='mt-8 mb-16 mr-8'
-														label='Clave (INA)'
-														id='planta.govermentUsers.ina.pass'
-														name='planta.govermentUsers.ina.pass'
-														value={form.planta.govermentUsers.ina.pass}
-														error={form.planta.govermentUsers.ina.pass === ''}
-														onChange={handleChange}
-														variant='outlined'
-														fullWidth
-													/>
-												</div>
-											)}
-											{acumar && (
-												<div className='flex'>
-													<TextField
-														className='mt-8 mb-16 mr-8'
-														label='Usuario (ACUMAR)'
-														id='planta.govermentUsers.acumar.user'
-														name='planta.govermentUsers.acumar.user'
-														value={form.planta.govermentUsers.acumar.user}
-														error={form.planta.govermentUsers.acumar.user === ''}
-														onChange={handleChange}
-														variant='outlined'
-														fullWidth
-													/>
-
-													<TextField
-														className='mt-8 mb-16 mr-8'
-														label='Clave (ACUMAR)'
-														id='planta.govermentUsers.acumar.pass'
-														name='planta.govermentUsers.acumar.pass'
-														value={form.planta.govermentUsers.acumar.pass}
-														error={form.planta.govermentUsers.acumar.pass === ''}
-														onChange={handleChange}
-														variant='outlined'
-														fullWidth
-													/>
-												</div>
-											)}
-										</div>
-									)}
-									{tabInnerPlanta === 3 && (
-										<div>
-											<div className='flex flex-row justify-around items-center mb-16'>
-												<FuseAnimate animation='transition.slideRightIn' delay={300}>
-													<Button
-														className='whitespace-no-wrap'
-														variant='contained'
-														onClick={() => closeMobiliaryModal(!showMobiliaryModal)}
-													>
-														Escoger campos a llenar
-													</Button>
-												</FuseAnimate>
-
-												<FuseAnimate animation='transition.slideRightIn' delay={300}>
-													<Button
-														className='whitespace-no-wrap'
-														variant='contained'
-														disabled={!plantaMobiliarySubmitted()}
-														onClick={() => addPlantaMobiliary(form.planta.mobiliary)}
-													>
-														Crear Inmueble
-													</Button>
-												</FuseAnimate>
-												{mobiliaryPlanta.length > 0 && (
-													<FuseAnimate animation='transition.slideRightIn' delay={300}>
-														<Button
-															className='whitespace-no-wrap '
-															variant='contained'
-															onClick={() =>
-																seeModalData(mobiliaryPlanta, 'mobiliaryPlanta')}
-														>
-															Ver inmuebles agregados
-														</Button>
-													</FuseAnimate>
-												)}
-												<FuseAnimate animation='transition.slideRightIn' delay={300}>
-													<Button
-														className='whitespace-no-wrap'
-														variant='contained'
-														disabled={!plantaSubmitted()}
-														onClick={() => addDataPlanta(form.planta)}
-													>
-														Crear Planta
-													</Button>
-												</FuseAnimate>
-												{dataPlanta.length > 0 && (
-													<FuseAnimate animation='transition.slideRightIn' delay={300}>
-														<Button
-															className='whitespace-no-wrap '
-															variant='contained'
-															onClick={() => seeModalData(dataPlanta, 'dataPlanta')}
-														>
-															Ver plantas agregadas
-														</Button>
-													</FuseAnimate>
-												)}
-											</div>
-
-											<div className='flex'>
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													label='Partida Inmobiliara Provincial'
-													id='planta.mobiliary.partidaInmobiliaria'
-													name='planta.mobiliary.partidaInmobiliaria'
-													value={form.planta.mobiliary.partidaInmobiliaria}
-													onChange={handleChange}
-													variant='outlined'
-													fullWidth
-													required
-													error={form.planta.mobiliary.partidaInmobiliaria === ''}
-												/>
-
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													label='Circunscripción'
-													id='planta.mobiliary.circunscripcion'
-													name='planta.mobiliary.circunscripcion'
-													value={capitalize(form.planta.mobiliary.circunscripcion)}
-													onChange={handleChange}
-													variant='outlined'
-													fullWidth
-													required
-													error={form.planta.mobiliary.circunscripcion === ''}
-												/>
-
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													label='Sección'
-													id='planta.mobiliary.seccion'
-													name='planta.mobiliary.seccion'
-													value={capitalize(form.planta.mobiliary.seccion)}
-													onChange={handleChange}
-													variant='outlined'
-													fullWidth
-													required
-													error={form.planta.mobiliary.seccion === ''}
-												/>
-
-												<TextField
-													className='mt-8 mb-16 mr-8'
-													label='Caracter de uso de suelo'
-													id='planta.mobiliary.caracterUso'
-													name='planta.mobiliary.caracterUso'
-													value={capitalize(form.planta.mobiliary.caracterUso)}
-													onChange={handleChange}
-													variant='outlined'
-													fullWidth
-													required
-													error={form.planta.mobiliary.caracterUso === ''}
-												/>
-											</div>
-
-											{(checkBoxMobiliary.fraccion ||
-												checkBoxMobiliary.manzana ||
-												checkBoxMobiliary.parcela ||
-												checkBoxMobiliary.poligono) && (
-												<FuseAnimate animation='transition.fadeIn' delay={300}>
-													<div className='flex'>
-														{checkBoxMobiliary.fraccion && (
-															<FuseAnimate
-																animation='transition.slideRightIn'
-																delay={300}
+													{innerContactsPlanta.length > 0 && (
+														<FuseAnimate animation='transition.slideRightIn' delay={300}>
+															<Button
+																className='whitespace-no-wrap '
+																variant='contained'
+																onClick={() =>
+																	seeModalData(
+																		innerContactsPlanta,
+																		'innerContactsPlanta'
+																	)}
 															>
-																<TextField
-																	className='mt-8 mb-16 mr-8'
-																	label='Fracción'
-																	id='planta.mobiliary.fraccion'
-																	name='planta.mobiliary.fraccion'
-																	value={form.planta.mobiliary.fraccion}
-																	onChange={handleChange}
-																	variant='outlined'
-																	fullWidth
-																/>
-															</FuseAnimate>
-														)}
-
-														{checkBoxMobiliary.manzana && (
-															<FuseAnimate
-																animation='transition.slideRightIn'
-																delay={300}
-															>
-																<TextField
-																	className='mt-8 mb-16 mr-8'
-																	label='Manzana'
-																	id='planta.mobiliary.manzana'
-																	name='planta.mobiliary.manzana'
-																	value={form.planta.mobiliary.manzana}
-																	onChange={handleChange}
-																	variant='outlined'
-																	fullWidth
-																/>
-															</FuseAnimate>
-														)}
-
-														{checkBoxMobiliary.parcela && (
-															<FuseAnimate
-																animation='transition.slideRightIn'
-																delay={300}
-															>
-																<TextField
-																	className='mt-8 mb-16 mr-8'
-																	label='Parcela'
-																	id='planta.mobiliary.parcela'
-																	name='planta.mobiliary.parcela'
-																	value={form.planta.mobiliary.parcela}
-																	onChange={handleChange}
-																	variant='outlined'
-																	fullWidth
-																/>
-															</FuseAnimate>
-														)}
-
-														{checkBoxMobiliary.poligono && (
-															<FuseAnimate
-																animation='transition.slideRightIn'
-																delay={300}
-															>
-																<TextField
-																	className='mt-8 mb-16 mr-8'
-																	label='Poligono'
-																	id='planta.mobiliary.poligono'
-																	name='planta.mobiliary.poligono'
-																	value={form.planta.mobiliary.poligono}
-																	onChange={handleChange}
-																	variant='outlined'
-																	fullWidth
-																/>
-															</FuseAnimate>
-														)}
-													</div>
-												</FuseAnimate>
-											)}
-
-											{(checkBoxMobiliary.propietario ||
-												checkBoxMobiliary.matricula ||
-												checkBoxMobiliary.superficie) && (
-												<FuseAnimate animation='transition.fadeIn' delay={300}>
-													<div className='flex'>
-														{checkBoxMobiliary.propietario && (
-															<TextField
-																className='mt-8 mb-16 mr-8'
-																label='Propietario'
-																id='planta.mobiliary.propietario'
-																name='planta.mobiliary.propietario'
-																value={capitalize(form.planta.mobiliary.propietario)}
-																onChange={handleChange}
-																variant='outlined'
-																fullWidth
-															/>
-														)}
-
-														{checkBoxMobiliary.matricula && (
-															<TextField
-																className='mt-8 mb-16 mr-8'
-																label='Matricula en registro de la propiedad'
-																id='planta.mobiliary.matricula'
-																name='planta.mobiliary.matricula'
-																value={form.planta.mobiliary.matricula}
-																onChange={handleChange}
-																variant='outlined'
-																fullWidth
-															/>
-														)}
-
-														{checkBoxMobiliary.superficie && (
-															<TextField
-																className='mt-8 mb-16 mr-8'
-																label='Superficie numérica'
-																id='planta.mobiliary.superficie'
-																name='planta.mobiliary.superficie'
-																placeholder='24512,52'
-																value={form.planta.mobiliary.superficie}
-																onChange={handleChange}
-																error={
-																	!isValidDecimalNumber(
-																		form.planta.mobiliary.superficie
-																	)
-																}
-																variant='outlined'
-																fullWidth
-															/>
-														)}
-													</div>
-												</FuseAnimate>
-											)}
-
-											<div className={classes.root}>
-												<Grid container spacing={3}>
-													<Grid item xs={checkBoxMobiliary.documentacionUso ? 6 : 12}>
-														<Paper className={classes.paper}>
-															<PlanchetaDropZone
-																formalDataFiles={formalDataFiles}
-																files={planchetas}
-																setFormalDataFiles={setFormalDataFiles}
-																callBack={useCallback}
-																getSignedUrl={getSignedUrl}
-																loading={planchetasLoading}
-																toggleLoading={toggleLoadingFiles}
-																loadingFiles={loadingFiles}
-																deleting={planchetasDeleting}
-																toggleDelete={toggleDeleteFiles}
-																deletingFiles={deletingFiles}
-																toggleDisabledFiles={toggleDisabledFiles}
-																disabledFiles={disabledFiles}
-															/>
-														</Paper>
-													</Grid>
-													{checkBoxMobiliary.documentacionUso && (
-														<FuseAnimate animation='transition.fadeIn' delay={300}>
-															<Grid item xs={6}>
-																<Paper className={classes.paper}>
-																	<DocumentacionUsoDropZone
-																		formalDataFiles={formalDataFiles}
-																		files={documentacionUso}
-																		setFormalDataFiles={setFormalDataFiles}
-																		callBack={useCallback}
-																		getSignedUrl={getSignedUrl}
-																		loading={documentacionUsoLoading}
-																		toggleLoading={toggleLoadingFiles}
-																		loadingFiles={loadingFiles}
-																		deleting={documentacionUsoDeleting}
-																		toggleDelete={toggleDeleteFiles}
-																		deletingFiles={deletingFiles}
-																		toggleDisabledFiles={toggleDisabledFiles}
-																		disabledFiles={disabledFiles}
-																	/>
-																</Paper>
-															</Grid>
+																Ver contactos creados
+															</Button>
 														</FuseAnimate>
 													)}
-												</Grid>
-											</div>
+												</div>
 
-											{checkBoxMobiliary.observaciones && (
-												<FuseAnimate animation='transition.fadeIn' delay={300}>
+												<div className='flex'>
 													<TextField
-														className='mt-8 mb-16'
-														id='planta.mobiliary.observaciones'
-														name='planta.mobiliary.observaciones'
+														className='mt-8 mb-16 mr-8'
+														label='Nombre del contacto interno'
+														id='planta.innerContact.name'
+														name='planta.innerContact.name'
+														value={capitalize(form.planta.innerContact.name)}
 														onChange={handleChange}
-														label='Observaciones'
-														type='text'
-														value={form.planta.mobiliary.observaciones}
-														multiline
-														rows={5}
 														variant='outlined'
 														fullWidth
 													/>
-												</FuseAnimate>
-											)}
-										</div>
-									)}
-								</React.Fragment>
-							)}
-						</div>
-					)
-				}
-				innerScroll
-			/>
-			<ShowInfoDialog
-				open={showModal}
-				closeModal={closeModal}
-				setDataModal={setDataModal}
-				data={dataTable}
-				type={typeTable}
-				setDataEdit={setDataEdit}
-				isNewClient={isNew}
-				history={props.history}
-			/>
-			<Dialog
-				classes={{
-					paper : 'm-24'
-				}}
-				open={showMobiliaryModal}
-				onClose={() => closeModalMobiliary()}
-				fullWidth
-				maxWidth='md'
-			>
-				<AppBar position='static' elevation={1}>
-					<Toolbar className='flex w-full'>
-						<IconButton
-							edge='start'
-							color='inherit'
-							onClick={() => closeModalMobiliary()}
-							aria-label='close'
-						>
-							<CloseIcon />
-						</IconButton>
-						<Typography>Campos opcionales del inmueble</Typography>
-					</Toolbar>
-				</AppBar>
-				<div className='flex flex-col overflow-hidden'>
-					<DialogContent classes={{ root: 'p-24' }}>
-						<div className={classes.root}>
-							<FormGroup row>
-								<FormControlLabel
-									control={
-										<Checkbox
-											checked={checkBoxMobiliary.fraccion}
-											onChange={() => {
-												saveFieldsMobiliary('fraccion', !checkBoxMobiliary.fraccion);
-											}}
-											value='gola'
-										/>
-									}
-									label='Posee Fracción'
-								/>
-								<FormControlLabel
-									control={
-										<Checkbox
-											checked={checkBoxMobiliary.manzana}
-											onChange={() => {
-												saveFieldsMobiliary('manzana', !checkBoxMobiliary.manzana);
-											}}
-											value='gola'
-										/>
-									}
-									label='Posee Manzana'
-								/>
-								<FormControlLabel
-									control={
-										<Checkbox
-											checked={checkBoxMobiliary.parcela}
-											onChange={() => {
-												saveFieldsMobiliary('parcela', !checkBoxMobiliary.parcela);
-											}}
-											value='gola'
-										/>
-									}
-									label='Posee Parcela'
-								/>
-								<FormControlLabel
-									control={
-										<Checkbox
-											checked={checkBoxMobiliary.poligono}
-											onChange={() => {
-												saveFieldsMobiliary('poligono', !checkBoxMobiliary.poligono);
-											}}
-											value='gola'
-										/>
-									}
-									label='Posee Poligono'
-								/>
-								<FormControlLabel
-									control={
-										<Checkbox
-											checked={checkBoxMobiliary.propietario}
-											onChange={() => {
-												saveFieldsMobiliary('propietario', !checkBoxMobiliary.propietario);
-											}}
-											value='gola'
-										/>
-									}
-									label='Posee Propietario'
-								/>
-								<FormControlLabel
-									control={
-										<Checkbox
-											checked={checkBoxMobiliary.matricula}
-											onChange={() => {
-												saveFieldsMobiliary('matricula', !checkBoxMobiliary.matricula);
-											}}
-											value='gola'
-										/>
-									}
-									label='Posee Matricula en registro de la propiedad'
-								/>
+													<TextField
+														className='mt-8 mb-16 mr-8'
+														label='Apellido del contacto interno'
+														id='planta.innerContact.lastName'
+														name='planta.innerContact.lastName'
+														value={capitalize(form.planta.innerContact.lastName)}
+														onChange={handleChange}
+														variant='outlined'
+														fullWidth
+													/>
+													<TextField
+														className='mt-8 mb-16 mr-8'
+														label='Telefono del Contacto interno'
+														id='planta.innerContact.phone'
+														name='planta.innerContact.phone'
+														value={form.planta.innerContact.phone}
+														onChange={handleChange}
+														variant='outlined'
+														fullWidth
+													/>
+												</div>
+												{innerContactsEmailPlanta.length > 0 && (
+													<div className='flex flex-row justify-around items-center mb-16'>
+														<FuseAnimate animation='transition.slideRightIn' delay={300}>
+															<Button
+																className='whitespace-no-wrap '
+																variant='contained'
+																onClick={() =>
+																	seeModalData(
+																		innerContactsEmailPlanta,
+																		'innerContactsEmailPlanta'
+																	)}
+															>
+																Ver correos agregados
+															</Button>
+														</FuseAnimate>
+													</div>
+												)}
+												<div className='flex'>
+													<TextField
+														className='mt-8 mb-16 mr-8'
+														label='Email del contacto'
+														id='planta.innerContact.email'
+														name='planta.innerContact.email'
+														error={!isEmail(form.planta.innerContact.email)}
+														value={form.planta.innerContact.email}
+														onChange={handleChange}
+														variant='outlined'
+														fullWidth
+													/>
 
-								<FormControlLabel
-									control={
-										<Checkbox
-											checked={checkBoxMobiliary.observaciones}
-											onChange={() => {
-												saveFieldsMobiliary('observaciones', !checkBoxMobiliary.observaciones);
-											}}
-											value='gola'
-										/>
-									}
-									label='Posee observaciones'
-								/>
-								<FormControlLabel
-									control={
-										<Checkbox
-											checked={checkBoxMobiliary.superficie}
-											onChange={() => {
-												saveFieldsMobiliary('superficie', !checkBoxMobiliary.superficie);
-											}}
-											value='gola'
-										/>
-									}
-									label='Posee Superficie numérica'
-								/>
-								<FormControlLabel
-									control={
-										<Checkbox
-											checked={checkBoxMobiliary.documentacionUso}
-											onChange={() => {
-												saveFieldsMobiliary(
-													'documentacionUso',
-													!checkBoxMobiliary.documentacionUso
-												);
-											}}
-											value='gola'
-										/>
-									}
-									label='Posee documentacion de uso'
-								/>
-							</FormGroup>
-						</div>
-					</DialogContent>
+													<FuseAnimate animation='transition.slideRightIn' delay={300}>
+														<Button
+															className='whitespace-no-wrap mt-8 mb-16 mr-8 h-56'
+															variant='contained'
+															disabled={!plantaInnerContactEmailSubmitted()}
+															onClick={() =>
+																addPlantaInnerContactsEmail(
+																	form.planta.innerContact.email
+																)}
+														>
+															Guardar email
+														</Button>
+													</FuseAnimate>
+												</div>
+												<div className='flex'>
+													<TextField
+														className='mt-8 mb-16 mr-8'
+														label='Cargo'
+														id='planta.innerContact.position'
+														name='planta.innerContact.position'
+														value={capitalize(form.planta.innerContact.position)}
+														onChange={handleChange}
+														variant='outlined'
+														fullWidth
+													/>
+													<TextField
+														className='mt-8 mb-16 mr-8'
+														label='Area'
+														id='planta.innerContact.workArea'
+														name='planta.innerContact.workArea'
+														value={capitalize(form.planta.innerContact.workArea)}
+														onChange={handleChange}
+														variant='outlined'
+														fullWidth
+													/>
+												</div>
+											</div>
+										)}
+										{tabInnerPlanta === 2 && (
+											<div>
+												<FormGroup row>
+													<FormControlLabel
+														control={
+															<Checkbox
+																checked={opds}
+																onChange={() => {
+																	toggleCheckBox({
+																		...checkBox,
+																		opds : !opds
+																	});
+																}}
+																value='gola'
+															/>
+														}
+														label='Tiene cuenta OPDS'
+													/>
 
-					<DialogActions className='justify-between pl-16'>
-						<Button variant='contained' color='primary' onClick={() => closeModalMobiliary()}>
-							Cerrar
-						</Button>
-					</DialogActions>
-				</div>
-			</Dialog>
-		</React.Fragment>
-	);
+													<FormControlLabel
+														control={
+															<Checkbox
+																checked={ada}
+																onChange={() => {
+																	toggleCheckBox({
+																		...checkBox,
+																		ada : !ada
+																	});
+																}}
+																value='gola'
+															/>
+														}
+														label='Tiene cuenta ADA'
+													/>
+
+													<FormControlLabel
+														control={
+															<Checkbox
+																checked={ina}
+																onChange={() => {
+																	toggleCheckBox({
+																		...checkBox,
+																		ina : !ina
+																	});
+																}}
+																value='gola'
+															/>
+														}
+														label='Tiene cuenta INA'
+													/>
+
+													<FormControlLabel
+														control={
+															<Checkbox
+																checked={acumar}
+																onChange={() => {
+																	toggleCheckBox({
+																		...checkBox,
+																		acumar : !acumar
+																	});
+																}}
+																value='gola'
+															/>
+														}
+														label='Tiene cuenta ACUMAR'
+													/>
+												</FormGroup>
+												{opds && (
+													<div className='flex'>
+														<TextField
+															className='mt-8 mb-16 mr-8'
+															label='Usuario (OPDS)'
+															id='planta.govermentUsers.opds.user'
+															name='planta.govermentUsers.opds.user'
+															value={form.planta.govermentUsers.opds.user}
+															error={form.planta.govermentUsers.opds.user === ''}
+															onChange={handleChange}
+															variant='outlined'
+															fullWidth
+														/>
+
+														<TextField
+															className='mt-8 mb-16 mr-8'
+															label='Clave (OPDS)'
+															id='planta.govermentUsers.opds.pass'
+															name='planta.govermentUsers.opds.pass'
+															value={form.planta.govermentUsers.opds.pass}
+															error={form.planta.govermentUsers.opds.pass === ''}
+															onChange={handleChange}
+															variant='outlined'
+															fullWidth
+														/>
+													</div>
+												)}
+												{ada && (
+													<div className='flex'>
+														<TextField
+															className='mt-8 mb-16 mr-8'
+															label='Usuario (ADA)'
+															id='planta.govermentUsers.ada.user'
+															name='planta.govermentUsers.ada.user'
+															value={form.planta.govermentUsers.ada.user}
+															error={form.planta.govermentUsers.ada.user === ''}
+															onChange={handleChange}
+															variant='outlined'
+															fullWidth
+														/>
+
+														<TextField
+															className='mt-8 mb-16 mr-8'
+															label='Clave (ADA)'
+															id='planta.govermentUsers.ada.pass'
+															name='planta.govermentUsers.ada.pass'
+															value={form.planta.govermentUsers.ada.pass}
+															error={form.planta.govermentUsers.ada.pass === ''}
+															onChange={handleChange}
+															variant='outlined'
+															fullWidth
+														/>
+													</div>
+												)}
+												{ina && (
+													<div className='flex'>
+														<TextField
+															className='mt-8 mb-16 mr-8'
+															label='Usuario (INA)'
+															id='planta.govermentUsers.ina.user'
+															name='planta.govermentUsers.ina.user'
+															value={form.planta.govermentUsers.ina.user}
+															error={form.planta.govermentUsers.ina.user === ''}
+															onChange={handleChange}
+															variant='outlined'
+															fullWidth
+														/>
+
+														<TextField
+															className='mt-8 mb-16 mr-8'
+															label='Clave (INA)'
+															id='planta.govermentUsers.ina.pass'
+															name='planta.govermentUsers.ina.pass'
+															value={form.planta.govermentUsers.ina.pass}
+															error={form.planta.govermentUsers.ina.pass === ''}
+															onChange={handleChange}
+															variant='outlined'
+															fullWidth
+														/>
+													</div>
+												)}
+												{acumar && (
+													<div className='flex'>
+														<TextField
+															className='mt-8 mb-16 mr-8'
+															label='Usuario (ACUMAR)'
+															id='planta.govermentUsers.acumar.user'
+															name='planta.govermentUsers.acumar.user'
+															value={form.planta.govermentUsers.acumar.user}
+															error={form.planta.govermentUsers.acumar.user === ''}
+															onChange={handleChange}
+															variant='outlined'
+															fullWidth
+														/>
+
+														<TextField
+															className='mt-8 mb-16 mr-8'
+															label='Clave (ACUMAR)'
+															id='planta.govermentUsers.acumar.pass'
+															name='planta.govermentUsers.acumar.pass'
+															value={form.planta.govermentUsers.acumar.pass}
+															error={form.planta.govermentUsers.acumar.pass === ''}
+															onChange={handleChange}
+															variant='outlined'
+															fullWidth
+														/>
+													</div>
+												)}
+											</div>
+										)}
+										{tabInnerPlanta === 3 && (
+											<div>
+												<div className='flex flex-row justify-around items-center mb-16'>
+													<FuseAnimate animation='transition.slideRightIn' delay={300}>
+														<Button
+															className='whitespace-no-wrap'
+															variant='contained'
+															onClick={() => closeMobiliaryModal(!showMobiliaryModal)}
+														>
+															Escoger campos a llenar
+														</Button>
+													</FuseAnimate>
+
+													<FuseAnimate animation='transition.slideRightIn' delay={300}>
+														<Button
+															className='whitespace-no-wrap'
+															variant='contained'
+															disabled={!plantaMobiliarySubmitted()}
+															onClick={() => addPlantaMobiliary(form.planta.mobiliary)}
+														>
+															Crear Inmueble
+														</Button>
+													</FuseAnimate>
+													{mobiliaryPlanta.length > 0 && (
+														<FuseAnimate animation='transition.slideRightIn' delay={300}>
+															<Button
+																className='whitespace-no-wrap '
+																variant='contained'
+																onClick={() =>
+																	seeModalData(mobiliaryPlanta, 'mobiliaryPlanta')}
+															>
+																Ver inmuebles agregados
+															</Button>
+														</FuseAnimate>
+													)}
+													<FuseAnimate animation='transition.slideRightIn' delay={300}>
+														<Button
+															className='whitespace-no-wrap'
+															variant='contained'
+															disabled={!plantaSubmitted()}
+															onClick={() => addDataPlanta(form.planta)}
+														>
+															Crear Planta
+														</Button>
+													</FuseAnimate>
+													{dataPlanta.length > 0 && (
+														<FuseAnimate animation='transition.slideRightIn' delay={300}>
+															<Button
+																className='whitespace-no-wrap '
+																variant='contained'
+																onClick={() => seeModalData(dataPlanta, 'dataPlanta')}
+															>
+																Ver plantas agregadas
+															</Button>
+														</FuseAnimate>
+													)}
+												</div>
+
+												<div className='flex'>
+													<TextField
+														className='mt-8 mb-16 mr-8'
+														label='Partida Inmobiliara Provincial'
+														id='planta.mobiliary.partidaInmobiliaria'
+														name='planta.mobiliary.partidaInmobiliaria'
+														value={form.planta.mobiliary.partidaInmobiliaria}
+														onChange={handleChange}
+														variant='outlined'
+														fullWidth
+														required
+														error={form.planta.mobiliary.partidaInmobiliaria === ''}
+													/>
+
+													<TextField
+														className='mt-8 mb-16 mr-8'
+														label='Circunscripción'
+														id='planta.mobiliary.circunscripcion'
+														name='planta.mobiliary.circunscripcion'
+														value={capitalize(form.planta.mobiliary.circunscripcion)}
+														onChange={handleChange}
+														variant='outlined'
+														fullWidth
+														required
+														error={form.planta.mobiliary.circunscripcion === ''}
+													/>
+
+													<TextField
+														className='mt-8 mb-16 mr-8'
+														label='Sección'
+														id='planta.mobiliary.seccion'
+														name='planta.mobiliary.seccion'
+														value={capitalize(form.planta.mobiliary.seccion)}
+														onChange={handleChange}
+														variant='outlined'
+														fullWidth
+														required
+														error={form.planta.mobiliary.seccion === ''}
+													/>
+
+													<TextField
+														className='mt-8 mb-16 mr-8'
+														label='Caracter de uso de suelo'
+														id='planta.mobiliary.caracterUso'
+														name='planta.mobiliary.caracterUso'
+														value={capitalize(form.planta.mobiliary.caracterUso)}
+														onChange={handleChange}
+														variant='outlined'
+														fullWidth
+														required
+														error={form.planta.mobiliary.caracterUso === ''}
+													/>
+												</div>
+
+												{(checkBoxMobiliary.fraccion ||
+													checkBoxMobiliary.manzana ||
+													checkBoxMobiliary.parcela ||
+													checkBoxMobiliary.poligono) && (
+													<FuseAnimate animation='transition.fadeIn' delay={300}>
+														<div className='flex'>
+															{checkBoxMobiliary.fraccion && (
+																<FuseAnimate
+																	animation='transition.slideRightIn'
+																	delay={300}
+																>
+																	<TextField
+																		className='mt-8 mb-16 mr-8'
+																		label='Fracción'
+																		id='planta.mobiliary.fraccion'
+																		name='planta.mobiliary.fraccion'
+																		value={form.planta.mobiliary.fraccion}
+																		onChange={handleChange}
+																		variant='outlined'
+																		fullWidth
+																	/>
+																</FuseAnimate>
+															)}
+
+															{checkBoxMobiliary.manzana && (
+																<FuseAnimate
+																	animation='transition.slideRightIn'
+																	delay={300}
+																>
+																	<TextField
+																		className='mt-8 mb-16 mr-8'
+																		label='Manzana'
+																		id='planta.mobiliary.manzana'
+																		name='planta.mobiliary.manzana'
+																		value={form.planta.mobiliary.manzana}
+																		onChange={handleChange}
+																		variant='outlined'
+																		fullWidth
+																	/>
+																</FuseAnimate>
+															)}
+
+															{checkBoxMobiliary.parcela && (
+																<FuseAnimate
+																	animation='transition.slideRightIn'
+																	delay={300}
+																>
+																	<TextField
+																		className='mt-8 mb-16 mr-8'
+																		label='Parcela'
+																		id='planta.mobiliary.parcela'
+																		name='planta.mobiliary.parcela'
+																		value={form.planta.mobiliary.parcela}
+																		onChange={handleChange}
+																		variant='outlined'
+																		fullWidth
+																	/>
+																</FuseAnimate>
+															)}
+
+															{checkBoxMobiliary.poligono && (
+																<FuseAnimate
+																	animation='transition.slideRightIn'
+																	delay={300}
+																>
+																	<TextField
+																		className='mt-8 mb-16 mr-8'
+																		label='Poligono'
+																		id='planta.mobiliary.poligono'
+																		name='planta.mobiliary.poligono'
+																		value={form.planta.mobiliary.poligono}
+																		onChange={handleChange}
+																		variant='outlined'
+																		fullWidth
+																	/>
+																</FuseAnimate>
+															)}
+														</div>
+													</FuseAnimate>
+												)}
+
+												{(checkBoxMobiliary.propietario ||
+													checkBoxMobiliary.matricula ||
+													checkBoxMobiliary.superficie) && (
+													<FuseAnimate animation='transition.fadeIn' delay={300}>
+														<div className='flex'>
+															{checkBoxMobiliary.propietario && (
+																<TextField
+																	className='mt-8 mb-16 mr-8'
+																	label='Propietario'
+																	id='planta.mobiliary.propietario'
+																	name='planta.mobiliary.propietario'
+																	value={capitalize(
+																		form.planta.mobiliary.propietario
+																	)}
+																	onChange={handleChange}
+																	variant='outlined'
+																	fullWidth
+																/>
+															)}
+
+															{checkBoxMobiliary.matricula && (
+																<TextField
+																	className='mt-8 mb-16 mr-8'
+																	label='Matricula en registro de la propiedad'
+																	id='planta.mobiliary.matricula'
+																	name='planta.mobiliary.matricula'
+																	value={form.planta.mobiliary.matricula}
+																	onChange={handleChange}
+																	variant='outlined'
+																	fullWidth
+																/>
+															)}
+
+															{checkBoxMobiliary.superficie && (
+																<TextField
+																	className='mt-8 mb-16 mr-8'
+																	label='Superficie numérica'
+																	id='planta.mobiliary.superficie'
+																	name='planta.mobiliary.superficie'
+																	placeholder='24512,52'
+																	value={form.planta.mobiliary.superficie}
+																	onChange={handleChange}
+																	error={
+																		!isValidDecimalNumber(
+																			form.planta.mobiliary.superficie
+																		)
+																	}
+																	variant='outlined'
+																	fullWidth
+																/>
+															)}
+														</div>
+													</FuseAnimate>
+												)}
+
+												<div className={classes.root}>
+													<Grid container spacing={3}>
+														<Grid item xs={checkBoxMobiliary.documentacionUso ? 6 : 12}>
+															<Paper className={classes.paper}>
+																<PlanchetaDropZone
+																	formalDataFiles={formalDataFiles}
+																	files={planchetas}
+																	setFormalDataFiles={setFormalDataFiles}
+																	callBack={useCallback}
+																	getSignedUrl={getSignedUrl}
+																	loading={planchetasLoading}
+																	toggleLoading={toggleLoadingFiles}
+																	loadingFiles={loadingFiles}
+																	deleting={planchetasDeleting}
+																	toggleDelete={toggleDeleteFiles}
+																	deletingFiles={deletingFiles}
+																	toggleDisabledFiles={toggleDisabledFiles}
+																	disabledFiles={disabledFiles}
+																/>
+															</Paper>
+														</Grid>
+														{checkBoxMobiliary.documentacionUso && (
+															<FuseAnimate animation='transition.fadeIn' delay={300}>
+																<Grid item xs={6}>
+																	<Paper className={classes.paper}>
+																		<DocumentacionUsoDropZone
+																			formalDataFiles={formalDataFiles}
+																			files={documentacionUso}
+																			setFormalDataFiles={setFormalDataFiles}
+																			callBack={useCallback}
+																			getSignedUrl={getSignedUrl}
+																			loading={documentacionUsoLoading}
+																			toggleLoading={toggleLoadingFiles}
+																			loadingFiles={loadingFiles}
+																			deleting={documentacionUsoDeleting}
+																			toggleDelete={toggleDeleteFiles}
+																			deletingFiles={deletingFiles}
+																			toggleDisabledFiles={toggleDisabledFiles}
+																			disabledFiles={disabledFiles}
+																		/>
+																	</Paper>
+																</Grid>
+															</FuseAnimate>
+														)}
+													</Grid>
+												</div>
+
+												{checkBoxMobiliary.observaciones && (
+													<FuseAnimate animation='transition.fadeIn' delay={300}>
+														<TextField
+															className='mt-8 mb-16'
+															id='planta.mobiliary.observaciones'
+															name='planta.mobiliary.observaciones'
+															onChange={handleChange}
+															label='Observaciones'
+															type='text'
+															value={form.planta.mobiliary.observaciones}
+															multiline
+															rows={5}
+															variant='outlined'
+															fullWidth
+														/>
+													</FuseAnimate>
+												)}
+											</div>
+										)}
+									</React.Fragment>
+								)}
+							</div>
+						)
+					}
+					innerScroll
+				/>
+				<ShowInfoDialog
+					open={showModal}
+					closeModal={closeModal}
+					setDataModal={setDataModal}
+					data={dataTable}
+					type={typeTable}
+					setDataEdit={setDataEdit}
+					isNewClient={isNew}
+					history={props.history}
+				/>
+				<Dialog
+					classes={{
+						paper : 'm-24'
+					}}
+					open={showMobiliaryModal}
+					onClose={() => closeModalMobiliary()}
+					fullWidth
+					maxWidth='md'
+				>
+					<AppBar position='static' elevation={1}>
+						<Toolbar className='flex w-full'>
+							<IconButton
+								edge='start'
+								color='inherit'
+								onClick={() => closeModalMobiliary()}
+								aria-label='close'
+							>
+								<CloseIcon />
+							</IconButton>
+							<Typography>Campos opcionales del inmueble</Typography>
+						</Toolbar>
+					</AppBar>
+					<div className='flex flex-col overflow-hidden'>
+						<DialogContent classes={{ root: 'p-24' }}>
+							<div className={classes.root}>
+								<FormGroup row>
+									<FormControlLabel
+										control={
+											<Checkbox
+												checked={checkBoxMobiliary.fraccion}
+												onChange={() => {
+													saveFieldsMobiliary('fraccion', !checkBoxMobiliary.fraccion);
+												}}
+												value='gola'
+											/>
+										}
+										label='Posee Fracción'
+									/>
+									<FormControlLabel
+										control={
+											<Checkbox
+												checked={checkBoxMobiliary.manzana}
+												onChange={() => {
+													saveFieldsMobiliary('manzana', !checkBoxMobiliary.manzana);
+												}}
+												value='gola'
+											/>
+										}
+										label='Posee Manzana'
+									/>
+									<FormControlLabel
+										control={
+											<Checkbox
+												checked={checkBoxMobiliary.parcela}
+												onChange={() => {
+													saveFieldsMobiliary('parcela', !checkBoxMobiliary.parcela);
+												}}
+												value='gola'
+											/>
+										}
+										label='Posee Parcela'
+									/>
+									<FormControlLabel
+										control={
+											<Checkbox
+												checked={checkBoxMobiliary.poligono}
+												onChange={() => {
+													saveFieldsMobiliary('poligono', !checkBoxMobiliary.poligono);
+												}}
+												value='gola'
+											/>
+										}
+										label='Posee Poligono'
+									/>
+									<FormControlLabel
+										control={
+											<Checkbox
+												checked={checkBoxMobiliary.propietario}
+												onChange={() => {
+													saveFieldsMobiliary('propietario', !checkBoxMobiliary.propietario);
+												}}
+												value='gola'
+											/>
+										}
+										label='Posee Propietario'
+									/>
+									<FormControlLabel
+										control={
+											<Checkbox
+												checked={checkBoxMobiliary.matricula}
+												onChange={() => {
+													saveFieldsMobiliary('matricula', !checkBoxMobiliary.matricula);
+												}}
+												value='gola'
+											/>
+										}
+										label='Posee Matricula en registro de la propiedad'
+									/>
+
+									<FormControlLabel
+										control={
+											<Checkbox
+												checked={checkBoxMobiliary.observaciones}
+												onChange={() => {
+													saveFieldsMobiliary(
+														'observaciones',
+														!checkBoxMobiliary.observaciones
+													);
+												}}
+												value='gola'
+											/>
+										}
+										label='Posee observaciones'
+									/>
+									<FormControlLabel
+										control={
+											<Checkbox
+												checked={checkBoxMobiliary.superficie}
+												onChange={() => {
+													saveFieldsMobiliary('superficie', !checkBoxMobiliary.superficie);
+												}}
+												value='gola'
+											/>
+										}
+										label='Posee Superficie numérica'
+									/>
+									<FormControlLabel
+										control={
+											<Checkbox
+												checked={checkBoxMobiliary.documentacionUso}
+												onChange={() => {
+													saveFieldsMobiliary(
+														'documentacionUso',
+														!checkBoxMobiliary.documentacionUso
+													);
+												}}
+												value='gola'
+											/>
+										}
+										label='Posee documentacion de uso'
+									/>
+								</FormGroup>
+							</div>
+						</DialogContent>
+
+						<DialogActions className='justify-between pl-16'>
+							<Button variant='contained' color='primary' onClick={() => closeModalMobiliary()}>
+								Cerrar
+							</Button>
+						</DialogActions>
+					</div>
+				</Dialog>
+			</React.Fragment>
+		);
+	} catch (err) {
+		Sentry.withScope((scope) => {
+			scope.setExtra('client', client);
+			scope.setExtra('form', form);
+			scope.setExtra('addressFormalData', addressFormalData);
+			scope.setExtra('legalRepresentativeFormalData', legalRepresentativeFormalData);
+			scope.setExtra('dataPlanta', dataPlanta);
+			scope.setExtra('phoneContactsPlanta', phoneContactsPlanta);
+			scope.setExtra('innerContactsPlanta', innerContactsPlanta);
+			scope.setExtra('innerContactsEmailPlanta', innerContactsEmailPlanta);
+			scope.setExtra('mobiliaryPlanta', mobiliaryPlanta);
+		});
+		Sentry.captureException(err);
+		props.history.push('/clients');
+		return null;
+	}
 };
 
 export default withReducer('clients', reducer)(Client);
