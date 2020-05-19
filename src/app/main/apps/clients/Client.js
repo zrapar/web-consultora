@@ -1935,10 +1935,11 @@ const Client = (props) => {
 				};
 			})
 		};
-
-		console.log(body);
-
-		dispatch(Actions.saveClient(body, props.history));
+		if (isNew) {
+			dispatch(Actions.saveClient(body, props.history));
+		} else {
+			dispatch(Actions.updateClient(body, params.clientId, props.history));
+		}
 	};
 
 	const seeModalData = (data, type) => {
@@ -1971,7 +1972,7 @@ const Client = (props) => {
 	const closeModalMobiliary = () => {
 		closeMobiliaryModal(!showMobiliaryModal);
 	};
-	console.log(addressFormalData);
+
 	return (
 		<React.Fragment>
 			<FusePageCarded
@@ -2013,18 +2014,19 @@ const Client = (props) => {
 									</div>
 								</div>
 							</div>
-							{isNew && (
-								<FuseAnimate animation='transition.slideRightIn' delay={300}>
+
+							<FuseAnimate animation='transition.slideRightIn' delay={300}>
+								{isNew && (
 									<Button
 										className='whitespace-no-wrap'
 										variant='contained'
 										disabled={!canBeSubmitted()}
 										onClick={() => saveClientData(form)}
 									>
-										Guardar
+										{isNew ? 'Guardar' : 'Actualizar'}
 									</Button>
-								</FuseAnimate>
-							)}
+								)}
+							</FuseAnimate>
 						</div>
 					)
 				}

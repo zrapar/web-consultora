@@ -3,6 +3,7 @@ import axios from 'axios';
 import { showMessage } from 'app/store/actions/fuse';
 import _ from 'lodash';
 import { dataClientShow } from 'utils';
+import * as Sentry from '@sentry/browser';
 
 export const GET_CLIENT = '@@Clients/ GET Client';
 export const SAVE_CLIENT = '@@Clients/ Save Client';
@@ -118,10 +119,55 @@ export const getClient = (client) => async (dispatch) => {
 };
 
 export const saveClient = (data, history) => async (dispatch) => {
+	Sentry.configureScope((scope) => {
+		scope.setExtra('newClientData', data);
+		// scope.clear();
+	});
 	try {
 		const response = await axios.post('/clients/', data);
 		if (response.data) {
 			dispatch(showMessage({ message: 'Cliente creado correctamente' }));
+		}
+
+		Promise.all([
+			dispatch({
+				type    : SAVE_CLIENT,
+				payload : dataClientShow
+			})
+		]).then(() => {
+			dispatch(getClients());
+			history.push('/apps/clients');
+		});
+	} catch (err) {
+		const errors = _.flatten(
+			Object.values(err.response.data).map((i) => {
+				return i;
+			})
+		);
+
+		Sentry.configureScope((scope) => {
+			scope.setExtra('errorsTryCatch', errors);
+		});
+
+		errors.forEach((i) => {
+			dispatch(
+				showMessage({
+					message : i === 'Introduzca un número entero válido.' ? 'El DNI introducido no es correcto' : i
+				})
+			);
+		});
+	} finally {
+		Sentry.configureScope((scope) => {
+			scope.clear();
+		});
+	}
+};
+
+export const updateClient = (data, id, history) => async (dispatch) => {
+	try {
+		const response = await axios.put(`/clients/${id}/`, data);
+		if (response.data) {
+			dispatch(showMessage({ message: 'Cliente actualizado correctamente' }));
 		}
 
 		Promise.all([

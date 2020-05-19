@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { showMessage } from 'app/store/actions/fuse';
 import _ from 'lodash';
+import * as Sentry from '@sentry/browser';
 
 // users
 export const GET_USERS = '@@Users/Get Users';
@@ -67,6 +68,9 @@ export const closeEditUserDialog = () => ({
 });
 
 export const addUser = (newUser) => async (dispatch) => {
+	Sentry.configureScope((scope) => {
+		scope.setExtra('newUserData', newUser);
+	});
 	try {
 		const response = await axios.post('/user/', newUser);
 
@@ -83,7 +87,9 @@ export const addUser = (newUser) => async (dispatch) => {
 				return i;
 			})
 		);
-
+		Sentry.configureScope((scope) => {
+			scope.setExtra('errorsTryCatch', errors);
+		});
 		errors.forEach((i) => {
 			dispatch(
 				showMessage({
@@ -91,10 +97,17 @@ export const addUser = (newUser) => async (dispatch) => {
 				})
 			);
 		});
+	} finally {
+		Sentry.configureScope((scope) => {
+			scope.clear();
+		});
 	}
 };
 
 export const updateUser = (user) => async (dispatch) => {
+	Sentry.configureScope((scope) => {
+		scope.setExtra('updateUserData', user);
+	});
 	try {
 		const response = await axios.put(`/user/${user.id}/`, user);
 
@@ -111,6 +124,9 @@ export const updateUser = (user) => async (dispatch) => {
 				return i;
 			})
 		);
+		Sentry.configureScope((scope) => {
+			scope.setExtra('errorsTryCatch', errors);
+		});
 
 		errors.forEach((i) => {
 			dispatch(
@@ -118,6 +134,10 @@ export const updateUser = (user) => async (dispatch) => {
 					message : i === 'Introduzca un número entero válido.' ? 'El DNI introducido no es correcto' : i
 				})
 			);
+		});
+	} finally {
+		Sentry.configureScope((scope) => {
+			scope.clear();
 		});
 	}
 };

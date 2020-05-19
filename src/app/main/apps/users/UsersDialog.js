@@ -94,14 +94,16 @@ const UsersDialog = (props) => {
 			const body = {
 				...form,
 				user_type : form.userType.value,
-				password  : form.username
+				password  : form.username,
+				address   : ''
 			};
 
 			dispatch(Actions.addUser(body));
 		} else {
 			const body = {
 				...form,
-				user_type : usersDialog.data.user_type === 0 ? 0 : form.userType.value
+				user_type : usersDialog.data.user_type === 0 ? 0 : form.userType.value,
+				address   : ''
 			};
 			dispatch(Actions.updateUser(body));
 		}
