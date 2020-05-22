@@ -79,7 +79,7 @@ class jwtService extends FuseUtils.EventEmitter {
 				password
 			});
 			if (response.data) {
-				this.setSession(response.data.access);
+				this.setSession(response.data.access, response.data.refresh);
 				const user = await this.getInfoUser(jwtDecode(response.data.access));
 
 				return { success: true, user };
@@ -124,12 +124,20 @@ class jwtService extends FuseUtils.EventEmitter {
 		});
 	};
 
-	setSession = (access_token) => {
+	setSession = (access_token, refresh = false) => {
 		if (access_token) {
+			const decoded = jwtDecode(access_token);
 			localStorage.setItem('jwt_access_token', access_token);
+			localStorage.setItem('exp_token', decoded.exp);
 			axios.defaults.headers.common['Authorization'] = 'Bearer ' + access_token;
+			if (refresh) {
+				localStorage.setItem('jwt_refresh_token', refresh);
+			}
+			this.emit('startTimers');
 		} else {
 			localStorage.removeItem('jwt_access_token');
+			localStorage.removeItem('jwt_refresh_token');
+			localStorage.removeItem('exp_token');
 			delete axios.defaults.headers.common['Authorization'];
 		}
 	};
@@ -145,6 +153,7 @@ class jwtService extends FuseUtils.EventEmitter {
 		const decoded = jwtDecode(access_token);
 		const currentTime = Date.now() / 1000;
 		if (decoded.exp < currentTime) {
+			this.emit('onAutoLogout');
 			console.warn('access token expired');
 			return false;
 		} else {
@@ -156,9 +165,29 @@ class jwtService extends FuseUtils.EventEmitter {
 		return window.localStorage.getItem('jwt_access_token');
 	};
 
+	getRefreshToken = () => {
+		return window.localStorage.getItem('jwt_refresh_token');
+	};
+
 	getInfoUser = async ({ user_id }) => {
 		const response = await axios.get(`/user/${user_id}/`);
 		return response.data;
+	};
+
+	updateToken = async () => {
+		const refresh = this.getRefreshToken();
+		if (refresh) {
+			const response = await axios.post('/api/refresh/', {
+				refresh
+			});
+
+			if (response.status === 200) {
+				this.setSession(response.data.access, refresh);
+			}
+		} else {
+			this.logout();
+			this.emit('onAutoLogout');
+		}
 	};
 }
 

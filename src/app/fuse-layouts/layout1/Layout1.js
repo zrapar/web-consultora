@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { renderRoutes } from 'react-router-config';
-import { FuseScrollbars, FuseMessage, FuseDialog, FuseSuspense } from '@fuse';
+import { FuseScrollbars, FuseMessage, FuseDialog, FuseSuspense, FuseSessionModal } from '@fuse';
 import { makeStyles } from '@material-ui/styles';
 import { useSelector } from 'react-redux';
 import ToolbarLayout1 from './components/ToolbarLayout1';
@@ -119,6 +119,7 @@ function Layout1(props) {
 					</div>
 
 					<FuseMessage />
+					<FuseSessionModal />
 				</div>
 			);
 		}
@@ -155,6 +156,7 @@ function Layout1(props) {
 					</div>
 
 					<FuseMessage />
+					<FuseSessionModal />
 				</div>
 			);
 		}

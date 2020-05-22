@@ -1,6 +1,6 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/styles';
-import { FuseScrollbars, FuseMessage, FuseDialog, FuseSuspense } from '@fuse';
+import { FuseScrollbars, FuseMessage, FuseDialog, FuseSuspense, FuseSessionModal } from '@fuse';
 import { renderRoutes } from 'react-router-config';
 import { useSelector } from 'react-redux';
 import clsx from 'clsx';
@@ -90,6 +90,7 @@ function Layout2(props) {
 					</div>
 
 					<FuseMessage />
+					<FuseSessionModal />
 				</div>
 			)}
 		</AppContext.Consumer>
