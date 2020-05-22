@@ -330,7 +330,7 @@ export const getTitle = (type) => {
 	}
 };
 
-export const getColumns = (type, handleClickOpen, setNewEditableData) => {
+export const getColumns = (type, handleClickOpen, setNewEditableData, setDataDropZone) => {
 	switch (type) {
 		case 'addressFormalData':
 			return [
@@ -366,7 +366,16 @@ export const getColumns = (type, handleClickOpen, setNewEditableData) => {
 						<Button
 							className='whitespace-no-wrap '
 							variant='contained'
-							onClick={() => handleClickOpen(rowData.estatuto)}
+							onClick={() => {
+								setDataDropZone({
+									folder  : 'estatutos',
+									varName : 'estatuto',
+									title   : 'Estatutos',
+									single  : false,
+									rowData : rowData
+								});
+								handleClickOpen(rowData.estatuto);
+							}}
 						>
 							Ver estatutos
 						</Button>
@@ -380,7 +389,16 @@ export const getColumns = (type, handleClickOpen, setNewEditableData) => {
 						<Button
 							className='whitespace-no-wrap '
 							variant='contained'
-							onClick={() => handleClickOpen(rowData.actaDesignacion)}
+							onClick={() => {
+								setDataDropZone({
+									folder  : 'actas',
+									varName : 'actaDesignacion',
+									title   : 'Actas de Designacion',
+									single  : false,
+									rowData : rowData
+								});
+								handleClickOpen(rowData.actaDesignacion);
+							}}
 						>
 							Ver Actas de designacion
 						</Button>
@@ -394,7 +412,16 @@ export const getColumns = (type, handleClickOpen, setNewEditableData) => {
 						<Button
 							className='whitespace-no-wrap '
 							variant='contained'
-							onClick={() => handleClickOpen(rowData.poderes)}
+							onClick={() => {
+								setDataDropZone({
+									folder  : 'poderes',
+									varName : 'poderes',
+									title   : 'Poderes',
+									single  : false,
+									rowData : rowData
+								});
+								handleClickOpen(rowData.poderes);
+							}}
 						>
 							Ver poderes
 						</Button>
@@ -408,7 +435,16 @@ export const getColumns = (type, handleClickOpen, setNewEditableData) => {
 						<Button
 							className='whitespace-no-wrap '
 							variant='contained'
-							onClick={() => handleClickOpen(rowData.extraPdfs)}
+							onClick={() => {
+								setDataDropZone({
+									folder  : 'extras',
+									varName : 'extraPdfs',
+									title   : 'Otros Documentos',
+									single  : false,
+									rowData : rowData
+								});
+								handleClickOpen(rowData.extraPdfs);
+							}}
 						>
 							Ver otros documentos
 						</Button>
@@ -422,7 +458,16 @@ export const getColumns = (type, handleClickOpen, setNewEditableData) => {
 						<Button
 							className='whitespace-no-wrap '
 							variant='contained'
-							onClick={() => handleClickOpen(rowData.dniDocument)}
+							onClick={() => {
+								setDataDropZone({
+									folder  : 'dniDocument',
+									varName : 'dniDocument',
+									title   : 'DNI (opcional)',
+									single  : true,
+									rowData : rowData
+								});
+								handleClickOpen(rowData.dniDocument);
+							}}
 						>
 							Ver el documento DNI
 						</Button>
@@ -496,7 +541,6 @@ export const getColumns = (type, handleClickOpen, setNewEditableData) => {
 							className='whitespace-no-wrap '
 							variant='contained'
 							onClick={() => {
-								// console.log(rowData.mobiliary);
 								setNewEditableData('mobiliaryPlanta', rowData.mobiliary, rowData.tableData.id);
 							}}
 						>
@@ -561,7 +605,16 @@ export const getColumns = (type, handleClickOpen, setNewEditableData) => {
 						<Button
 							className='whitespace-no-wrap '
 							variant='contained'
-							onClick={() => handleClickOpen(rowData.plancheta)}
+							onClick={() => {
+								setDataDropZone({
+									folder  : 'planchetas',
+									varName : 'plancheta',
+									title   : 'Plancheta',
+									single  : true,
+									rowData : rowData
+								});
+								handleClickOpen(rowData.plancheta);
+							}}
 						>
 							Ver plancheta
 						</Button>
@@ -577,6 +630,13 @@ export const getColumns = (type, handleClickOpen, setNewEditableData) => {
 							variant='contained'
 							onClick={() => {
 								const data = rowData.documentacionUso ? rowData.documentacionUso : [];
+								setDataDropZone({
+									folder  : 'documentacionUso',
+									varName : 'documentacionUso',
+									title   : 'Documentacion de uso',
+									single  : true,
+									rowData : rowData
+								});
 								handleClickOpen(data);
 							}}
 						>

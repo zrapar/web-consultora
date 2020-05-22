@@ -83,3 +83,25 @@ export const deleteFile = async (fileName, folder, clientId, callback) => {
 		return callback(true);
 	});
 };
+
+export const getSignedUrl = async (files, folder, clientId, callBack) => {
+	const signedUrls = await files.map(async (file) => {
+		const fileName = file.name.replace('.pdf', '').replace(/\s/g, '-').replace(/--/g, '-');
+		const fileType = file.type;
+		const data = await SingS3(fileName, fileType, folder, clientId);
+		if (data.success) {
+			const upload = await uploadFile({ fileType, signedRequest: data.data.signedRequest, file });
+			if (upload) {
+				return {
+					...data.data,
+					fileName,
+					path     : file.path.replace(/\s/g, '-').replace(/--/g, '-')
+				};
+			} else {
+				return false;
+			}
+		}
+	});
+
+	return callBack(Promise.all(signedUrls));
+};

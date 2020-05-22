@@ -12,11 +12,6 @@ import {
 	FormControlLabel,
 	Grid,
 	Paper,
-	List,
-	ListItem,
-	ListItemText,
-	ListItemIcon,
-	CircularProgress,
 	Dialog,
 	DialogActions,
 	DialogContent,
@@ -25,7 +20,6 @@ import {
 	IconButton
 } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
-import DeleteIcon from '@material-ui/icons/Delete';
 import { makeStyles } from '@material-ui/styles';
 import { FuseAnimate, FusePageCarded, FuseChipSelect } from '@fuse';
 import { useForm } from '@fuse/hooks';
@@ -35,11 +29,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import withReducer from 'app/store/withReducer';
 import * as Actions from './store/actions';
 import reducer from './store/reducers';
-import { useDropzone } from 'react-dropzone';
-import { SingS3, uploadFile, deleteFile } from 'utils/aws';
 import ShowInfoDialog from './ShowInfoDialog';
 import { isEmail, capitalize, isNaturalPositiveNumber, isValidDecimalNumber } from 'utils';
 import NumberFormat from 'react-number-format';
+import DropZone from './DropZone';
 
 const useStyles = makeStyles((theme) => ({
 	root     : {
@@ -65,7 +58,6 @@ const useStyles = makeStyles((theme) => ({
 const Client = (props) => {
 	const dispatch = useDispatch();
 	const client = useSelector(({ clients: { clients } }) => clients.client);
-	// console.log(client);
 
 	const classes = useStyles(props);
 	const [ tabValue, setTabValue ] = useState(0);
@@ -397,8 +389,8 @@ const Client = (props) => {
 	const canBeSubmitted = () => {
 		let isSubmitted = false;
 		const { clientId, clientName, cuit } = form.formalData;
-		const addressLegalValid = addressFormalData.filter((i) => i.type === 'legal');
-		const addressRegisteredValid = addressFormalData.filter((i) => i.type === 'registered');
+		const addressLegalValid = itsLoaded ? addressFormalData.filter((i) => i.type === 'legal') : [];
+		const addressRegisteredValid = itsLoaded ? addressFormalData.filter((i) => i.type === 'registered') : [];
 
 		if (
 			legalRepresentativeFormalData.length > 0 &&
@@ -531,1086 +523,12 @@ const Client = (props) => {
 		if (checkBoxMobiliary.superficie && !isValidDecimalNumber(form.planta.mobiliary.superficie)) {
 			isSubmitted = false;
 		}
-		// console.log(documentacionUso.length);
-		// console.log(checkBoxMobiliary.documentacionUso);
 
 		if (checkBoxMobiliary.documentacionUso && documentacionUso.length === 0) {
 			isSubmitted = false;
 		}
 
 		return isSubmitted;
-	};
-
-	const EstatutoDropZone = ({
-		formalDataFiles,
-		files,
-		setFormalDataFiles,
-		callBack,
-		getSignedUrl,
-		loading,
-		toggleLoading,
-		loadingFiles,
-		deleting,
-		toggleDelete,
-		deletingFiles,
-		toggleDisabledFiles,
-		disabledFiles
-	}) => {
-		const folder = 'estatutos';
-		const onDrop = callBack(async (uploadedFiles) => {
-			toggleLoading({
-				...loadingFiles,
-				[`${folder}Loading`]: true
-			});
-			toggleDisabledFiles({
-				estatutosDisabled        : false,
-				actasDisabled            : true,
-				poderesDisabled          : true,
-				extrasDisabled           : true,
-				planchetasDisabled       : true,
-				dniDocumentDisabled      : true,
-				documentacionUsoDisabled : true
-			});
-			getSignedUrl(uploadedFiles, folder, async (response) => {
-				const arrayPromise = await response;
-				const acceptedFiles = arrayPromise.filter((i) => i);
-				if (acceptedFiles.length > 0) {
-					setFormalDataFiles({
-						...formalDataFiles,
-						estatuto : [ ...files, ...acceptedFiles ]
-					});
-				} else {
-					alert('Existio un problema subiendo el (los) documento(s), intente de nuevo');
-				}
-				toggleLoading({
-					...loadingFiles,
-					[`${folder}Loading`]: false
-				});
-				toggleDisabledFiles({
-					estatutosDisabled        : false,
-					actasDisabled            : false,
-					poderesDisabled          : false,
-					extrasDisabled           : false,
-					planchetasDisabled       : false,
-					dniDocumentDisabled      : false,
-					documentacionUsoDisabled : false
-				});
-			});
-		});
-
-		const { getRootProps, getInputProps } = useDropzone({
-			accept   : 'application/pdf',
-			onDrop,
-			disabled : form.formalData.clientId === ''
-		});
-
-		const removeFile = async (file) => {
-			toggleDelete({
-				...deletingFiles,
-				[`${folder}Deleting`]: true
-			});
-			deleteFile(file.replace('.pdf', ''), folder, form.formalData.clientId, (isDeleted) => {
-				if (isDeleted) {
-					const newFiles = files.filter((i) => i.path !== file);
-					setFormalDataFiles({
-						...formalDataFiles,
-						estatuto : newFiles
-					});
-				} else {
-					alert('No se pudo borrar el archivo, intente de nuevo');
-				}
-				toggleDelete({
-					...deletingFiles,
-					[`${folder}Deleting`]: false
-				});
-			});
-		};
-
-		const fileList = files.map((item, index) => (
-			<ListItem key={index} alignItems='center'>
-				<ListItemIcon className='cursor-pointer' onClick={() => removeFile(item.path)}>
-					<DeleteIcon />
-				</ListItemIcon>
-				<ListItemText className='text-justify' primary={item.path} />
-			</ListItem>
-		));
-
-		return (
-			<div className='flex flex-col min-h-128 h-full justify-around cursor-pointer'>
-				{loading || deleting ? (
-					<div className={`flex-col justify-around items-center w-full ${classes.center}`}>
-						<Typography variant='h5' component='h3'>
-							{loading ? 'Cargando Archivos...' : 'Borrando Archivo'}
-						</Typography>
-						<CircularProgress className={classes.progress} />
-					</div>
-				) : (
-					<React.Fragment>
-						{form.formalData.clientId !== '' && !disabledFiles.estatutosDisabled ? (
-							<div {...getRootProps()}>
-								<input {...getInputProps()} />
-								<Typography variant='h5' component='h3'>
-									Estatutos
-								</Typography>
-								<Typography component='p'>
-									Puede arrastrar, o dar click para cargar los archivos
-								</Typography>
-							</div>
-						) : (
-							<React.Fragment>
-								{disabledFiles.estatutosDisabled && (
-									<Typography variant='h5' component='h3'>
-										Debe esperar que termine de subir los otros archivos
-									</Typography>
-								)}
-								{form.formalData.clientId === '' && (
-									<Typography variant='h5' component='h3'>
-										Primero debe agregar el ID del Cliente
-									</Typography>
-								)}
-							</React.Fragment>
-						)}
-
-						{files.length > 0 && (
-							<Grid container spacing={2} className='mt-8'>
-								<Grid item xs={12}>
-									<Typography variant='h6' className={classes.title}>
-										Archivos
-									</Typography>
-									<div className={classes.demo}>
-										<List dense={true}>{fileList}</List>
-									</div>
-								</Grid>
-							</Grid>
-						)}
-					</React.Fragment>
-				)}
-			</div>
-		);
-	};
-
-	const ActaDesignacionDropZone = ({
-		formalDataFiles,
-		files,
-		setFormalDataFiles,
-		callBack,
-		getSignedUrl,
-		loading,
-		toggleLoading,
-		loadingFiles,
-		deleting,
-		toggleDelete,
-		deletingFiles,
-		disabledFiles,
-		toggleDisabledFiles
-	}) => {
-		const folder = 'actas';
-		const onDrop = callBack(async (uploadedFiles) => {
-			toggleLoading({
-				...loadingFiles,
-				[`${folder}Loading`]: true
-			});
-			toggleDisabledFiles({
-				estatutosDisabled        : true,
-				actasDisabled            : false,
-				poderesDisabled          : true,
-				extrasDisabled           : true,
-				planchetasDisabled       : true,
-				dniDocumentDisabled      : true,
-				documentacionUsoDisabled : true
-			});
-			getSignedUrl(uploadedFiles, folder, async (response) => {
-				const arrayPromise = await response;
-				const acceptedFiles = arrayPromise.filter((i) => i);
-				if (acceptedFiles.length > 0) {
-					setFormalDataFiles({
-						...formalDataFiles,
-						actaDesignacion : [ ...files, ...acceptedFiles ]
-					});
-				} else {
-					alert('Existio un problema subiendo el (los) documento(s), intente de nuevo');
-				}
-				toggleLoading({
-					...loadingFiles,
-					[`${folder}Loading`]: false
-				});
-				toggleDisabledFiles({
-					estatutosDisabled        : false,
-					actasDisabled            : false,
-					poderesDisabled          : false,
-					extrasDisabled           : false,
-					planchetasDisabled       : false,
-					dniDocumentDisabled      : false,
-					documentacionUsoDisabled : false
-				});
-			});
-		});
-
-		const { getRootProps, getInputProps } = useDropzone({
-			accept   : 'application/pdf',
-			onDrop,
-			disabled : form.formalData.clientId === ''
-		});
-
-		const removeFile = async (file) => {
-			toggleDelete({
-				...deletingFiles,
-				[`${folder}Deleting`]: true
-			});
-			deleteFile(file.replace('.pdf', ''), folder, form.formalData.clientId, (isDeleted) => {
-				if (isDeleted) {
-					const newFiles = files.filter((i) => i.path !== file);
-					setFormalDataFiles({
-						...formalDataFiles,
-						actaDesignacion : newFiles
-					});
-				} else {
-					alert('No se pudo borrar el archivo, intente de nuevo');
-				}
-				toggleDelete({
-					...deletingFiles,
-					[`${folder}Deleting`]: false
-				});
-			});
-		};
-
-		const fileList = files.map((item, index) => (
-			<ListItem key={index} alignItems='center'>
-				<ListItemIcon className='cursor-pointer' onClick={() => removeFile(item.path)}>
-					<DeleteIcon />
-				</ListItemIcon>
-				<ListItemText className='text-justify' primary={item.path} />
-			</ListItem>
-		));
-
-		return (
-			<div className='flex flex-col min-h-128 h-full justify-around cursor-pointer'>
-				{loading || deleting ? (
-					<div className={`flex-col justify-around items-center w-full ${classes.center}`}>
-						<Typography variant='h5' component='h3'>
-							{loading ? 'Cargando Archivos...' : 'Borrando Archivo'}
-						</Typography>
-						<CircularProgress className={classes.progress} />
-					</div>
-				) : (
-					<React.Fragment>
-						{form.formalData.clientId !== '' && !disabledFiles.actasDisabled ? (
-							<div {...getRootProps()}>
-								<input {...getInputProps()} />
-								<Typography variant='h5' component='h3'>
-									Actas de Designacion
-								</Typography>
-								<Typography component='p'>
-									Puede arrastrar, o dar click para cargar los archivos
-								</Typography>
-							</div>
-						) : (
-							<React.Fragment>
-								{disabledFiles.actasDisabled && (
-									<Typography variant='h5' component='h3'>
-										Debe esperar que termine de subir los otros archivos
-									</Typography>
-								)}
-								{form.formalData.clientId === '' && (
-									<Typography variant='h5' component='h3'>
-										Primero debe agregar el ID del Cliente
-									</Typography>
-								)}
-							</React.Fragment>
-						)}
-
-						{files.length > 0 && (
-							<Grid container spacing={2} className='mt-8'>
-								<Grid item xs={12}>
-									<Typography variant='h6' className={classes.title}>
-										Archivos
-									</Typography>
-									<div className={classes.demo}>
-										<List dense={true}>{fileList}</List>
-									</div>
-								</Grid>
-							</Grid>
-						)}
-					</React.Fragment>
-				)}
-			</div>
-		);
-	};
-
-	const PoderesDropZone = ({
-		formalDataFiles,
-		files,
-		setFormalDataFiles,
-		callBack,
-		getSignedUrl,
-		loading,
-		toggleLoading,
-		loadingFiles,
-		deleting,
-		toggleDelete,
-		deletingFiles,
-		disabledFiles,
-		toggleDisabledFiles
-	}) => {
-		const folder = 'poderes';
-		const onDrop = callBack(async (uploadedFiles) => {
-			toggleLoading({
-				...loadingFiles,
-				[`${folder}Loading`]: true
-			});
-			toggleDisabledFiles({
-				estatutosDisabled        : true,
-				actasDisabled            : true,
-				poderesDisabled          : false,
-				extrasDisabled           : true,
-				planchetasDisabled       : true,
-				dniDocumentDisabled      : true,
-				documentacionUsoDisabled : true
-			});
-			getSignedUrl(uploadedFiles, folder, async (response) => {
-				const arrayPromise = await response;
-				const acceptedFiles = arrayPromise.filter((i) => i);
-				if (acceptedFiles.length > 0) {
-					setFormalDataFiles({
-						...formalDataFiles,
-						poderes : [ ...files, ...acceptedFiles ]
-					});
-				} else {
-					alert('Existio un problema subiendo el (los) documento(s), intente de nuevo');
-				}
-				toggleLoading({
-					...loadingFiles,
-					[`${folder}Loading`]: false
-				});
-				toggleDisabledFiles({
-					estatutosDisabled        : false,
-					actasDisabled            : false,
-					poderesDisabled          : false,
-					extrasDisabled           : false,
-					planchetasDisabled       : false,
-					dniDocumentDisabled      : false,
-					documentacionUsoDisabled : false
-				});
-			});
-		});
-
-		const { getRootProps, getInputProps } = useDropzone({
-			accept   : 'application/pdf',
-			onDrop,
-			disabled : form.formalData.clientId === ''
-		});
-
-		const removeFile = async (file) => {
-			toggleDelete({
-				...deletingFiles,
-				[`${folder}Deleting`]: true
-			});
-			deleteFile(file.replace('.pdf', ''), folder, form.formalData.clientId, (isDeleted) => {
-				if (isDeleted) {
-					const newFiles = files.filter((i) => i.path !== file);
-					setFormalDataFiles({
-						...formalDataFiles,
-						poderes : newFiles
-					});
-				} else {
-					alert('No se pudo borrar el archivo, intente de nuevo');
-				}
-				toggleDelete({
-					...deletingFiles,
-					[`${folder}Deleting`]: false
-				});
-			});
-		};
-
-		const fileList = files.map((item, index) => (
-			<ListItem key={index} alignItems='center'>
-				<ListItemIcon className='cursor-pointer' onClick={() => removeFile(item.path)}>
-					<DeleteIcon />
-				</ListItemIcon>
-				<ListItemText className='text-justify' primary={item.path} />
-			</ListItem>
-		));
-
-		return (
-			<div className='flex flex-col min-h-128 h-full justify-around cursor-pointer'>
-				{loading || deleting ? (
-					<div className={`flex-col justify-around items-center w-full ${classes.center}`}>
-						<Typography variant='h5' component='h3'>
-							{loading ? 'Cargando Archivos...' : 'Borrando Archivo'}
-						</Typography>
-						<CircularProgress className={classes.progress} />
-					</div>
-				) : (
-					<React.Fragment>
-						{form.formalData.clientId !== '' && !disabledFiles.poderesDisabled ? (
-							<div {...getRootProps()}>
-								<input {...getInputProps()} />
-								<Typography variant='h5' component='h3'>
-									Poderes
-								</Typography>
-								<Typography component='p'>
-									Puede arrastrar, o dar click para cargar los archivos
-								</Typography>
-							</div>
-						) : (
-							<React.Fragment>
-								{disabledFiles.poderesDisabled && (
-									<Typography variant='h5' component='h3'>
-										Debe esperar que termine de subir los otros archivos
-									</Typography>
-								)}
-								{form.formalData.clientId === '' && (
-									<Typography variant='h5' component='h3'>
-										Primero debe agregar el ID del Cliente
-									</Typography>
-								)}
-							</React.Fragment>
-						)}
-
-						{files.length > 0 && (
-							<Grid container spacing={2} className='mt-8'>
-								<Grid item xs={12}>
-									<Typography variant='h6' className={classes.title}>
-										Archivos
-									</Typography>
-									<div className={classes.demo}>
-										<List dense={true}>{fileList}</List>
-									</div>
-								</Grid>
-							</Grid>
-						)}
-					</React.Fragment>
-				)}
-			</div>
-		);
-	};
-
-	const ExtraDropZone = ({
-		formalDataFiles,
-		files,
-		setFormalDataFiles,
-		callBack,
-		getSignedUrl,
-		loading,
-		toggleLoading,
-		loadingFiles,
-		deleting,
-		toggleDelete,
-		deletingFiles,
-		disabledFiles,
-		toggleDisabledFiles
-	}) => {
-		const folder = 'extras';
-		const onDrop = callBack(async (uploadedFiles) => {
-			toggleLoading({
-				...loadingFiles,
-				[`${folder}Loading`]: true
-			});
-			toggleDisabledFiles({
-				estatutosDisabled        : true,
-				actasDisabled            : true,
-				poderesDisabled          : true,
-				extrasDisabled           : false,
-				planchetasDisabled       : true,
-				dniDocumentDisabled      : true,
-				documentacionUsoDisabled : true
-			});
-			getSignedUrl(uploadedFiles, folder, async (response) => {
-				const arrayPromise = await response;
-				const acceptedFiles = arrayPromise.filter((i) => i);
-				if (acceptedFiles.length > 0) {
-					setFormalDataFiles({
-						...formalDataFiles,
-						extraPdfs : [ ...files, ...acceptedFiles ]
-					});
-				} else {
-					alert('Existio un problema subiendo el (los) documento(s), intente de nuevo');
-				}
-				toggleLoading({
-					...loadingFiles,
-					[`${folder}Loading`]: false
-				});
-				toggleDisabledFiles({
-					estatutosDisabled        : false,
-					actasDisabled            : false,
-					poderesDisabled          : false,
-					extrasDisabled           : false,
-					planchetasDisabled       : false,
-					dniDocumentDisabled      : false,
-					documentacionUsoDisabled : false
-				});
-			});
-		});
-
-		const { getRootProps, getInputProps } = useDropzone({
-			accept   : 'application/pdf',
-			onDrop,
-			disabled : form.formalData.clientId === ''
-		});
-
-		const removeFile = async (file) => {
-			toggleDelete({
-				...deletingFiles,
-				[`${folder}Deleting`]: true
-			});
-			deleteFile(file.replace('.pdf', ''), folder, form.formalData.clientId, (isDeleted) => {
-				if (isDeleted) {
-					const newFiles = files.filter((i) => i.path !== file);
-					setFormalDataFiles({
-						...formalDataFiles,
-						extraPdfs : newFiles
-					});
-				} else {
-					alert('No se pudo borrar el archivo, intente de nuevo');
-				}
-				toggleDelete({
-					...deletingFiles,
-					[`${folder}Deleting`]: false
-				});
-			});
-		};
-
-		const fileList = files.map((item, index) => (
-			<ListItem key={index} alignItems='center'>
-				<ListItemIcon className='cursor-pointer' onClick={() => removeFile(item.path)}>
-					<DeleteIcon />
-				</ListItemIcon>
-				<ListItemText className='text-justify' primary={item.path} />
-			</ListItem>
-		));
-
-		return (
-			<div className='flex flex-col min-h-128 h-full justify-around cursor-pointer'>
-				{loading || deleting ? (
-					<div className={`flex-col justify-around items-center w-full ${classes.center}`}>
-						<Typography variant='h5' component='h3'>
-							{loading ? 'Cargando Archivos...' : 'Borrando Archivo'}
-						</Typography>
-						<CircularProgress className={classes.progress} />
-					</div>
-				) : (
-					<React.Fragment>
-						{form.formalData.clientId !== '' && !disabledFiles.extrasDisabled ? (
-							<div {...getRootProps()}>
-								<input {...getInputProps()} />
-								<Typography variant='h5' component='h3'>
-									Otros Documentos
-								</Typography>
-								<Typography component='p'>
-									Puede arrastrar, o dar click para cargar los archivos
-								</Typography>
-							</div>
-						) : (
-							<React.Fragment>
-								{disabledFiles.extrasDisabled && (
-									<Typography variant='h5' component='h3'>
-										Debe esperar que termine de subir los otros archivos
-									</Typography>
-								)}
-								{form.formalData.clientId === '' && (
-									<Typography variant='h5' component='h3'>
-										Primero debe agregar el ID del Cliente
-									</Typography>
-								)}
-							</React.Fragment>
-						)}
-
-						{files.length > 0 && (
-							<Grid container spacing={2} className='mt-8'>
-								<Grid item xs={12}>
-									<Typography variant='h6' className={classes.title}>
-										Archivos
-									</Typography>
-									<div className={classes.demo}>
-										<List dense={true}>{fileList}</List>
-									</div>
-								</Grid>
-							</Grid>
-						)}
-					</React.Fragment>
-				)}
-			</div>
-		);
-	};
-	console.log(dataPlanta);
-	const PlanchetaDropZone = ({
-		formalDataFiles,
-		files,
-		setFormalDataFiles,
-		callBack,
-		getSignedUrl,
-		loading,
-		toggleLoading,
-		loadingFiles,
-		deleting,
-		toggleDelete,
-		deletingFiles,
-		disabledFiles,
-		toggleDisabledFiles
-	}) => {
-		const folder = 'planchetas';
-		const folderPlanta =
-			dataPlanta.length === 0
-				? `${form.formalData.clientId}-1`
-				: `${form.formalData.clientId}-${dataPlanta.length + 1}`;
-		const onDrop = callBack(async (uploadedFiles) => {
-			toggleLoading({
-				...loadingFiles,
-				[`${folder}Loading`]: true
-			});
-			toggleDisabledFiles({
-				estatutosDisabled        : true,
-				actasDisabled            : true,
-				poderesDisabled          : true,
-				extrasDisabled           : true,
-				planchetasDisabled       : false,
-				dniDocumentDisabled      : true,
-				documentacionUsoDisabled : true
-			});
-			getSignedUrl(uploadedFiles, `${folder}/${folderPlanta}`, async (response) => {
-				const arrayPromise = await response;
-				const acceptedFiles = arrayPromise.filter((i) => i);
-
-				if (acceptedFiles.length > 0) {
-					setFormalDataFiles({
-						...formalDataFiles,
-						planchetas : [ acceptedFiles[0] ]
-					});
-				} else {
-					alert('Existio un problema subiendo el (los) documento(s), intente de nuevo');
-				}
-				toggleLoading({
-					...loadingFiles,
-					[`${folder}Loading`]: false
-				});
-				toggleDisabledFiles({
-					estatutosDisabled        : false,
-					actasDisabled            : false,
-					poderesDisabled          : false,
-					extrasDisabled           : false,
-					planchetasDisabled       : false,
-					dniDocumentDisabled      : false,
-					documentacionUsoDisabled : false
-				});
-			});
-		});
-
-		const { getRootProps, getInputProps } = useDropzone({
-			accept   : 'application/pdf',
-			onDrop,
-			disabled : form.formalData.clientId === '',
-			multiple : false
-		});
-
-		const removeFile = async (file) => {
-			toggleDelete({
-				...deletingFiles,
-				[`${folder}Deleting`]: true
-			});
-			deleteFile(file.replace('.pdf', ''), `${folder}/${folderPlanta}`, form.formalData.clientId, (isDeleted) => {
-				if (isDeleted) {
-					const newFiles = files.filter((i) => i.path !== file);
-					setFormalDataFiles({
-						...formalDataFiles,
-						planchetas : newFiles
-					});
-				} else {
-					alert('No se pudo borrar el archivo, intente de nuevo');
-				}
-				toggleDelete({
-					...deletingFiles,
-					[`${folder}Deleting`]: false
-				});
-			});
-		};
-
-		const fileList = files.map((item, index) => (
-			<ListItem key={index} alignItems='center'>
-				<ListItemIcon className='cursor-pointer' onClick={() => removeFile(item.path)}>
-					<DeleteIcon />
-				</ListItemIcon>
-				<ListItemText className='text-justify' primary={item.path} />
-			</ListItem>
-		));
-
-		return (
-			<div className='flex flex-col min-h-128 h-full justify-around cursor-pointer'>
-				{loading || deleting ? (
-					<div className={`flex-col justify-around items-center w-full ${classes.center}`}>
-						<Typography variant='h5' component='h3'>
-							{loading ? 'Cargando Archivos...' : 'Borrando Archivo'}
-						</Typography>
-						<CircularProgress className={classes.progress} />
-					</div>
-				) : (
-					<React.Fragment>
-						{form.formalData.clientId !== '' && !disabledFiles.planchetasDisabled ? (
-							<div {...getRootProps()}>
-								<input {...getInputProps()} />
-								<Typography variant='h5' component='h3'>
-									Plancheta
-								</Typography>
-								<Typography component='p'>
-									Puede arrastrar, o dar click para cargar los archivos
-								</Typography>
-							</div>
-						) : (
-							<React.Fragment>
-								{form.formalData.clientId === '' && (
-									<Typography variant='h5' component='h3'>
-										Debe agregar el ID del Cliente
-									</Typography>
-								)}
-								{disabledFiles.planchetasDisabled && (
-									<Typography variant='h5' component='h3'>
-										Debe esperar que termine de subir los otros archivos
-									</Typography>
-								)}
-							</React.Fragment>
-						)}
-
-						{files.length > 0 && (
-							<Grid container spacing={2} className='mt-8'>
-								<Grid item xs={12}>
-									<Typography variant='h6' className={classes.title}>
-										Archivos
-									</Typography>
-									<div className={classes.demo}>
-										<List dense={true}>{fileList}</List>
-									</div>
-								</Grid>
-							</Grid>
-						)}
-					</React.Fragment>
-				)}
-			</div>
-		);
-	};
-
-	const DocumentacionUsoDropZone = ({
-		formalDataFiles,
-		files,
-		setFormalDataFiles,
-		callBack,
-		getSignedUrl,
-		loading,
-		toggleLoading,
-		loadingFiles,
-		deleting,
-		toggleDelete,
-		deletingFiles,
-		disabledFiles,
-		toggleDisabledFiles
-	}) => {
-		const folder = 'documentacionUso';
-		const folderPlanta =
-			dataPlanta.length === 0
-				? `${form.formalData.clientId}-1`
-				: `${form.formalData.clientId}-${dataPlanta.length + 1}`;
-		const onDrop = callBack(async (uploadedFiles) => {
-			toggleLoading({
-				...loadingFiles,
-				[`${folder}Loading`]: true
-			});
-			toggleDisabledFiles({
-				estatutosDisabled        : true,
-				actasDisabled            : true,
-				poderesDisabled          : true,
-				extrasDisabled           : true,
-				planchetasDisabled       : true,
-				dniDocumentDisabled      : true,
-				documentacionUsoDisabled : false
-			});
-			getSignedUrl(uploadedFiles, `${folder}/${folderPlanta}`, async (response) => {
-				const arrayPromise = await response;
-				const acceptedFiles = arrayPromise.filter((i) => i);
-
-				if (acceptedFiles.length > 0) {
-					setFormalDataFiles({
-						...formalDataFiles,
-						documentacionUso : [ acceptedFiles[0] ]
-					});
-				} else {
-					alert('Existio un problema subiendo el (los) documento(s), intente de nuevo');
-				}
-				toggleLoading({
-					...loadingFiles,
-					[`${folder}Loading`]: false
-				});
-				toggleDisabledFiles({
-					estatutosDisabled        : false,
-					actasDisabled            : false,
-					poderesDisabled          : false,
-					extrasDisabled           : false,
-					planchetasDisabled       : false,
-					dniDocumentDisabled      : false,
-					documentacionUsoDisabled : false
-				});
-			});
-		});
-
-		const { getRootProps, getInputProps } = useDropzone({
-			accept   : 'application/pdf',
-			onDrop,
-			disabled : form.formalData.clientId === '',
-			multiple : false
-		});
-
-		const removeFile = async (file) => {
-			toggleDelete({
-				...deletingFiles,
-				[`${folder}Deleting`]: true
-			});
-			deleteFile(file.replace('.pdf', ''), `${folder}/${folderPlanta}`, form.formalData.clientId, (isDeleted) => {
-				if (isDeleted) {
-					const newFiles = files.filter((i) => i.path !== file);
-					setFormalDataFiles({
-						...formalDataFiles,
-						documentacionUso : newFiles
-					});
-				} else {
-					alert('No se pudo borrar el archivo, intente de nuevo');
-				}
-				toggleDelete({
-					...deletingFiles,
-					[`${folder}Deleting`]: false
-				});
-			});
-		};
-
-		const fileList = files.map((item, index) => (
-			<ListItem key={index} alignItems='center'>
-				<ListItemIcon className='cursor-pointer' onClick={() => removeFile(item.path)}>
-					<DeleteIcon />
-				</ListItemIcon>
-				<ListItemText className='text-justify' primary={item.path} />
-			</ListItem>
-		));
-
-		return (
-			<div className='flex flex-col min-h-128 h-full justify-around cursor-pointer'>
-				{loading || deleting ? (
-					<div className={`flex-col justify-around items-center w-full ${classes.center}`}>
-						<Typography variant='h5' component='h3'>
-							{loading ? 'Cargando Archivos...' : 'Borrando Archivo'}
-						</Typography>
-						<CircularProgress className={classes.progress} />
-					</div>
-				) : (
-					<React.Fragment>
-						{form.formalData.clientId !== '' && !disabledFiles.documentacionUsoDisabled ? (
-							<div {...getRootProps()}>
-								<input {...getInputProps()} />
-								<Typography variant='h5' component='h3'>
-									Documentacion de uso
-								</Typography>
-								<Typography component='p'>
-									Puede arrastrar, o dar click para cargar los archivos
-								</Typography>
-							</div>
-						) : (
-							<React.Fragment>
-								{form.formalData.clientId === '' && (
-									<Typography variant='h5' component='h3'>
-										Debe agregar el ID del Cliente
-									</Typography>
-								)}
-								{disabledFiles.documentacionUsoDisabled && (
-									<Typography variant='h5' component='h3'>
-										Debe esperar que termine de subir los otros archivos
-									</Typography>
-								)}
-							</React.Fragment>
-						)}
-
-						{files.length > 0 && (
-							<Grid container spacing={2} className='mt-8'>
-								<Grid item xs={12}>
-									<Typography variant='h6' className={classes.title}>
-										Archivos
-									</Typography>
-									<div className={classes.demo}>
-										<List dense={true}>{fileList}</List>
-									</div>
-								</Grid>
-							</Grid>
-						)}
-					</React.Fragment>
-				)}
-			</div>
-		);
-	};
-
-	const DniDocumentDropZone = ({
-		formalDataFiles,
-		files,
-		setFormalDataFiles,
-		callBack,
-		getSignedUrl,
-		loading,
-		toggleLoading,
-		loadingFiles,
-		deleting,
-		toggleDelete,
-		deletingFiles,
-		disabledFiles,
-		toggleDisabledFiles
-	}) => {
-		const folder = 'dniDocument';
-		const onDrop = callBack(async (uploadedFiles) => {
-			toggleLoading({
-				...loadingFiles,
-				[`${folder}Loading`]: true
-			});
-			toggleDisabledFiles({
-				estatutosDisabled        : true,
-				actasDisabled            : true,
-				poderesDisabled          : true,
-				extrasDisabled           : true,
-				planchetasDisabled       : true,
-				dniDocumentDisabled      : false,
-				documentacionUsoDisabled : true
-			});
-			getSignedUrl(uploadedFiles, folder, async (response) => {
-				const arrayPromise = await response;
-				const acceptedFiles = arrayPromise.filter((i) => i);
-
-				if (acceptedFiles.length > 0) {
-					setFormalDataFiles({
-						...formalDataFiles,
-						dniDocument : [ acceptedFiles[0] ]
-					});
-				} else {
-					alert('Existio un problema subiendo el (los) documento(s), intente de nuevo');
-				}
-				toggleLoading({
-					...loadingFiles,
-					[`${folder}Loading`]: false
-				});
-				toggleDisabledFiles({
-					estatutosDisabled        : false,
-					actasDisabled            : false,
-					poderesDisabled          : false,
-					extrasDisabled           : false,
-					planchetasDisabled       : false,
-					dniDocumentDisabled      : false,
-					documentacionUsoDisabled : false
-				});
-			});
-		});
-
-		const { getRootProps, getInputProps } = useDropzone({
-			accept   : 'application/pdf',
-			onDrop,
-			disabled : form.formalData.clientId === '',
-			multiple : false
-		});
-
-		const removeFile = async (file) => {
-			toggleDelete({
-				...deletingFiles,
-				[`${folder}Deleting`]: true
-			});
-			deleteFile(file.replace('.pdf', ''), folder, form.formalData.clientId, (isDeleted) => {
-				if (isDeleted) {
-					const newFiles = files.filter((i) => i.path !== file);
-					setFormalDataFiles({
-						...formalDataFiles,
-						dniDocument : newFiles
-					});
-				} else {
-					alert('No se pudo borrar el archivo, intente de nuevo');
-				}
-				toggleDelete({
-					...deletingFiles,
-					[`${folder}Deleting`]: false
-				});
-			});
-		};
-
-		const fileList = files.map((item, index) => (
-			<ListItem key={index} alignItems='center'>
-				<ListItemIcon className='cursor-pointer' onClick={() => removeFile(item.path)}>
-					<DeleteIcon />
-				</ListItemIcon>
-				<ListItemText className='text-justify' primary={item.path} />
-			</ListItem>
-		));
-
-		return (
-			<div className='flex flex-col min-h-128 h-full justify-around cursor-pointer'>
-				{loading || deleting ? (
-					<div className={`flex-col justify-around items-center w-full ${classes.center}`}>
-						<Typography variant='h5' component='h3'>
-							{loading ? 'Cargando Archivos...' : 'Borrando Archivo'}
-						</Typography>
-						<CircularProgress className={classes.progress} />
-					</div>
-				) : (
-					<React.Fragment>
-						{form.formalData.clientId !== '' && !disabledFiles.dniDocumentDisabled ? (
-							<div {...getRootProps()}>
-								<input {...getInputProps()} />
-								<Typography variant='h5' component='h3'>
-									DNI (opcional)
-								</Typography>
-								<Typography component='p'>
-									Puede arrastrar, o dar click para cargar los archivos
-								</Typography>
-							</div>
-						) : (
-							<React.Fragment>
-								{form.formalData.clientId === '' && (
-									<Typography variant='h5' component='h3'>
-										Primero debe agregar el ID del Cliente
-									</Typography>
-								)}
-								{disabledFiles.dniDocumentDisabled && (
-									<Typography variant='h5' component='h3'>
-										Debe esperar que termine de subir los otros archivos
-									</Typography>
-								)}
-							</React.Fragment>
-						)}
-
-						{files.length > 0 && (
-							<Grid container spacing={2} className='mt-8'>
-								<Grid item xs={12}>
-									<Typography variant='h6' className={classes.title}>
-										Archivos
-									</Typography>
-									<div className={classes.demo}>
-										<List dense={true}>{fileList}</List>
-									</div>
-								</Grid>
-							</Grid>
-						)}
-					</React.Fragment>
-				)}
-			</div>
-		);
-	};
-
-	const getSignedUrl = async (files, folder, callBack) => {
-		const signedUrls = await files.map(async (file) => {
-			const fileName = file.name.replace('.pdf', '');
-			const fileType = file.type;
-			const data = await SingS3(fileName, fileType, folder, form.formalData.clientId);
-			if (data.success) {
-				const upload = await uploadFile({ fileType, signedRequest: data.data.signedRequest, file });
-				if (upload) {
-					return {
-						...data.data,
-						fileName,
-						path     : file.path
-					};
-				} else {
-					return false;
-				}
-			}
-		});
-
-		return callBack(Promise.all(signedUrls));
 	};
 
 	const addFormalDataAddress = (address) => {
@@ -1646,21 +564,22 @@ const Client = (props) => {
 			{
 				...legalRepresentative,
 				estatuto        : estatuto.map((i) => {
-					return { url: i.url, name: i.fileName };
+					return { url: i.url, name: i.fileName, path: i.path };
 				}),
 				actaDesignacion : actaDesignacion.map((i) => {
-					return { url: i.url, name: i.fileName };
+					return { url: i.url, name: i.fileName, path: i.path };
 				}),
 				poderes         : poderes.map((i) => {
-					return { url: i.url, name: i.fileName };
+					return { url: i.url, name: i.fileName, path: i.path };
 				}),
 				extraPdfs       : extraPdfs.map((i) => {
-					return { url: i.url, name: i.fileName };
+					return { url: i.url, name: i.fileName, path: i.path };
 				}),
 				dniDocument     : dniDocument.map((i) => {
 					return {
 						url  : i.url,
-						name : i.fileName
+						name : i.fileName,
+						path : i.path
 					};
 				})
 			}
@@ -1925,18 +844,21 @@ const Client = (props) => {
 							...m,
 							superficie       :
 								m.superficie.length > 0 ? parseFloat(m.superficie.replace(',', '.')) : null,
-							plancheta        : m.plancheta.url,
-							documentacionUso :
-								m.documentacionUso && m.documentacionUso.hasOwnProperty('url')
+							plancheta        : _.isArray(m.plancheta) ? m.plancheta[0].url : m.plancheta.url,
+							documentacionUso : _.isArray(m.documentacionUso)
+								? m.documentacionUso[0].url
+								: m.documentacionUso && m.documentacionUso.hasOwnProperty('url')
 									? m.documentacionUso.url
 									: null,
-							documentacion    :
-								m.documentacionUso && m.documentacionUso.hasOwnProperty('url') ? 'SI' : 'NO'
+							documentacion    : _.isArray(m.documentacionUso)
+								? 'SI'
+								: m.documentacionUso && m.documentacionUso.hasOwnProperty('url') ? 'SI' : 'NO'
 						};
 					})
 				};
 			})
 		};
+		console.log(body);
 		if (isNew) {
 			dispatch(Actions.saveClient(body, props.history));
 		} else {
@@ -2476,12 +1398,10 @@ const Client = (props) => {
 														<Grid container spacing={3}>
 															<Grid item xs={6}>
 																<Paper className={classes.paper}>
-																	<EstatutoDropZone
-																		formalDataFiles={formalDataFiles}
+																	<DropZone
+																		anotherFiles={formalDataFiles}
 																		files={estatuto}
-																		setFormalDataFiles={setFormalDataFiles}
-																		callBack={useCallback}
-																		getSignedUrl={getSignedUrl}
+																		setFiles={setFormalDataFiles}
 																		loading={estatutosLoading}
 																		toggleLoading={toggleLoadingFiles}
 																		loadingFiles={loadingFiles}
@@ -2490,17 +1410,19 @@ const Client = (props) => {
 																		deletingFiles={deletingFiles}
 																		toggleDisabledFiles={toggleDisabledFiles}
 																		disabledFiles={disabledFiles}
+																		clientId={form.formalData.clientId}
+																		folderName='estatutos'
+																		varName='estatuto'
+																		title='Estatutos'
 																	/>
 																</Paper>
 															</Grid>
 															<Grid item xs={6}>
 																<Paper className={classes.paper}>
-																	<ActaDesignacionDropZone
-																		formalDataFiles={formalDataFiles}
+																	<DropZone
+																		anotherFiles={formalDataFiles}
 																		files={actaDesignacion}
-																		setFormalDataFiles={setFormalDataFiles}
-																		callBack={useCallback}
-																		getSignedUrl={getSignedUrl}
+																		setFiles={setFormalDataFiles}
 																		loading={actasLoading}
 																		toggleLoading={toggleLoadingFiles}
 																		loadingFiles={loadingFiles}
@@ -2509,17 +1431,19 @@ const Client = (props) => {
 																		deletingFiles={deletingFiles}
 																		toggleDisabledFiles={toggleDisabledFiles}
 																		disabledFiles={disabledFiles}
+																		clientId={form.formalData.clientId}
+																		folderName='actas'
+																		varName='actaDesignacion'
+																		title='Actas de Designacion'
 																	/>
 																</Paper>
 															</Grid>
 															<Grid item xs={6}>
 																<Paper className={classes.paper}>
-																	<PoderesDropZone
-																		formalDataFiles={formalDataFiles}
+																	<DropZone
+																		anotherFiles={formalDataFiles}
 																		files={poderes}
-																		setFormalDataFiles={setFormalDataFiles}
-																		callBack={useCallback}
-																		getSignedUrl={getSignedUrl}
+																		setFiles={setFormalDataFiles}
 																		loading={poderesLoading}
 																		toggleLoading={toggleLoadingFiles}
 																		loadingFiles={loadingFiles}
@@ -2528,17 +1452,19 @@ const Client = (props) => {
 																		deletingFiles={deletingFiles}
 																		toggleDisabledFiles={toggleDisabledFiles}
 																		disabledFiles={disabledFiles}
+																		clientId={form.formalData.clientId}
+																		folderName='poderes'
+																		varName='poderes'
+																		title='Poderes'
 																	/>
 																</Paper>
 															</Grid>
 															<Grid item xs={6}>
 																<Paper className={classes.paper}>
-																	<ExtraDropZone
-																		formalDataFiles={formalDataFiles}
+																	<DropZone
+																		anotherFiles={formalDataFiles}
 																		files={extraPdfs}
-																		setFormalDataFiles={setFormalDataFiles}
-																		callBack={useCallback}
-																		getSignedUrl={getSignedUrl}
+																		setFiles={setFormalDataFiles}
 																		loading={extrasLoading}
 																		toggleLoading={toggleLoadingFiles}
 																		loadingFiles={loadingFiles}
@@ -2547,6 +1473,10 @@ const Client = (props) => {
 																		deletingFiles={deletingFiles}
 																		toggleDisabledFiles={toggleDisabledFiles}
 																		disabledFiles={disabledFiles}
+																		clientId={form.formalData.clientId}
+																		folderName='extras'
+																		varName='extraPdfs'
+																		title='Otros Documentos'
 																	/>
 																</Paper>
 															</Grid>
@@ -2557,12 +1487,10 @@ const Client = (props) => {
 														<Grid container spacing={3}>
 															<Grid item xs={12}>
 																<Paper className={classes.paper}>
-																	<DniDocumentDropZone
-																		formalDataFiles={formalDataFiles}
+																	<DropZone
+																		anotherFiles={formalDataFiles}
 																		files={dniDocument}
-																		setFormalDataFiles={setFormalDataFiles}
-																		callBack={useCallback}
-																		getSignedUrl={getSignedUrl}
+																		setFiles={setFormalDataFiles}
 																		loading={dniDocumentLoading}
 																		toggleLoading={toggleLoadingFiles}
 																		loadingFiles={loadingFiles}
@@ -2571,6 +1499,11 @@ const Client = (props) => {
 																		deletingFiles={deletingFiles}
 																		toggleDisabledFiles={toggleDisabledFiles}
 																		disabledFiles={disabledFiles}
+																		clientId={form.formalData.clientId}
+																		folderName='dniDocument'
+																		varName='dniDocument'
+																		title='DNI (opcional)'
+																		single={true}
 																	/>
 																</Paper>
 															</Grid>
@@ -3345,12 +2278,10 @@ const Client = (props) => {
 														<Grid container spacing={3}>
 															<Grid item xs={checkBoxMobiliary.documentacionUso ? 6 : 12}>
 																<Paper className={classes.paper}>
-																	<PlanchetaDropZone
-																		formalDataFiles={formalDataFiles}
+																	<DropZone
+																		anotherFiles={formalDataFiles}
 																		files={planchetas}
-																		setFormalDataFiles={setFormalDataFiles}
-																		callBack={useCallback}
-																		getSignedUrl={getSignedUrl}
+																		setFiles={setFormalDataFiles}
 																		loading={planchetasLoading}
 																		toggleLoading={toggleLoadingFiles}
 																		loadingFiles={loadingFiles}
@@ -3359,6 +2290,12 @@ const Client = (props) => {
 																		deletingFiles={deletingFiles}
 																		toggleDisabledFiles={toggleDisabledFiles}
 																		disabledFiles={disabledFiles}
+																		clientId={form.formalData.clientId}
+																		folderName='planchetas'
+																		plantaLength={`${dataPlanta.length + 1}`}
+																		varName='planchetas'
+																		title='Plancheta'
+																		single={true}
 																	/>
 																</Paper>
 															</Grid>
@@ -3366,12 +2303,10 @@ const Client = (props) => {
 																<FuseAnimate animation='transition.fadeIn' delay={300}>
 																	<Grid item xs={6}>
 																		<Paper className={classes.paper}>
-																			<DocumentacionUsoDropZone
-																				formalDataFiles={formalDataFiles}
+																			<DropZone
+																				anotherFiles={formalDataFiles}
 																				files={documentacionUso}
-																				setFormalDataFiles={setFormalDataFiles}
-																				callBack={useCallback}
-																				getSignedUrl={getSignedUrl}
+																				setFiles={setFormalDataFiles}
 																				loading={documentacionUsoLoading}
 																				toggleLoading={toggleLoadingFiles}
 																				loadingFiles={loadingFiles}
@@ -3382,6 +2317,13 @@ const Client = (props) => {
 																					toggleDisabledFiles
 																				}
 																				disabledFiles={disabledFiles}
+																				clientId={form.formalData.clientId}
+																				folderName='documentacionUso'
+																				plantaLength={`${dataPlanta.length +
+																					1}`}
+																				varName='documentacionUso'
+																				title='Documentacion de uso'
+																				single={true}
 																			/>
 																		</Paper>
 																	</Grid>
@@ -3417,6 +2359,7 @@ const Client = (props) => {
 						innerScroll
 					/>
 					<ShowInfoDialog
+						clientId={form.formalData.clientId}
 						open={showModal}
 						closeModal={closeModal}
 						setDataModal={setDataModal}
@@ -3426,6 +2369,7 @@ const Client = (props) => {
 						isNewClient={isNew}
 						history={props.history}
 					/>
+
 					<Dialog
 						classes={{
 							paper : 'm-24'

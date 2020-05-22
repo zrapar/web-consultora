@@ -63,33 +63,38 @@ export const getClient = (client) => async (dispatch) => {
 						actaDesignacion : o.actaDesignacion.map((p) => {
 							return {
 								url  : p,
-								name : p.split('actas/')[1]
+								name : p.split('actas/')[1],
+								path : p.split('actas/')[1] + '.pdf'
 							};
 						}),
 						estatuto        : o.estatuto.map((p) => {
 							return {
 								url  : p,
-								name : p.split('estatutos/')[1]
+								name : p.split('estatutos/')[1],
+								path : p.split('estatutos/')[1] + '.pdf'
 							};
 						}),
 						extraPdfs       : o.extraPdfs.map((p) => {
 							return {
 								url  : p,
-								name : p.split('extras/')[1]
+								name : p.split('extras/')[1],
+								path : p.split('extras/')[1] + '.pdf'
 							};
 						}),
 						poderes         : o.poderes.map((p) => {
 							return {
 								url  : p,
-								name : p.split('poderes/')[1]
+								name : p.split('poderes/')[1],
+								path : p.split('poderes/')[1] + '.pdf'
 							};
 						}),
 						dniDocument     : o.dniDocument
 							? {
 									url  : o.dniDocument,
-									name : o.dniDocument.split('dniDocument/')[1]
+									name : o.dniDocument.split('dniDocument/')[1],
+									path : o.dniDocument.split('dniDocument/')[1] + '.pdf'
 								}
-							: ''
+							: []
 					};
 				})
 			},
@@ -103,12 +108,16 @@ export const getClient = (client) => async (dispatch) => {
 							documentacionUso : m.documentacionUso
 								? {
 										url  : m.documentacionUso,
-										name : m.documentacionUso.split(`documentacionUso/${clientId}-${index + 1}/`)[1]
+										name : m.documentacionUso.split(`documentacionUso/${clientId}-${index + 1}/`)[1],
+										path :
+											m.documentacionUso.split(`documentacionUso/${clientId}-${index + 1}/`)[1] +
+											'.pdf'
 									}
 								: '',
 							plancheta        : {
 								url  : m.plancheta,
-								name : m.plancheta.split(`planchetas/${clientId}-${index + 1}/`)[1]
+								name : m.plancheta.split(`planchetas/${clientId}-${index + 1}/`)[1],
+								path : m.plancheta.split(`planchetas/${clientId}-${index + 1}/`)[1] + '.pdf'
 							}
 						};
 					})
@@ -171,10 +180,11 @@ export const updateClient = (data, id, history) => async (dispatch) => {
 		}
 
 		Promise.all([
-			dispatch({
-				type    : SAVE_CLIENT,
-				payload : dataClientShow
-			})
+			dispatch(getClients())
+			// dispatch({
+			// 	type    : SAVE_CLIENT,
+			// 	payload : data
+			// })
 		]).then(() => {
 			dispatch(getClients());
 			history.push('/apps/clients');

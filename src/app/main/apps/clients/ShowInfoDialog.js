@@ -12,14 +12,15 @@ import {
 	Link
 	// CircularProgress
 } from '@material-ui/core';
-import { Document, Page } from 'react-pdf/dist/entry.webpack';
 import CloseIcon from '@material-ui/icons/Close';
 import { FuseAnimate } from '@fuse';
 import { makeStyles } from '@material-ui/core/styles';
 import { getTitle, getColumns, convertData } from 'utils';
 import MaterialTable from 'material-table';
+import { Document, Page } from 'react-pdf/dist/entry.webpack';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import _ from 'lodash';
+import DropZone from './DropZone';
 
 const options = {
 	cMapUrl    : 'cmaps/',
@@ -55,7 +56,7 @@ const useStyles = makeStyles((theme) => ({
 
 const ShowInfoDialog = (props) => {
 	const classes = useStyles();
-	const { closeModal, setDataModal, data, type, setDataEdit, isNewClient, ...modalProps } = props;
+	const { clientId, closeModal, setDataModal, data, type, setDataEdit, isNewClient, ...modalProps } = props;
 	const [ dataTable, setDataTable ] = useState([]);
 	const [ typeTable, setTypeTable ] = useState('');
 
@@ -71,7 +72,17 @@ const ShowInfoDialog = (props) => {
 		url      : null,
 		numPages : null
 	});
+
 	const [ filesShow, setFiles ] = useState([]);
+
+	const [ dataDropZone, setDataDropZone ] = useState({
+		folder  : '',
+		varName : '',
+		title   : '',
+		single  : false,
+		rowData : null
+	});
+
 	const [ state, setState ] = useState({
 		columns : [],
 		data    : []
@@ -82,7 +93,6 @@ const ShowInfoDialog = (props) => {
 		typeFather      : '',
 		dataGrandFather : [],
 		dataFather      : [],
-		back            : false,
 		actualIndex     : null,
 		lastIndex       : null
 	});
@@ -92,7 +102,7 @@ const ShowInfoDialog = (props) => {
 	const [ openViewer, setOpenViewer ] = useState(false);
 
 	const handleClickOpen = (files) => {
-		setFiles(_.isArray(files) ? files : [ files ]);
+		setFiles(_.isArray(files) ? files : [ files ].filter((i) => i));
 		setOpen(true);
 	};
 
@@ -151,7 +161,7 @@ const ShowInfoDialog = (props) => {
 
 			setState({
 				data    : dataToShow,
-				columns : getColumns(typeTable, handleClickOpen, getNewData)
+				columns : getColumns(typeTable, handleClickOpen, getNewData, setDataDropZone)
 			});
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -183,14 +193,20 @@ const ShowInfoDialog = (props) => {
 		});
 		setDataTable(dataActual);
 		setTypeTable(typeActual);
+		setDataEdit({
+			type : typeActual,
+			data : dataActual
+		});
 	};
 
 	const closeComposeDialog = () => {
 		closeModal(false);
+
 		setState({
 			columns : [],
 			data    : []
 		});
+
 		setDataModal({
 			dataTable : [],
 			typeTable : ''
@@ -238,6 +254,54 @@ const ShowInfoDialog = (props) => {
 		}
 	};
 
+	const updateFiles = (files) => {
+		const data = [ ...state.data ];
+		const idData = dataDropZone.rowData.tableData.id;
+		const formatedFiles = files.map((file) => {
+			return { url: file.url, name: file.fileName };
+		});
+		const isUnique =
+			dataDropZone.varName === 'plancheta' || dataDropZone.varName === 'documentacionUso' ? true : false;
+
+		const newFiles = isUnique ? formatedFiles : [ ...data[idData][dataDropZone.varName], ...formatedFiles ];
+		data[idData][dataDropZone.varName] = newFiles;
+
+		setState({ ...state, data });
+		const hadFather = lastData.typeFather !== '';
+		if (hadFather) {
+			let dataParents = [ ...lastData.dataFather ];
+
+			switch (typeTable) {
+				case 'phoneContactsPlanta':
+					dataParents[lastData.actualIndex].phoneContacts = data.map((i) => i.phone);
+					break;
+				case 'innerContactsEmailPlanta':
+					dataParents[lastData.actualIndex].email = data.map((i) => i.email);
+					break;
+				case 'innerContactsPlanta':
+					dataParents[lastData.actualIndex].innerContact = data;
+					break;
+				case 'mobiliaryPlanta':
+					dataParents[lastData.actualIndex].mobiliary = data;
+					break;
+
+				default:
+					break;
+			}
+
+			setLastData({
+				...lastData,
+				dataFather : dataParents
+			});
+		} else {
+			setDataEdit({
+				type : typeTable,
+				data
+			});
+		}
+		setFiles(newFiles);
+	};
+
 	return (
 		<Dialog
 			classes={{
@@ -248,6 +312,8 @@ const ShowInfoDialog = (props) => {
 			fullWidth
 			maxWidth='lg'
 			fullScreen
+			disableBackdropClick
+			disableEscapeKeyDown
 		>
 			<AppBar position='static' elevation={1}>
 				<Toolbar className='flex w-full'>
@@ -323,114 +389,109 @@ const ShowInfoDialog = (props) => {
 									}
 								}
 							}}
-							editable={
-								isNewClient ? (
-									{
-										onRowAdd    : (newData) =>
-											new Promise((resolve) => {
-												setTimeout(() => {
-													resolve();
-													const data = [ ...state.data ];
-													data.push(newData);
-													setState({ ...state, data });
-													setDataEdit({
-														type : typeTable,
-														data
-													});
-												}, 600);
-											}),
-										onRowUpdate : (newData, oldData) =>
-											new Promise((resolve) => {
-												setTimeout(() => {
-													resolve();
-													const data = [ ...state.data ];
-													data[data.indexOf(oldData)] = newData;
-													setState({ ...state, data });
-													if (!lastData.back) {
-														setDataEdit({
-															type : typeTable,
-															data
-														});
-													} else {
-														let dataParents = [ ...lastData.data ];
-														switch (typeTable) {
-															case 'phoneContactsPlanta':
-																dataParents[
-																	lastData.actualIndex
-																].phoneContacts = data.map((i) => i.phone);
-																break;
-															case 'innerContactsEmailPlanta':
-																dataParents[lastData.actualIndex].email = data.map(
-																	(i) => i.email
-																);
-																break;
-															case 'innerContactsPlanta':
-																dataParents[lastData.actualIndex].innerContact = data;
-																break;
-															case 'mobiliaryPlanta':
-																dataParents[lastData.actualIndex].mobiliary = data;
-																break;
+							editable={{
+								onRowAdd    : (newData) =>
+									new Promise((resolve) => {
+										setTimeout(() => {
+											resolve();
+											const data = [ ...state.data ];
+											data.push(newData);
+											setState({ ...state, data });
+											setDataEdit({
+												type : typeTable,
+												data
+											});
+										}, 600);
+									}),
+								onRowUpdate : (newData, oldData) =>
+									new Promise((resolve) => {
+										setTimeout(() => {
+											resolve();
+											const data = [ ...state.data ];
+											data[data.indexOf(oldData)] = newData;
+											setState({ ...state, data });
+											const hadFather = lastData.typeFather !== '';
+											if (hadFather) {
+												let dataParents = [ ...lastData.dataFather ];
+												switch (typeTable) {
+													case 'phoneContactsPlanta':
+														dataParents[lastData.actualIndex].phoneContacts = data.map(
+															(i) => i.phone
+														);
+														break;
+													case 'innerContactsEmailPlanta':
+														dataParents[lastData.actualIndex].email = data.map(
+															(i) => i.email
+														);
+														break;
+													case 'innerContactsPlanta':
+														dataParents[lastData.actualIndex].innerContact = data;
+														break;
+													case 'mobiliaryPlanta':
+														dataParents[lastData.actualIndex].mobiliary = data;
+														break;
 
-															default:
-																break;
-														}
-														setLastData({
-															...lastData,
-															data : dataParents
-														});
-													}
-												}, 600);
-											}),
-										onRowDelete : (oldData) =>
-											new Promise((resolve) => {
-												setTimeout(() => {
-													resolve();
-													const data = [ ...state.data ];
-													data.splice(data.indexOf(oldData), 1);
-													setState({ ...state, data });
+													default:
+														break;
+												}
+												setLastData({
+													...lastData,
+													dataFather : dataParents
+												});
+											} else {
+												setDataEdit({
+													type : typeTable,
+													data
+												});
+											}
+										}, 600);
+									}),
+								onRowDelete : (oldData) =>
+									new Promise((resolve) => {
+										setTimeout(() => {
+											resolve();
+											const data = [ ...state.data ];
+											data.splice(data.indexOf(oldData), 1);
+											setState({ ...state, data });
 
-													if (!lastData.back) {
-														setDataEdit({
-															type : typeTable,
-															data
-														});
-													} else {
-														let dataParents = [ ...lastData.data ];
-														switch (typeTable) {
-															case 'phoneContactsPlanta':
-																dataParents[
-																	lastData.actualIndex
-																].phoneContacts = data.map((i) => i.phone);
-																break;
-															case 'innerContactsEmailPlanta':
-																dataParents[lastData.actualIndex].email = data.map(
-																	(i) => i.email
-																);
-																break;
-															case 'innerContactsPlanta':
-																dataParents[lastData.actualIndex].innerContact = data;
-																break;
-															case 'mobiliaryPlanta':
-																dataParents[lastData.actualIndex].mobiliary = data;
-																break;
+											if (!lastData.back) {
+												setDataEdit({
+													type : typeTable,
+													data
+												});
+											} else {
+												let dataParents = [ ...lastData.dataFather ];
+												switch (typeTable) {
+													case 'phoneContactsPlanta':
+														dataParents[lastData.actualIndex].phoneContacts = data.map(
+															(i) => i.phone
+														);
+														break;
+													case 'innerContactsEmailPlanta':
+														dataParents[lastData.actualIndex].email = data.map(
+															(i) => i.email
+														);
+														break;
+													case 'innerContactsPlanta':
+														dataParents[lastData.actualIndex].innerContact = data;
+														break;
+													case 'mobiliaryPlanta':
+														dataParents[lastData.actualIndex].mobiliary = data;
+														break;
 
-															default:
-																break;
-														}
-														setLastData({
-															...lastData,
-															data : dataParents
-														});
-													}
-												}, 600);
-											}),
-										isEditable  : () => false,
-										isDeletable : () => true
-									}
-								) : (
-									{}
-								)
-							}
+													default:
+														break;
+												}
+												setLastData({
+													...lastData,
+													dataFather : dataParents
+												});
+											}
+										}, 600);
+									}),
+								isEditable  : () => true,
+								isDeletable : () => true
+							}}
 						/>
 					</div>
 				</DialogContent>
@@ -447,17 +508,28 @@ const ShowInfoDialog = (props) => {
 					)}
 				</DialogActions>
 			</div>
+
 			<Dialog fullWidth maxWidth='sm' onClose={handleClose} aria-labelledby='customized-dialog-title' open={open}>
 				<DialogTitle id='customized-dialog-title' onClose={handleClose}>
 					Archivos
 				</DialogTitle>
-				{console.log(filesShow)}
 				<DialogContent dividers>
-					{filesShow.map((i, index) => (
+					<DropZone
+						clientId={clientId}
+						files={filesShow}
+						folderName={dataDropZone.folder}
+						setFiles={updateFiles}
+						title={dataDropZone.title}
+						editable={true}
+						single={dataDropZone.single}
+						varName={dataDropZone.varName}
+						extraDta={lastData}
+					/>
+					{/* {filesShow.map((i, index) => (
 						<Link key={index} onClick={() => handleClickOpenViewer(i.url)}>
 							{i.name}
 						</Link>
-					))}
+					))} */}
 				</DialogContent>
 				<DialogActions>
 					<Button onClick={handleClose} color='primary'>

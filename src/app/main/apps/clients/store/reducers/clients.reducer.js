@@ -11,7 +11,8 @@ const clientsReducer = function(state = initialState, action) {
 		case Actions.GET_CLIENTS: {
 			return {
 				...state,
-				clients : action.payload
+				clients : action.payload,
+				client  : null
 			};
 		}
 		case Actions.SET_CLIENTS_SEARCH_TEXT: {
@@ -26,12 +27,12 @@ const clientsReducer = function(state = initialState, action) {
 				client : action.payload
 			};
 		}
-		case Actions.SAVE_CLIENT: {
-			return {
-				...state,
-				client : action.payload
-			};
-		}
+		// case Actions.SAVE_CLIENT: {
+		// 	return {
+		// 		...state,
+		// 		client : action.payload
+		// 	};
+		// }
 		default: {
 			return state;
 		}
