@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
 	Button,
 	Tab,
@@ -81,20 +81,20 @@ const Client = (props) => {
 	});
 
 	const [ loadingFiles, toggleLoadingFiles ] = useState({
-		estatutosLoading        : false,
-		actasLoading            : false,
+		estatutoLoading         : false,
+		actaDesignacionLoading  : false,
 		poderesLoading          : false,
-		extrasLoading           : false,
+		extraPdfsLoading        : false,
 		planchetasLoading       : false,
 		dniDocumentLoading      : false,
 		documentacionUsoLoading : false
 	});
 
 	const [ deletingFiles, toggleDeleteFiles ] = useState({
-		estatutosDeleting        : false,
-		actasDeleting            : false,
+		estatutoDeleting         : false,
+		actaDesignacionDeleting  : false,
 		poderesDeleting          : false,
-		extrasDeleting           : false,
+		extraPdfsDeleting        : false,
 		planchetasDeleting       : false,
 		dniDocumentDeleting      : false,
 		documentacionUsoDeleting : false
@@ -102,9 +102,9 @@ const Client = (props) => {
 
 	const [ disabledFiles, toggleDisabledFiles ] = useState({
 		estatutosDisabled        : false,
-		actasDisabled            : false,
+		actaDesignacionDisabled  : false,
 		poderesDisabled          : false,
-		extrasDisabled           : false,
+		extraPdfsDisabled        : false,
 		planchetasDisabled       : false,
 		dniDocumentDisabled      : false,
 		documentacionUsoDisabled : false
@@ -163,20 +163,20 @@ const Client = (props) => {
 	} = formalDataFiles;
 
 	const {
-		estatutosLoading,
-		actasLoading,
+		estatutoLoading,
+		actaDesignacionLoading,
 		poderesLoading,
-		extrasLoading,
+		extraPdfsLoading,
 		planchetasLoading,
 		dniDocumentLoading,
 		documentacionUsoLoading
 	} = loadingFiles;
 
 	const {
-		estatutosDeleting,
-		actasDeleting,
+		estatutoDeleting,
+		actaDesignacionDeleting,
 		poderesDeleting,
-		extrasDeleting,
+		extraPdfsDeleting,
 		planchetasDeleting,
 		dniDocumentDeleting,
 		documentacionUsoDeleting
@@ -1402,10 +1402,10 @@ const Client = (props) => {
 																		anotherFiles={formalDataFiles}
 																		files={estatuto}
 																		setFiles={setFormalDataFiles}
-																		loading={estatutosLoading}
+																		loading={estatutoLoading}
 																		toggleLoading={toggleLoadingFiles}
 																		loadingFiles={loadingFiles}
-																		deleting={estatutosDeleting}
+																		deleting={estatutoDeleting}
 																		toggleDelete={toggleDeleteFiles}
 																		deletingFiles={deletingFiles}
 																		toggleDisabledFiles={toggleDisabledFiles}
@@ -1423,10 +1423,10 @@ const Client = (props) => {
 																		anotherFiles={formalDataFiles}
 																		files={actaDesignacion}
 																		setFiles={setFormalDataFiles}
-																		loading={actasLoading}
+																		loading={actaDesignacionLoading}
 																		toggleLoading={toggleLoadingFiles}
 																		loadingFiles={loadingFiles}
-																		deleting={actasDeleting}
+																		deleting={actaDesignacionDeleting}
 																		toggleDelete={toggleDeleteFiles}
 																		deletingFiles={deletingFiles}
 																		toggleDisabledFiles={toggleDisabledFiles}
@@ -1465,10 +1465,10 @@ const Client = (props) => {
 																		anotherFiles={formalDataFiles}
 																		files={extraPdfs}
 																		setFiles={setFormalDataFiles}
-																		loading={extrasLoading}
+																		loading={extraPdfsLoading}
 																		toggleLoading={toggleLoadingFiles}
 																		loadingFiles={loadingFiles}
-																		deleting={extrasDeleting}
+																		deleting={extraPdfsDeleting}
 																		toggleDelete={toggleDeleteFiles}
 																		deletingFiles={deletingFiles}
 																		toggleDisabledFiles={toggleDisabledFiles}

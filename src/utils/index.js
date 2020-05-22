@@ -221,6 +221,8 @@ export const tableTitles = (type) => {
 				'Superficie',
 				'Acciones'
 			];
+		case 'govermentUsers':
+			return [ 'Cuenta', 'Usuario', 'Clave', 'Acciones' ];
 
 		default:
 			return false;
@@ -477,7 +479,7 @@ export const getColumns = (type, handleClickOpen, setNewEditableData, setDataDro
 			];
 		case 'dataPlanta':
 			return [
-				{ title: 'ID del Establecimiento', field: 'id_establecimiento' },
+				{ title: 'ID del Establecimiento', field: 'id_establecimiento', editable: 'never' },
 				{ title: 'Calle / Ruta', field: 'address.calleRuta' },
 				{ title: 'N° / Km', field: 'address.nKm' },
 				{ title: 'Piso', field: 'address.piso' },
@@ -524,8 +526,9 @@ export const getColumns = (type, handleClickOpen, setNewEditableData, setDataDro
 						<Button
 							className='whitespace-no-wrap '
 							variant='contained'
-							onClick={() =>
-								setNewEditableData('govermentUsers', rowData.govermentUsers, rowData.tableData.id)}
+							onClick={() => {
+								setNewEditableData('govermentUsers', rowData.govermentUsers, rowData.tableData.id);
+							}}
 						>
 							Ver Usuarios Gubernamentales
 						</Button>
@@ -579,7 +582,17 @@ export const getColumns = (type, handleClickOpen, setNewEditableData, setDataDro
 			return [ { title: 'Emails del Contacto', field: 'email' } ];
 		case 'govermentUsers':
 			return [
-				{ title: 'Cuenta', field: 'type' },
+				{
+					title    : 'Cuenta',
+					field    : 'type',
+					editable : 'onAdd',
+					lookup   : {
+						opds   : 'OPDS',
+						ada    : 'ADA',
+						ina    : 'INA',
+						acumar : 'ACUMAR'
+					}
+				},
 				{ title: 'Usuario', field: 'user' },
 				{ title: 'Contraseña', field: 'pass' }
 			];
@@ -668,9 +681,8 @@ export const convertData = (type, data, getSame = false) => {
 			case 'govermentUsers':
 				return Object.keys(data).map((i) => {
 					return {
-						type : i.toUpperCase(),
-						user : data[i].user,
-						pass : data[i].pass
+						...data[i],
+						type : i
 					};
 				});
 

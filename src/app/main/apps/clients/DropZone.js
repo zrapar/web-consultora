@@ -113,24 +113,26 @@ const DropZone = ({
 		[ plantaLength, editable, folderName, clientId, idEstablecimiento ]
 	);
 
-	console.log('folder', folder);
-
 	const startOnDrop = () => {
 		if (!editable) {
 			toggleLoading({
 				...loadingFiles,
-				[`${folder}Loading`]: true
+				[`${varName}Loading`]: true
 			});
 
-			toggleDisabledFiles({
-				estatutosDisabled        : false,
-				actasDisabled            : true,
-				poderesDisabled          : true,
-				extrasDisabled           : true,
-				planchetasDisabled       : true,
-				dniDocumentDisabled      : true,
-				documentacionUsoDisabled : true
+			const disableObj = {};
+
+			const nameDisabled = `${varName}Disabled`;
+
+			Object.keys(disabledFiles).forEach((name) => {
+				if (name === nameDisabled) {
+					disableObj[name] = false;
+				} else {
+					disableObj[name] = true;
+				}
 			});
+
+			toggleDisabledFiles(disableObj);
 		} else {
 			toggleInnerDisabled(true);
 			toggleInnerLoading(true);
@@ -141,17 +143,16 @@ const DropZone = ({
 		if (!editable) {
 			toggleLoading({
 				...loadingFiles,
-				[`${folder}Loading`]: false
+				[`${varName}Loading`]: false
 			});
-			toggleDisabledFiles({
-				estatutosDisabled        : false,
-				actasDisabled            : false,
-				poderesDisabled          : false,
-				extrasDisabled           : false,
-				planchetasDisabled       : false,
-				dniDocumentDisabled      : false,
-				documentacionUsoDisabled : false
+
+			const disableObj = {};
+
+			Object.keys(disabledFiles).forEach((name) => {
+				disableObj[name] = false;
 			});
+
+			toggleDisabledFiles(disableObj);
 		} else {
 			toggleInnerDisabled(false);
 			toggleInnerLoading(false);
@@ -380,7 +381,7 @@ const DropZone = ({
 						</div>
 					) : (
 						<React.Fragment>
-							{clientId !== '' && !disabledFiles[`${folder}Disabled`] ? (
+							{clientId !== '' && !disabledFiles[`${varName}Disabled`] ? (
 								<div {...getRootProps()}>
 									<input {...getInputProps()} />
 									<Typography variant='h5' component='h3'>
@@ -392,7 +393,7 @@ const DropZone = ({
 								</div>
 							) : (
 								<React.Fragment>
-									{disabledFiles[`${folder}Disabled`] && (
+									{disabledFiles[`${varName}Disabled`] && (
 										<Typography variant='h5' component='h3'>
 											Debe esperar que termine de subir los otros archivos
 										</Typography>

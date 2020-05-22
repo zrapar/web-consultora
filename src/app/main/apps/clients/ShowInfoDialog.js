@@ -8,8 +8,7 @@ import {
 	Typography,
 	Toolbar,
 	AppBar,
-	DialogTitle,
-	Link
+	DialogTitle
 	// CircularProgress
 } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
@@ -104,14 +103,6 @@ const ShowInfoDialog = (props) => {
 	const handleClickOpen = (files) => {
 		setFiles(_.isArray(files) ? files : [ files ].filter((i) => i));
 		setOpen(true);
-	};
-
-	const handleClickOpenViewer = (url) => {
-		setFile({
-			...file,
-			url
-		});
-		setOpenViewer(true);
 	};
 
 	const handleClose = () => {
@@ -302,6 +293,26 @@ const ShowInfoDialog = (props) => {
 		setFiles(newFiles);
 	};
 
+	const showAdd = () => {
+		if (isNewClient) {
+			return {
+				Add         : (props) => null,
+				Search      : (props) => null,
+				ResetSearch : (props) => null
+			};
+		} else {
+			const objIcons = {
+				Search      : (props) => null,
+				ResetSearch : (props) => null
+			};
+
+			if (typeTable !== 'govermentUsers') {
+				objIcons['Add'] = (props) => null;
+			}
+			return objIcons;
+		}
+	};
+
 	return (
 		<Dialog
 			classes={{
@@ -338,21 +349,7 @@ const ShowInfoDialog = (props) => {
 							columns={state.columns}
 							data={state.data}
 							// icons={isNewClient ? { Add: (props) => null } : {}}
-							icons={
-								isNewClient ? (
-									{
-										Add         : (props) => null,
-										Search      : (props) => null,
-										ResetSearch : (props) => null
-									}
-								) : (
-									{
-										Add         : (props) => null,
-										Search      : (props) => null,
-										ResetSearch : (props) => null
-									}
-								)
-							}
+							icons={showAdd()}
 							localization={{
 								pagination : {
 									labelDisplayedRows : '{from}-{to} de {count}',
@@ -391,17 +388,37 @@ const ShowInfoDialog = (props) => {
 							}}
 							editable={{
 								onRowAdd    : (newData) =>
-									new Promise((resolve) => {
+									new Promise((resolve, reject) => {
 										setTimeout(() => {
+											if (typeTable === 'govermentUsers') {
+												const data = [ ...state.data ];
+												const existType = data.filter((i) => i.type === newData.type).length;
+												if (existType < 1) {
+													let dataParents = [ ...lastData.dataFather ];
+													data.push(newData);
+													setState({ ...state, data });
+													const resultObj = {};
+													const map = new Map();
+													for (const item of data) {
+														const typeValue = item.type;
+														if (!map.has(item.type)) {
+															map.set(item.type, true); // set any value to Map
+															resultObj[typeValue] = {
+																user : item.user,
+																pass : item.pass
+															};
+														}
+													}
+
+													dataParents[lastData.actualIndex].govermentUsers = resultObj;
+													setLastData({
+														...lastData,
+														dataFather : dataParents
+													});
+												}
+											}
 											resolve();
-											const data = [ ...state.data ];
-											data.push(newData);
-											setState({ ...state, data });
-											setDataEdit({
-												type : typeTable,
-												data
-											});
-										}, 600);
+										}, typeTable === 'govermentUsers' ? 600 : 0);
 									}),
 								onRowUpdate : (newData, oldData) =>
 									new Promise((resolve) => {
@@ -430,7 +447,18 @@ const ShowInfoDialog = (props) => {
 													case 'mobiliaryPlanta':
 														dataParents[lastData.actualIndex].mobiliary = data;
 														break;
-
+													case 'govermentUsers':
+														const govermentUsersObj = {};
+														data.forEach((i) => {
+															govermentUsersObj[i.type] = {
+																user : i.user,
+																pass : i.pass
+															};
+														});
+														dataParents[
+															lastData.actualIndex
+														].govermentUsers = govermentUsersObj;
+														break;
 													default:
 														break;
 												}
@@ -454,7 +482,8 @@ const ShowInfoDialog = (props) => {
 											data.splice(data.indexOf(oldData), 1);
 											setState({ ...state, data });
 
-											if (!lastData.back) {
+											const hadFather = lastData.typeFather !== '';
+											if (!hadFather) {
 												setDataEdit({
 													type : typeTable,
 													data
@@ -477,6 +506,18 @@ const ShowInfoDialog = (props) => {
 														break;
 													case 'mobiliaryPlanta':
 														dataParents[lastData.actualIndex].mobiliary = data;
+														break;
+													case 'govermentUsers':
+														const govermentUsersObj = {};
+														data.forEach((i) => {
+															govermentUsersObj[i.type] = {
+																user : i.user,
+																pass : i.pass
+															};
+														});
+														dataParents[
+															lastData.actualIndex
+														].govermentUsers = govermentUsersObj;
 														break;
 
 													default:
