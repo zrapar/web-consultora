@@ -59,7 +59,7 @@ const ClientsTableHead = (props) => {
 	const dispatch = useDispatch();
 	const classes = useStyles(props);
 	const [ selectedClientsMenu, setSelectedClientsMenu ] = useState(null);
-	const [ warning, toggleWaring ] = useState(false);
+	const [ warning, toggleWarning ] = useState(false);
 
 	const createSortHandler = (property) => (event) => {
 		props.onRequestSort(event, property);
@@ -70,7 +70,7 @@ const ClientsTableHead = (props) => {
 	};
 
 	const closeSelectedClientsMenu = () => {
-		toggleWaring(true);
+		toggleWarning(true);
 		setSelectedClientsMenu(null);
 	};
 
@@ -78,7 +78,7 @@ const ClientsTableHead = (props) => {
 		if (props.selected.length > 0 && confirmDelete) {
 			dispatch(removeClients(props.selected));
 		}
-		toggleWaring(false);
+		toggleWarning(false);
 	};
 
 	return (
